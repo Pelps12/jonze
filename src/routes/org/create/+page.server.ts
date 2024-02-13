@@ -1,4 +1,6 @@
 import { JWT_SECRET_KEY } from '$env/static/private';
+import db from '$lib/server/drizzle/db';
+import schema from '$lib/server/drizzle/schema';
 import workos from '$lib/server/workos';
 import { redirect, type Actions, error } from '@sveltejs/kit';
 import { SignJWT } from 'jose';
@@ -18,6 +20,12 @@ export const actions: Actions = {
 			allowProfilesOutsideOrganization: true
 		});
 
+		//Insert into our DB
+		await db.insert(schema.organization).values({
+			id: organization.id,
+			name: organization.name
+		});
+
 		await workos.userManagement.createOrganizationMembership({
 			organizationId: organization.id,
 			userId: locals.user.id
@@ -32,7 +40,7 @@ export const actions: Actions = {
 		})
 			.setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
 			.setIssuedAt()
-			.setExpirationTime('1h')
+			.setExpirationTime('1d')
 			.sign(new Uint8Array(Buffer.from(JWT_SECRET_KEY, 'base64')));
 
 		const url = new URL(request.url);

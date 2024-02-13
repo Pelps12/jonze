@@ -29,7 +29,7 @@ export const GET: RequestHandler = async ({ request, cookies }) => {
 		})
 			.setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
 			.setIssuedAt()
-			.setExpirationTime('1h')
+			.setExpirationTime('1d')
 			.sign(new Uint8Array(Buffer.from(JWT_SECRET_KEY, 'base64')));
 
 		const url = new URL(request.url);

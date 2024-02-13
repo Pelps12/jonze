@@ -40,8 +40,8 @@
   <!-- ========== HEADER ========== -->
   <header class="flex flex-wrap sm:justify-start sm:flex-nowrap z-50 w-full border-b text-sm py-2.5 sm:py-4 ">
     <nav class="max-w-[100rem] flex basis-full items-center w-full mx-auto px-4 sm:px-6 lg:px-8" aria-label="Global">
-      <div class="me-5 md:me-8">
-        <a class="flex-none text-xl font-semibold dark:text-white d " href="/" aria-label="Brand">Brand</a>
+      <div class="w-full">
+        <a class="flex-none text-xl font-semibold dark:text-white d " href="/" aria-label="Brand">{user?.orgs.find(org => org.id === $page.params.id)?.name ?? "Brand"}</a>
       </div>
 
       <div class="w-full flex items-center justify-end ms-auto sm:gap-x-3 sm:order-3">

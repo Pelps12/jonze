@@ -55,14 +55,5 @@ export type CustomResponseField = {
 	type: CustomField['type'];
 };
 
-export type CustomFormData = {
-	json: CustomField;
-};
-
-export type CustomFormContext = {
-	data: CustomFormData[];
-	add: (value: CustomFormData) => void;
-	setData: (value: CustomFormData[]) => void;
-	edit: (id: number, value: Partial<CustomField>) => void;
-	deleteElement: (id: number) => void;
-};
+export const ZodCustomForm = z.record(ZodCustomField);
+export type CustomForm = z.infer<typeof ZodCustomForm>;

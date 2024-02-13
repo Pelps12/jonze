@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/planetscale-serverless';
 import { connect } from '@planetscale/database';
 import { DATABASE_HOST, DATABASE_PASSWORD, DATABASE_USERNAME } from '$env/static/private';

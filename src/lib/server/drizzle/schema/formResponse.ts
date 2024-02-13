@@ -11,7 +11,7 @@ export const formResponse = mysqlTable('FormResponse', {
 		.$defaultFn(() => newId('response'))
 		.primaryKey(),
 	formId: varchar('formId', { length: 128 }).notNull(),
-	response: json('form').$type<Record<string, string | number>>().notNull(),
+	response: json('response').$type<Record<string, string>>().notNull(),
 	createdAt: datetime('createdAt', { mode: 'date', fsp: 3 })
 		.default(sql`CURRENT_TIMESTAMP(3)`)
 		.notNull(),
