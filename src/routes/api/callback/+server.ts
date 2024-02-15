@@ -1,7 +1,6 @@
-import { JWT_SECRET_KEY } from '$env/static/private';
+import { signJWT } from '$lib/server/helpers';
 import workos, { clientId } from '$lib/server/workos';
 import { error, redirect, type RequestHandler } from '@sveltejs/kit';
-import { SignJWT } from 'jose';
 
 export const GET: RequestHandler = async ({ request, cookies }) => {
 	const url = new URL(request.url);
@@ -25,14 +24,7 @@ export const GET: RequestHandler = async ({ request, cookies }) => {
 			})
 		);
 		console.log(user);
-		const token = await new SignJWT({
-			// Here you might lookup and retrieve user details from your database
-			user: { ...user, orgs: orgs }
-		})
-			.setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
-			.setIssuedAt()
-			.setExpirationTime('1d')
-			.sign(new Uint8Array(Buffer.from(JWT_SECRET_KEY, 'base64')));
+		const token = await signJWT({ ...user, orgs: orgs });
 
 		const url = new URL(callbackUrl ? callbackUrl : request.url);
 
