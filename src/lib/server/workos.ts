@@ -4,7 +4,6 @@ import { jwtVerify } from 'jose';
 const workos = new WorkOS(WORKOS_API_KEY);
 export default workos;
 export const clientId = WORKOS_CLIENT_ID;
-import { Buffer } from 'node:buffer';
 
 export async function verifyJwtToken(token: string) {
 	try {
