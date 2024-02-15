@@ -9,7 +9,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 	console.log('Verified', verifiedToken);
 
 	if (verifiedToken) {
-		event.locals.user = verifiedToken.user as User & { orgs: Organization[] };
+		// @ts-expect-error: Already valid
+		event.locals.user = verifiedToken as User & { orgs: Organization[] };
 	}
 	const response = await resolve(event);
 	return response;
