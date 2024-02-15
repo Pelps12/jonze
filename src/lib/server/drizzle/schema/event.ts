@@ -3,6 +3,7 @@ import { newId } from '../utils/createId';
 import { relations, sql } from 'drizzle-orm';
 import { organization } from './organization';
 import { attendance } from './attendance';
+import { organizationForm } from './organizationForm';
 
 export const event = mysqlTable('Event', {
 	id: varchar('id', { length: 128 })
@@ -14,6 +15,7 @@ export const event = mysqlTable('Event', {
 	description: text('description'),
 	image: varchar('image', { length: 191 }),
 	orgId: varchar('orgId', { length: 128 }).notNull(),
+	formId: varchar('formId', { length: 128 }),
 	createdAt: datetime('createdAt', { mode: 'date', fsp: 3 })
 		.default(sql`CURRENT_TIMESTAMP(3)`)
 		.notNull(),
@@ -24,5 +26,6 @@ export const event = mysqlTable('Event', {
 
 export const eventRelations = relations(event, ({ one, many }) => ({
 	organization: one(organization, { fields: [event.orgId], references: [organization.id] }),
+	form: one(organizationForm, { fields: [event.formId], references: [organizationForm.id] }),
 	attendances: many(attendance)
 }));

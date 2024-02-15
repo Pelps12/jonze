@@ -1,4 +1,4 @@
-import { attendance } from './attendance';
+import * as attendance from './attendance';
 import * as event from './event';
 import * as formResponse from './formResponse';
 import * as member from './member';

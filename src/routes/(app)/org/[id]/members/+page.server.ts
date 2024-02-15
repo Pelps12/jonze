@@ -5,6 +5,7 @@ import schema from '$lib/server/drizzle/schema';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const members = await db.query.member.findMany({
+		where: eq(schema.member.orgId, params.id),
 		with: {
 			user: {
 				columns: {

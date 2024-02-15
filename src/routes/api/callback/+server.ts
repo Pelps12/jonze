@@ -6,6 +6,8 @@ import { SignJWT } from 'jose';
 export const GET: RequestHandler = async ({ request, cookies }) => {
 	const url = new URL(request.url);
 	const code = url.searchParams.get('code');
+	const callbackUrl = url.searchParams.get('state');
+	console.log(callbackUrl);
 	if (code) {
 		const { user } = await workos.userManagement.authenticateWithCode({
 			code,
@@ -32,13 +34,15 @@ export const GET: RequestHandler = async ({ request, cookies }) => {
 			.setExpirationTime('1d')
 			.sign(new Uint8Array(Buffer.from(JWT_SECRET_KEY, 'base64')));
 
-		const url = new URL(request.url);
+		const url = new URL(callbackUrl ? callbackUrl : request.url);
 
 		// Cleanup params
 		url.searchParams.delete('code');
 
 		// Redirect to the requested path and store the session
-		url.pathname = '/';
+		if (!callbackUrl) {
+			url.pathname = '/';
+		}
 
 		cookies.set('token', token, {
 			path: '/',

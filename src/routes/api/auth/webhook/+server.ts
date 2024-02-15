@@ -49,20 +49,6 @@ export const POST: RequestHandler = async ({ request }) => {
 			break;
 		}
 
-		case 'organization_membership.added': {
-			const member = webhook.data;
-			const existingMember = await db.query.member.findFirst({
-				where: eq(schema.member.orgId, member.organizationId)
-			});
-			await db.insert(schema.member).values({
-				id: member.id,
-				orgId: member.organizationId,
-				userId: member.userId,
-				role: existingMember ? 'MEMBER' : 'OWNER'
-			});
-			break;
-		}
-
 		case 'organization_membership.removed': {
 			const member = webhook.data;
 			await db.delete(schema.member).where(eq(schema.member.id, member.id));

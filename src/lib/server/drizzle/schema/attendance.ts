@@ -7,6 +7,9 @@ import { member } from './member';
 import { event } from './event';
 
 export const attendance = mysqlTable('Attendance', {
+	id: varchar('id', { length: 128 })
+		.$defaultFn(() => newId('attendance'))
+		.primaryKey(),
 	memId: varchar('memId', { length: 128 })
 		.$defaultFn(() => newId('attendance'))
 		.notNull(),

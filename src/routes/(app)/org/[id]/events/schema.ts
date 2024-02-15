@@ -11,19 +11,8 @@ const sizeInMB = (sizeInBytes: number, decimalsNum = 2) => {
 export const eventCreationSchema = z.object({
 	start: z.string(),
 	end: z.string(),
-	image: z
-		.custom<FileList>()
-		.refine((files) => {
-			return Array.from(files ?? []).length !== 0;
-		}, 'Image is required')
-		.refine((files) => {
-			return Array.from(files ?? []).every((file) => sizeInMB(file.size) <= MAX_IMAGE_SIZE);
-		}, `The maximum image size is ${MAX_IMAGE_SIZE}MB`)
-		.refine((files) => {
-			return Array.from(files ?? []).every((file) => ACCEPTED_IMAGE_TYPES.includes(file.type));
-		}, 'File type is not supported'),
+	image: z.string(),
 	description: z.string(),
-	orgId: z.string(),
 	name: z.string()
 });
 

@@ -5,6 +5,7 @@ import type { CustomForm } from '$lib/types/forms';
 import { relations } from 'drizzle-orm';
 import { organization } from './organization';
 import { formResponse } from './formResponse';
+import { event } from './event';
 
 export const organizationForm = mysqlTable('OrganizationForm', {
 	id: varchar('id', { length: 128 })
@@ -26,5 +27,9 @@ export const formRelations = relations(organizationForm, ({ one, many }) => ({
 		fields: [organizationForm.orgId],
 		references: [organization.id]
 	}),
+	events: one(event, {
+		fields: [organizationForm.id],
+		references: [event.formId]
+	}), //May change
 	responses: many(formResponse)
 }));

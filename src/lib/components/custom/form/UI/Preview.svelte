@@ -9,6 +9,7 @@
     export let form: CustomForm;
     export let userResponse: Record<string, string>|undefined;
     $: userResponse, console.log(userResponse);
+    $: response, console.log(response);
 
     $: response = Object.keys(form).reduce<Record<string, string>>((accumulator, currentKey) => {
         if(userResponse){
@@ -25,24 +26,32 @@
             <div class="flex flex-col space-y-1.5">
                 {#if form[key].type === "text"}
                     <Label for={key}>{form[key].label}</Label>
-                    <Input id={key} placeholder={form[key].placeholder} name={key} value={response[key]}/>
+                    <Input id={key} placeholder={response[key] ? response[key]: form[key].placeholder} name={key} disabled={!!userResponse}/>
                 {:else if form[key].type === "textarea"}
                     <Label for={key}>{form[key].label}</Label>
-                    <Textarea id={key} placeholder={form[key].placeholder} name={key} value={response[key]}/>
+                    <Textarea id={key} placeholder={form[key].placeholder} name={key} disabled={!!userResponse}/>
                 {:else if form[key].type === "dropdown"}
                     <Label for="framework">{form[key].label}</Label>
-                    <Select.Root name={key} selected={response[key]}>
-                        <Select.Trigger id={key}>
-                            <Select.Value placeholder="Select" />
-                        </Select.Trigger>
-                        <Select.Content>
-                            {#each form[key].options as option}
-                            <Select.Item value={option.label} label={option.label}
-                                >{option.label}</Select.Item
-                            >
-                            {/each}
-                        </Select.Content>
-                    </Select.Root>
+                    {#if !!userResponse}
+                        <Input id={key} placeholder={response[key] ? response[key]: form[key].placeholder} name={key} disabled={!!userResponse}/>
+                    {:else}
+                        <Select.Root disabled={!!userResponse}  onSelectedChange={(e) => {
+                            if(typeof e?.value === "string") response = {...response, [key]: e.value}
+                        }}>
+                            <Select.Trigger id={key}>
+                                <Select.Value placeholder="Select" />
+                            </Select.Trigger>
+                            <Select.Content>
+                                {#each form[key].options as option}
+                                <Select.Item value={option.label} label={option.label}
+                                    >{option.label}</Select.Item
+                                >
+                                {/each}
+                            </Select.Content>
+                            <input class="hidden" name={key} value={response[key]} />
+                        </Select.Root>
+                    {/if}
+
                 {/if}
                 
             </div>

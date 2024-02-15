@@ -4,9 +4,9 @@
     import type { SuperValidated } from "sveltekit-superforms";
     
     export let form: SuperValidated<EventCreationSchema>;
-    import * as LR from "@uploadcare/blocks";
-    import blocksStyles from '@uploadcare/blocks/web/lr-file-uploader-minimal.min.css?url';
-    LR.registerBlocks(LR);
+    import { Input } from "$lib/components/ui/input";
+    import { client } from "$lib/client/uploadcare";
+
   
     const frameworks = [
       {
@@ -26,7 +26,16 @@
         label: "Nuxt.js"
       }
     ];
-  </script>
+    $: form, console.log(form)
+  
+
+	async function handleUpload(e: Event & { currentTarget: EventTarget & HTMLInputElement; }, setValue: (value: unknown) => void): Promise<void> {
+    if(!e.currentTarget.files) return
+    const file = e.currentTarget.files[0]
+    client.uploadFile(file).then((file) => {console.log(file); setValue(file.cdnUrl)})
+    console.log(form)
+	}
+</script>
   
 
   <Form.Root method="POST" {form} schema={eventCreationSchema} let:config enctype="multipart/form-data" class="p-4">
@@ -65,13 +74,13 @@
             </Form.Item>
         </Form.Field>
     </div>
-    <Form.Field {config} name="image" >
-        <Form.Item class="w-full">
-            <Form.Label>Image</Form.Label>
-            <Form.Input type="file" accept={ACCEPTED_IMAGE_TYPES.join(", ")} />
-            <Form.Description>This could be your Instagram poster</Form.Description>
-            <Form.Validation />
-        </Form.Item>
+    <Form.Field {config} name="image" let:setValue>
+      <Form.Item>
+        <Form.Label>Image</Form.Label>
+        <Input type="file" on:input={(e) => handleUpload(e, setValue)}/>
+        <Form.Input class="hidden" />
+        <Form.Validation />
+      </Form.Item>
     </Form.Field>
     
     

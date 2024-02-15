@@ -39,7 +39,7 @@
 <ModeWatcher />
   <!-- ========== HEADER ========== -->
   <header class="flex flex-wrap sm:justify-start sm:flex-nowrap z-50 w-full border-b text-sm py-2.5 sm:py-4 ">
-    <nav class="max-w-[100rem] flex basis-full items-center w-full mx-auto px-4 sm:px-6 lg:px-8" aria-label="Global">
+    <nav class=" flex basis-full items-center w-full mx-auto px-4 sm:px-6 lg:px-8" aria-label="Global">
       <div class="w-full">
         <a class="flex-none text-xl font-semibold dark:text-white d " href="/" aria-label="Brand">{user?.orgs.find(org => org.id === $page.params.id)?.name ?? "Brand"}</a>
       </div>

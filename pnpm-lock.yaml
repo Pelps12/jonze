@@ -17,9 +17,12 @@ dependencies:
   '@uploadcare/blocks':
     specifier: 0.32.1
     version: 0.32.1
+  '@uploadcare/upload-client':
+    specifier: ^6.13.0
+    version: 6.13.0
   '@workos-inc/node':
-    specifier: ^5.2.0
-    version: 5.2.0
+    specifier: ^6.0.0
+    version: 6.0.0
   bits-ui:
     specifier: ^0.17.0
     version: 0.17.0(svelte@4.2.10)
@@ -32,6 +35,12 @@ dependencies:
   d3-scale:
     specifier: ^4.0.2
     version: 4.0.2
+  date-fns:
+    specifier: ^3.3.1
+    version: 3.3.1
+  date-fns-tz:
+    specifier: ^2.0.0
+    version: 2.0.0(date-fns@3.3.1)
   dot-env:
     specifier: ^0.0.1
     version: 0.0.1
@@ -41,6 +50,9 @@ dependencies:
   formsnap:
     specifier: ^0.4.3
     version: 0.4.3(svelte@4.2.10)(sveltekit-superforms@1.13.4)(zod@3.22.4)
+  install:
+    specifier: ^0.13.0
+    version: 0.13.0
   jose:
     specifier: ^5.2.1
     version: 5.2.1
@@ -1295,13 +1307,10 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@workos-inc/node@5.2.0:
-    resolution: {integrity: sha512-dh1DDfciXm8nNaANDz7eKn57a9fqVjkq3VX27UoSx1S2a7d+F6fJ3JVb2PV6GZr8bjWJOHQAb3k60sCxRLPFEg==}
+  /@workos-inc/node@6.0.0:
+    resolution: {integrity: sha512-CtIoBmEhgkgrIhs+uDg8XT5wad67B2t4+kpM5L6dOiyhakE869GCyvyXDEyLmYGv7Cjgfm5ndTZ5TCf6PIoEjA==}
     dependencies:
-      axios: 1.6.7
       pluralize: 8.0.0
-    transitivePeerDependencies:
-      - debug
     dev: false
 
   /acorn-jsx@5.3.2(acorn@8.11.3):
@@ -1390,16 +1399,6 @@ packages:
       postcss: 8.4.35
       postcss-value-parser: 4.2.0
     dev: true
-
-  /axios@1.6.7:
-    resolution: {integrity: sha512-/hDJGff6/c7u0hDkvkGxR/oy6CbCs8ziCsC7SqmhjfozqiJGc8Z11wrv9z9lYfY4K8l+H9TpjcMDX0xOZmx+RA==}
-    dependencies:
-      follow-redirects: 1.15.5
-      form-data: 4.0.0
-      proxy-from-env: 1.1.0
-    transitivePeerDependencies:
-      - debug
-    dev: false
 
   /axobject-query@4.0.0:
     resolution: {integrity: sha512-+60uv1hiVFhHZeO+Lz0RYzsVHy5Wr1ayX0mwda9KPDVLNJgZ1T9Ny7VmFbLDzxsH0D87I86vgj3gFrjTJUYznw==}
@@ -1865,6 +1864,18 @@ packages:
       es5-ext: 0.10.62
       type: 1.2.0
     dev: true
+
+  /date-fns-tz@2.0.0(date-fns@3.3.1):
+    resolution: {integrity: sha512-OAtcLdB9vxSXTWHdT8b398ARImVwQMyjfYGkKD2zaGpHseG2UPHbHjXELReErZFxWdSLph3c2zOaaTyHfOhERQ==}
+    peerDependencies:
+      date-fns: '>=2.0.0'
+    dependencies:
+      date-fns: 3.3.1
+    dev: false
+
+  /date-fns@3.3.1:
+    resolution: {integrity: sha512-y8e109LYGgoQDveiEBD3DYXKba1jWf5BA8YU1FL5Tvm0BTdEfy54WLCwnuYWZNnzzvALy/QQ4Hov+Q9RVRv+Zw==}
+    dev: false
 
   /debug@4.3.4:
     resolution: {integrity: sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==}
@@ -2412,16 +2423,6 @@ packages:
       tabbable: 6.2.0
     dev: false
 
-  /follow-redirects@1.15.5:
-    resolution: {integrity: sha512-vSFWUON1B+yAw1VN4xMfxgn5fTUiaOzAJCKBwIIgT/+7CuGy9+r+5gITvP62j3RmaD5Ph65UaERdOSRGUzZtgw==}
-    engines: {node: '>=4.0'}
-    peerDependencies:
-      debug: '*'
-    peerDependenciesMeta:
-      debug:
-        optional: true
-    dev: false
-
   /foreground-child@3.1.1:
     resolution: {integrity: sha512-TMKDUnIte6bfb5nWv7V/caI169OHgvwjb7V4WkeUvbQQdjr5rWKqHFiKWb/fcOwB+CzBT+qbWjvj+DVwRskpIg==}
     engines: {node: '>=14'}
@@ -2618,6 +2619,11 @@ packages:
   /inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
     dev: true
+
+  /install@0.13.0:
+    resolution: {integrity: sha512-zDml/jzr2PKU9I8J/xyZBQn8rPCAY//UOYNmR01XwNwyfhEWObo2SWfSl1+0tm1u6PhxLwDnfsT/6jB7OUxqFA==}
+    engines: {node: '>= 0.10'}
+    dev: false
 
   /internmap@2.0.3:
     resolution: {integrity: sha512-5Hh7Y1wQbvY5ooGgPbDaL5iYLAPzMTUrjMulskHLH6wnv/A+1q5rgEaiuqEjB+oxGXIVZs1FF+R/KPN3ZSQYYg==}
@@ -3217,10 +3223,6 @@ packages:
   /prismjs@1.29.0:
     resolution: {integrity: sha512-Kx/1w86q/epKcmte75LNrEoT+lX8pBpavuAbvJWRXar7Hz8jrtF+e3vY751p0R8H9HdArwaCTNDDzHg/ScJK1Q==}
     engines: {node: '>=6'}
-    dev: false
-
-  /proxy-from-env@1.1.0:
-    resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
     dev: false
 
   /punycode@2.3.1:

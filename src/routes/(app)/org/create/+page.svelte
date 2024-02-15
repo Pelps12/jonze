@@ -4,24 +4,6 @@
     import { Input } from "$lib/components/ui/input";
     import { Label } from "$lib/components/ui/label";
   
-    const frameworks = [
-      {
-        value: "sveltekit",
-        label: "SvelteKit"
-      },
-      {
-        value: "next",
-        label: "Next.js"
-      },
-      {
-        value: "astro",
-        label: "Astro"
-      },
-      {
-        value: "nuxt",
-        label: "Nuxt.js"
-      }
-    ];
   </script>
   <div class="w-[100vw] h-[100vh] flex justify-center items-center">
     <Card.Root class="w-[350px]">

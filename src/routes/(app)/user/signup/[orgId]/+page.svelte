@@ -7,6 +7,7 @@
 	import { formSchema, type FormSchema } from "../schema";
 	import type { ActionData } from "./$types";
 	import Preview from "$lib/components/custom/form/UI/Preview.svelte";
+	import { page } from "$app/stores";
     export let data;
     export let form: ActionData;
 </script>
@@ -18,7 +19,18 @@
             <Card.Title>{data.formName}</Card.Title>
             </Card.Header>
             <Card.Content>
-                
+                <div class="grid w-full items-center gap-4 pb-4">
+                    <div class="flex flex-col space-y-1.5">
+                        <Label for="firstName">First Name</Label>
+                        <Input id="firstName" name="firstName" placeholder="First Name" value={data.defaultFields.firstName}/>
+                    </div>
+    
+                    <div class="flex flex-col space-y-1.5">
+                        <Label for="lastName">Last Name</Label>
+                        <Input id="lastName" name="lastName" placeholder="First Name" value={data.defaultFields.lastName}/>
+                    </div>
+                </div>
+
                 <Preview form={data.form} userResponse={undefined}/>
 
             
