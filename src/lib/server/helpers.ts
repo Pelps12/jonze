@@ -1,5 +1,6 @@
 import { JWT_SECRET_KEY } from '$env/static/private';
 import { SignJWT } from 'jose';
+import { Buffer } from 'buffer';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function signJWT(payload: Record<string, any>) {

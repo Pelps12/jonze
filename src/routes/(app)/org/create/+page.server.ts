@@ -1,9 +1,8 @@
-import { JWT_SECRET_KEY } from '$env/static/private';
 import db from '$lib/server/drizzle/db';
 import schema from '$lib/server/drizzle/schema';
+import { signJWT } from '$lib/server/helpers';
 import workos from '$lib/server/workos';
 import { redirect, type Actions, error } from '@sveltejs/kit';
-import { SignJWT } from 'jose';
 
 export const actions: Actions = {
 	create: async ({ locals, request, cookies }) => {
@@ -42,14 +41,7 @@ export const actions: Actions = {
 			...locals.user,
 			orgs: [...locals.user.orgs, { id: organization.id, name: organization.name }]
 		};
-		const token = await new SignJWT({
-			// Here you might lookup and retrieve user details from your database
-			user: newUser
-		})
-			.setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
-			.setIssuedAt()
-			.setExpirationTime('1d')
-			.sign(new Uint8Array(Buffer.from(JWT_SECRET_KEY, 'base64')));
+		const token = await signJWT(newUser);
 
 		const url = new URL(request.url);
 
