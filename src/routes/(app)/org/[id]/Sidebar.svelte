@@ -4,7 +4,7 @@
 	import { Button, type ButtonEvents } from "$lib/components/ui/button";
 	import { cn } from "$lib/utils";
 	import { CalendarIcon, FileText, FolderIcon, HomeIcon, SettingsIcon, UsersIcon } from "lucide-svelte";
-	import type { KeyboardEventHandler } from "svelte/elements";
+
 	let className: string | null | undefined = undefined;
 
 	export { className as class };

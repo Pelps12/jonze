@@ -11,9 +11,19 @@ const sizeInMB = (sizeInBytes: number, decimalsNum = 2) => {
 export const eventCreationSchema = z.object({
 	start: z.string(),
 	end: z.string(),
-	image: z.string(),
-	description: z.string(),
+	image: z.string().nullable(),
+	description: z.string().nullable(),
+	name: z.string()
+});
+
+export const eventUpdationSchema = z.object({
+	id: z.string(),
+	start: z.string(),
+	end: z.string(),
+	image: z.string().nullable(),
+	description: z.string().nullable(),
 	name: z.string()
 });
 
 export type EventCreationSchema = typeof eventCreationSchema;
+export type EventUpdationSchema = typeof eventUpdationSchema;

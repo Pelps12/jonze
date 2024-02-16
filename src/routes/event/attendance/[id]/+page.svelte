@@ -21,6 +21,24 @@
     >
   </Alert.Root>
 {/if}
+
+{#if new Date() > data.event.end}
+<Alert.Root>
+    <Alert.Title>Event has already ended</Alert.Title>
+    <Alert.Description
+      >Events can't be filled after they have ended</Alert.Description
+    >
+  </Alert.Root>
+{/if}
+
+{#if new Date() < data.event.start}
+<Alert.Root>
+    <Alert.Title>Event hasn't yet started</Alert.Title>
+    <Alert.Description
+      >Come back and fill this form when the event begins</Alert.Description
+    >
+  </Alert.Root>
+{/if}
   <div class="flex justify-center items-center h-[100vh]">
     <form method="post">
         <Card.Root class="w-[350px]">
@@ -51,7 +69,7 @@
 
             </Card.Content>
             <Card.Footer class="flex justify-center">
-            <Button disabled={filled} type="submit">Mark Attendance</Button>
+            <Button disabled={filled || new Date() > data.event.end } type="submit">Mark Attendance</Button>
             </Card.Footer>
         </Card.Root>
     </form>

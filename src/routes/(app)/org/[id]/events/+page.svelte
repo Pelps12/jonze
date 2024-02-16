@@ -6,14 +6,15 @@
     import { Input } from "$lib/components/ui/input";
     import { Label } from "$lib/components/ui/label";
     import { mediaQuery } from "svelte-legos";
-	import NewEventForm from "./NewEventForm.svelte";
-    import { parseISO, format } from 'date-fns';
+	import EventForm from "./EventForm.svelte";
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
 	import { Copy, MoreHorizontal } from "lucide-svelte";
     import {browser} from "$app/environment"
     import {PUBLIC_URL} from "$env/static/public"
 	import { toast } from "svelte-sonner";
-    let open = false;
+	import Preview from "$lib/components/custom/form/UI/Preview.svelte";
+    let newFormOpen = false;
+    let editFormOpen = false;
     const isDesktop = mediaQuery("(min-width: 768px)");
     const handleCopyAttendance = (eventId: string) => {
         if(browser){
@@ -34,7 +35,7 @@
     <h2 class="text-xl font-semibold">Events</h2>
     <div class="flex space-x-2">
         {#if $isDesktop}
-            <Dialog.Root bind:open >
+            <Dialog.Root bind:open={newFormOpen} >
                 <Dialog.Trigger asChild let:builder>
                 <Button variant="outline" builders={[builder]}>Add Event</Button>
                 </Dialog.Trigger>
@@ -45,11 +46,11 @@
                         Allow members mark attendance on your events
                     </Dialog.Description>
                 </Dialog.Header>
-                    <NewEventForm form={data.form}/>
+                    <EventForm form={data.form} event={undefined}/>
                 </Dialog.Content>
             </Dialog.Root>
         {:else}
-            <Drawer.Root bind:open>
+            <Drawer.Root bind:open={newFormOpen}>
                 <Drawer.Trigger asChild let:builder>
                 <Button variant="outline" builders={[builder]}>Add Event</Button>
                 </Drawer.Trigger>
@@ -60,7 +61,7 @@
                         Allow members mark attendance on your events
                     </Drawer.Description>
                 </Drawer.Header>
-                    <NewEventForm form={data.form}/>
+                    <EventForm form={data.form} event={undefined}/>
                 <Drawer.Footer class="pt-2">
                     <Drawer.Close asChild let:builder>
                     <Button variant="outline" builders={[builder]}>Cancel</Button>
@@ -90,40 +91,37 @@
                                     <span class="sr-only">Open menu</span>
                                 </Button>
                             </DropdownMenu.Trigger>
+
                             <DropdownMenu.Content class="w-[200px]" align="end">
-                                
-                                    <DropdownMenu.Item>
-                                        <Dialog.Trigger>
-                                            Additional Info
-                                        </Dialog.Trigger
-                                    >
-                                    </DropdownMenu.Item>
-                                    
-                    
-                                
                                 <DropdownMenu.Item on:click={() => handleCopyAttendance(event.id)}>
                                     <span>Attendance Link</span> 
                                     <Copy class="ml-2 h-4 w-4"/> 
                                 </DropdownMenu.Item>
-                                
-                                <DropdownMenu.Item>Favorite</DropdownMenu.Item>
-                                <DropdownMenu.Separator />
-                                <DropdownMenu.Separator />
-                                <DropdownMenu.Item>
-                                    Delete
-                                    <DropdownMenu.Shortcut>⌘⌫</DropdownMenu.Shortcut>
-                                </DropdownMenu.Item>
+                                {#if event.form}
+                                    <DropdownMenu.Item>
+                                        <Dialog.Trigger>
+                                            Event Form
+                                        </Dialog.Trigger>
+                                    </DropdownMenu.Item>
+                                {/if}
+                                <DropdownMenu.Item href={`events/${event.id}`}>View Attendance</DropdownMenu.Item>
                             </DropdownMenu.Content>
+
+                            {#if event.form}
+                                <Dialog.Content class="sm:max-w-[425px]">
+                                    <Dialog.Header>
+                                        <Dialog.Title>{event.form.name}</Dialog.Title>
+                                        <Dialog.Description>
+                                            Form attached to event attendance
+                                        </Dialog.Description>
+                                    </Dialog.Header>
+
+                                    <Preview form={event.form.form} userResponse={undefined}/>
+                                    
+                                </Dialog.Content>
+                            {/if}
                     
-                            <Dialog.Content class="sm:max-w-[425px]">
-                                <Dialog.Header>
-                                    <Dialog.Title>User Info</Dialog.Title>
-                                    <Dialog.Description>
-                                        Additional fields you asked for from "User Info" form
-                                    </Dialog.Description>
-                                </Dialog.Header>
-                                
-                            </Dialog.Content>
+                            
                         </DropdownMenu.Root>
                     </Dialog.Root>
                 </Card.Title>
@@ -140,7 +138,7 @@
                     class=" aspect-square object-cover m-5 w-auto rounded-lg "
                     height={350}
                     src={event.image}
-        
+                    placeholder={"/placeholder.svg"}
                     width={350}
                     />
                 </div>
@@ -149,9 +147,44 @@
                     {event.description}
                 </p>
                 </Card.Content>
-                <Card.Footer class="flex justify-end">
-                
-                <Button variant="destructive">Delete</Button>
+                <Card.Footer class="flex justify-between">
+                    {#if $isDesktop}
+                        <Dialog.Root bind:open={editFormOpen} >
+                            <Dialog.Trigger asChild let:builder>
+                            <Button variant="outline" builders={[builder]}>Edit</Button>
+                            </Dialog.Trigger>
+                            <Dialog.Content class="sm:max-w-[425px]">
+                            <Dialog.Header>
+                                <Dialog.Title>Update your Event</Dialog.Title>
+                                <Dialog.Description>
+                                    Allow members mark attendance on your events
+                                </Dialog.Description>
+                            </Dialog.Header>
+                                <EventForm form={data.updateForm} event={event} actionType="update"/>
+                            </Dialog.Content>
+                        </Dialog.Root>
+                    {:else}
+                        <Drawer.Root bind:open={editFormOpen}>
+                            <Drawer.Trigger asChild let:builder>
+                            <Button variant="outline" builders={[builder]}>Edit</Button>
+                            </Drawer.Trigger>
+                            <Drawer.Content class="p-4">
+                            <Drawer.Header class="text-left">
+                                <Drawer.Title>Update your Event</Drawer.Title>
+                                <Drawer.Description>
+                                    Allow members mark attendance on your events
+                                </Drawer.Description>
+                            </Drawer.Header>
+                                <EventForm form={data.updateForm} event={event} actionType="update"/>
+                            <Drawer.Footer class="pt-2">
+                                <Drawer.Close asChild let:builder>
+                                <Button variant="outline" builders={[builder]}>Cancel</Button>
+                                </Drawer.Close>
+                            </Drawer.Footer>
+                            </Drawer.Content>
+                        </Drawer.Root>
+                    {/if}
+                    <Button variant="destructive">Delete</Button>
                 </Card.Footer>
             </Card.Root>
         {/each}

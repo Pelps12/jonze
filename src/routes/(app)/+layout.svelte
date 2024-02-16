@@ -12,9 +12,9 @@
 
   import { Toaster } from "$lib/components/ui/sonner";
   export let data: LayoutData
-  onMount(() => {
-    console.log(data.user)
-  })
+  
+  console.log(data.user, "USER")
+  
 
   
 

@@ -1,5 +1,6 @@
 import schema from './schema';
 
+export type Attendance = typeof schema.attendance.$inferSelect;
 export type Event = typeof schema.event.$inferSelect;
 export type User = typeof schema.user.$inferSelect;
 export type Member = typeof schema.member.$inferSelect;

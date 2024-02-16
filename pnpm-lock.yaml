@@ -39,11 +39,11 @@ dependencies:
     specifier: ^4.0.2
     version: 4.0.2
   date-fns:
-    specifier: ^3.3.1
-    version: 3.3.1
+    specifier: ^2.30.0
+    version: 2.30.0
   date-fns-tz:
     specifier: ^2.0.0
-    version: 2.0.0(date-fns@3.3.1)
+    version: 2.0.0(date-fns@2.30.0)
   dot-env:
     specifier: ^0.0.1
     version: 0.0.1
@@ -1883,16 +1883,19 @@ packages:
       type: 1.2.0
     dev: true
 
-  /date-fns-tz@2.0.0(date-fns@3.3.1):
+  /date-fns-tz@2.0.0(date-fns@2.30.0):
     resolution: {integrity: sha512-OAtcLdB9vxSXTWHdT8b398ARImVwQMyjfYGkKD2zaGpHseG2UPHbHjXELReErZFxWdSLph3c2zOaaTyHfOhERQ==}
     peerDependencies:
       date-fns: '>=2.0.0'
     dependencies:
-      date-fns: 3.3.1
+      date-fns: 2.30.0
     dev: false
 
-  /date-fns@3.3.1:
-    resolution: {integrity: sha512-y8e109LYGgoQDveiEBD3DYXKba1jWf5BA8YU1FL5Tvm0BTdEfy54WLCwnuYWZNnzzvALy/QQ4Hov+Q9RVRv+Zw==}
+  /date-fns@2.30.0:
+    resolution: {integrity: sha512-fnULvOpxnC5/Vg3NCiWelDsLiUc9bRwAPs/+LfTLNvetFCtCTN+yQz15C/fs4AwX1R9K5GLtLfn8QW+dWisaAw==}
+    engines: {node: '>=0.11'}
+    dependencies:
+      '@babel/runtime': 7.23.9
     dev: false
 
   /debug@4.3.4:

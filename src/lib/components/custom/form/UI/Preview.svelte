@@ -26,16 +26,16 @@
             <div class="flex flex-col space-y-1.5">
                 {#if form[key].type === "text"}
                     <Label for={key}>{form[key].label}</Label>
-                    <Input id={key} placeholder={response[key] ? response[key]: form[key].placeholder} name={key} disabled={!!userResponse}/>
+                    <Input id={key} placeholder={response[key] ? response[key]: form[key].placeholder} name={key} />
                 {:else if form[key].type === "textarea"}
                     <Label for={key}>{form[key].label}</Label>
-                    <Textarea id={key} placeholder={form[key].placeholder} name={key} disabled={!!userResponse}/>
+                    <Textarea id={key} placeholder={form[key].placeholder} name={key} />
                 {:else if form[key].type === "dropdown"}
                     <Label for="framework">{form[key].label}</Label>
                     {#if !!userResponse}
-                        <Input id={key} placeholder={response[key] ? response[key]: form[key].placeholder} name={key} disabled={!!userResponse}/>
+                        <Input id={key} placeholder={response[key] ? response[key]: form[key].placeholder} name={key} />
                     {:else}
-                        <Select.Root disabled={!!userResponse}  onSelectedChange={(e) => {
+                        <Select.Root   onSelectedChange={(e) => {
                             if(typeof e?.value === "string") response = {...response, [key]: e.value}
                         }}>
                             <Select.Trigger id={key}>

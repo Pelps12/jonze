@@ -1,32 +1,48 @@
 <script lang="ts">
     import * as Form from "$lib/components/ui/form";
-    import { ACCEPTED_IMAGE_TYPES, eventCreationSchema, type EventCreationSchema } from "./schema";
+    import { ACCEPTED_IMAGE_TYPES, eventCreationSchema, type EventUpdationSchema, type EventCreationSchema } from "./schema";
     import type { SuperValidated } from "sveltekit-superforms";
     
-    export let form: SuperValidated<EventCreationSchema>;
+    export let form: SuperValidated<EventCreationSchema> | SuperValidated<EventUpdationSchema>;
     import { Input } from "$lib/components/ui/input";
     import { client } from "$lib/client/uploadcare";
+    import { parseISO, format } from 'date-fns';
+    import enUS from 'date-fns/locale/en-US'
+    import { formatInTimeZone } from 'date-fns-tz';
+	  import type { OrgForm, Event as dbEvent } from "$lib/server/drizzle/types";
+	import { onMount } from "svelte";
+    export let event: dbEvent & {form: OrgForm|null}| undefined;
+    export let actionType: "create" | "update" = "create";
 
-  
-    const frameworks = [
-      {
-        value: "sveltekit",
-        label: "SvelteKit"
-      },
-      {
-        value: "next",
-        label: "Next.js"
-      },
-      {
-        value: "astro",
-        label: "Astro"
-      },
-      {
-        value: "nuxt",
-        label: "Nuxt.js"
+
+    function formatToBrowserTimeZone(date: Date) {
+      // Format the date and time in the desired format, using the browser's timezone
+      const formattedDate = formatInTimeZone(date, Intl.DateTimeFormat().resolvedOptions().timeZone, 'yyyy-MM-dd\'T\'HH:mm');
+      console.log(formattedDate);
+      return formattedDate;
+    }
+
+    $: form.data, console.log(form.data);
+
+    onMount(() => {
+      if(event){
+        console.log("SHOULD DO SOMETHING")
+        form.data = {
+          id: event.id,
+          name: event.name,
+          start: formatToBrowserTimeZone(event.start),
+          end: formatToBrowserTimeZone(event.end),
+          image: event.image,
+          description: event.description
+        }
       }
-    ];
-    $: form, console.log(form)
+    })
+
+
+
+
+
+
   
 
 	async function handleUpload(e: Event & { currentTarget: EventTarget & HTMLInputElement; }, setValue: (value: unknown) => void): Promise<void> {
@@ -38,7 +54,7 @@
 </script>
   
 
-  <Form.Root method="POST" {form} schema={eventCreationSchema} let:config enctype="multipart/form-data" class="p-4">
+  <Form.Root method="POST" {form} schema={eventCreationSchema} let:config enctype="multipart/form-data" class="p-4" action={actionType === "update" ? "?/update": "?/create"}>
     <Form.Field {config} name="name">
       <Form.Item>
         <Form.Label>Name</Form.Label>
@@ -76,9 +92,9 @@
     </div>
     <Form.Field {config} name="image" let:setValue>
       <Form.Item>
-        <Form.Label>Image</Form.Label>
+        <Form.Label>Image {form.data.image ? "(Image already present)": ""}</Form.Label>
         <Input type="file" on:input={(e) => handleUpload(e, setValue)}/>
-        <Form.Input class="hidden" />
+        <Form.Input  class="hidden"/>
         <Form.Validation />
       </Form.Item>
     </Form.Field>
@@ -87,5 +103,5 @@
     
 
     
-    <Form.Button>Submit</Form.Button>
+    <Form.Button>{actionType === "create" ? "Create": "Update"}</Form.Button>
   </Form.Root>
