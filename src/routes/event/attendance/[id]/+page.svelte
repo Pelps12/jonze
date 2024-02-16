@@ -57,7 +57,7 @@
                 </div>
             </div>
             <Card.Header>
-            <Card.Title>Attendance for {data.event.name}</Card.Title>
+            <Card.Title>Attendance for "{data.event.name}"</Card.Title>
             </Card.Header>
             <Card.Content>
                 
@@ -69,7 +69,7 @@
 
             </Card.Content>
             <Card.Footer class="flex justify-center">
-            <Button disabled={filled || new Date() > data.event.end } type="submit">Mark Attendance</Button>
+            <Button disabled={filled || new Date() > data.event.end || new Date() < data.event.start} type="submit">Mark Attendance</Button>
             </Card.Footer>
         </Card.Root>
     </form>

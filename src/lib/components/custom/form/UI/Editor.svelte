@@ -89,8 +89,8 @@
             <Sheet.Root>
                 <Sheet.Trigger asChild let:builder>
                     <Button builders={[builder]} variant="secondary" >
-                        <PlusCircle class="h-4 w-4 mr-2"/> 
-                        <span>Add Field</span> 
+                        <PlusCircle class="h-4 w-4 lg:mr-2"/> 
+                        <span class="hidden lg:block">Add Field</span> 
                     </Button>
                 </Sheet.Trigger>
                 <Sheet.Content side="left">
@@ -128,8 +128,8 @@
                 <Dialog.Root bind:open>
                     <Dialog.Trigger asChild let:builder>
                         <Button builders={[builder]} variant="secondary">
-                            <ScanEye class="w-4 h-4 mr-2"/>
-                            <span>Preview</span> 
+                            <ScanEye class="w-4 h-4 lg:mr-2"/>
+                            <span class="hidden lg:block">Preview</span> 
                         </Button>
                     </Dialog.Trigger>
                     <Dialog.Content class="sm:max-w-[425px]">
@@ -146,11 +146,11 @@
               <Drawer.Root bind:open>
                 <Drawer.Trigger asChild let:builder>
                     <Button builders={[builder]} variant="secondary">
-                        <ScanEye class="w-4 h-4 mr-2"/>
-                        <span>Preview</span> 
+                        <ScanEye class="w-4 h-4 lg:mr-2"/>
+                        <span class="hidden lg:block">Preview</span> 
                     </Button>
                 </Drawer.Trigger>
-                <Drawer.Content class="p-2">
+                <Drawer.Content class="p-4">
                   <Drawer.Header class="text-left">
                     <Drawer.Title>Form Preview</Drawer.Title>
                     <Drawer.Description>
@@ -170,8 +170,8 @@
 
 
               <Button  on:click={() => onSave()}>
-                <Save class="w-4 h-4 mr-2" />
-                <span>Save Changes</span> 
+                <Save class="w-4 h-4 lg:mr-2" />
+                <span class="hidden lg:block">Save Changes</span> 
             </Button>
         
     </div>

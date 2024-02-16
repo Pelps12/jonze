@@ -65,7 +65,8 @@ export const actions: Actions = {
 				image: form.data.image,
 				description: form.data.description,
 				orgId: event.params.id,
-				name: form.data.name
+				name: form.data.name,
+				updatedAt: new Date()
 			})
 			.where(eq(schema.event.id, form.data.id));
 		if (newEvent) {

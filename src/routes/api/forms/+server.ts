@@ -44,7 +44,8 @@ export const PUT: RequestHandler = async ({ request }) => {
 		.set({
 			orgId: data.organizationId,
 			form: data.form,
-			name: data.formName
+			name: data.formName,
+			updatedAt: new Date()
 		})
 		.where(eq(schema.organizationForm.id, data.formId));
 

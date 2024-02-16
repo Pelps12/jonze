@@ -11,7 +11,8 @@ export const load: PageServerLoad = async ({ params }) => {
 			name: true,
 			updatedAt: true,
 			createdAt: true
-		}
+		},
+		orderBy: (form, { desc }) => [desc(form.updatedAt)]
 	});
 
 	return { forms };

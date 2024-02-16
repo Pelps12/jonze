@@ -30,6 +30,8 @@ export const load: PageServerLoad = async ({ params }) => {
 		orderBy: (members, { desc }) => [desc(members.createdAt)]
 	});
 
+	console.log(members);
+
 	const organizationForm = await db.query.organizationForm.findFirst({
 		where: and(
 			eq(schema.organizationForm.orgId, params.id),

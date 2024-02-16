@@ -29,7 +29,7 @@
                     <Input id={key} placeholder={response[key] ? response[key]: form[key].placeholder} name={key} />
                 {:else if form[key].type === "textarea"}
                     <Label for={key}>{form[key].label}</Label>
-                    <Textarea id={key} placeholder={form[key].placeholder} name={key} />
+                    <Textarea id={key} placeholder={response[key] ? response[key]: form[key].placeholder} name={key} />
                 {:else if form[key].type === "dropdown"}
                     <Label for="framework">{form[key].label}</Label>
                     {#if !!userResponse}

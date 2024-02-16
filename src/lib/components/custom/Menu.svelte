@@ -88,18 +88,7 @@
               </DropdownMenu.Label>
               <DropdownMenu.Separator />
               <DropdownMenu.Group>
-                <DropdownMenu.Item>
-                  Profile
-                  <DropdownMenu.Shortcut>⇧⌘P</DropdownMenu.Shortcut>
-                </DropdownMenu.Item>
-                <DropdownMenu.Item>
-                  Billing
-                  <DropdownMenu.Shortcut>⌘B</DropdownMenu.Shortcut>
-                </DropdownMenu.Item>
-                <DropdownMenu.Item>
-                  Settings
-                  <DropdownMenu.Shortcut>⌘S</DropdownMenu.Shortcut>
-                </DropdownMenu.Item>
+
                 <DropdownMenu.Sub>
                     <DropdownMenu.SubTrigger>
                       <UserPlus class="mr-2 h-4 w-4" />

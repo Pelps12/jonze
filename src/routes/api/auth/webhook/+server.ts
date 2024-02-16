@@ -43,7 +43,8 @@ export const POST: RequestHandler = async ({ request }) => {
 					lastName: updatedUser.lastName,
 					profilePictureUrl: updatedUser.profilePictureUrl,
 					email: updatedUser.email,
-					emailVerified: updatedUser.emailVerified
+					emailVerified: updatedUser.emailVerified,
+					updatedAt: new Date()
 				})
 				.where(eq(schema.user.id, updatedUser.id));
 			break;

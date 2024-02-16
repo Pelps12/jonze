@@ -57,7 +57,7 @@
           return "";
 
         },
-        plugins: {
+        plugins: {  
           sort: {
             disable: true
           }
@@ -67,7 +67,7 @@
     const { headerRows, pageRows, tableAttrs, tableBodyAttrs } =
       table.createViewModel(columns);
   </script>
-  <div class="rounded-md border">
+  <div class="rounded-md border ">
     <Table.Root {...$tableAttrs}>
       <Table.Header>
         {#each $headerRows as headerRow}

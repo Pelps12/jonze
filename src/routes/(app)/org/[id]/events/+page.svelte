@@ -8,11 +8,12 @@
     import { mediaQuery } from "svelte-legos";
 	import EventForm from "./EventForm.svelte";
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
-	import { Copy, MoreHorizontal } from "lucide-svelte";
+	import { Copy, MoreHorizontal, QrCode } from "lucide-svelte";
     import {browser} from "$app/environment"
     import {PUBLIC_URL} from "$env/static/public"
 	import { toast } from "svelte-sonner";
 	import Preview from "$lib/components/custom/form/UI/Preview.svelte";
+    import QRCode from 'qrcode'
     let newFormOpen = false;
     let editFormOpen = false;
     const isDesktop = mediaQuery("(min-width: 768px)");
@@ -23,6 +24,20 @@
             })
         }
     }
+
+    const createQRCode = async (fileName: string, link: string) => {
+        if(browser){
+            const aElement = document.createElement('a');
+            aElement.setAttribute('download', fileName);
+            const href = await QRCode.toDataURL(link);
+            aElement.href = href;
+            aElement.setAttribute('target', '_blank');
+            aElement.click();
+            URL.revokeObjectURL(href);
+        }
+
+    
+    };
 
 
   export let data;
@@ -93,9 +108,14 @@
                             </DropdownMenu.Trigger>
 
                             <DropdownMenu.Content class="w-[200px]" align="end">
-                                <DropdownMenu.Item on:click={() => handleCopyAttendance(event.id)}>
+                                <DropdownMenu.Item on:click={() => handleCopyAttendance(event.id)} class="justify-between">
                                     <span>Attendance Link</span> 
                                     <Copy class="ml-2 h-4 w-4"/> 
+                                </DropdownMenu.Item>
+
+                                <DropdownMenu.Item class="justify-between" on:click={() => createQRCode(`${event.name} - QR Code`, `${PUBLIC_URL}/event/attendance/${event.id}`)}>
+                                    <span>Attendance QRCode</span> 
+                                    <QrCode class="ml-2 h-4 w-4"/>
                                 </DropdownMenu.Item>
                                 {#if event.form}
                                     <DropdownMenu.Item>
@@ -147,11 +167,11 @@
                     {event.description}
                 </p>
                 </Card.Content>
-                <Card.Footer class="flex justify-between">
+                <Card.Footer class="flex justify-end">
                     {#if $isDesktop}
                         <Dialog.Root bind:open={editFormOpen} >
                             <Dialog.Trigger asChild let:builder>
-                            <Button variant="outline" builders={[builder]}>Edit</Button>
+                            <Button variant="outline" builders={[builder]} class="hidden">Edit</Button>
                             </Dialog.Trigger>
                             <Dialog.Content class="sm:max-w-[425px]">
                             <Dialog.Header>
@@ -166,7 +186,7 @@
                     {:else}
                         <Drawer.Root bind:open={editFormOpen}>
                             <Drawer.Trigger asChild let:builder>
-                            <Button variant="outline" builders={[builder]}>Edit</Button>
+                            <Button variant="outline" builders={[builder]} class="hidden">Edit</Button>
                             </Drawer.Trigger>
                             <Drawer.Content class="p-4">
                             <Drawer.Header class="text-left">
@@ -178,7 +198,7 @@
                                 <EventForm form={data.updateForm} event={event} actionType="update"/>
                             <Drawer.Footer class="pt-2">
                                 <Drawer.Close asChild let:builder>
-                                <Button variant="outline" builders={[builder]}>Cancel</Button>
+                                <Button variant="outline" builders={[builder]} class="hidden">Cancel</Button>
                                 </Drawer.Close>
                             </Drawer.Footer>
                             </Drawer.Content>

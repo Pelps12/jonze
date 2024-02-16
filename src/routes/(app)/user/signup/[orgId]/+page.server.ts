@@ -158,7 +158,8 @@ export const actions: Actions = {
 					orgId: om.organizationId,
 					userId: om.userId,
 					role: 'MEMBER',
-					additionalInfoId: responseId
+					additionalInfoId: responseId,
+					updatedAt: new Date()
 				}
 			});
 
