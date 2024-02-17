@@ -3,7 +3,7 @@
     import Actions from "./data-table-actions.svelte";
     import { readable } from "svelte/store";
     import * as Table from "$lib/components/ui/table";
-	  import type { Attendance, FormResponse, Member, OrgForm, User } from "$lib/server/drizzle/types";
+	  import type { Attendance, FormResponse, Member, OrgForm, User } from "@repo/db/types";
     export let attendants: (
       Attendance & {
         member: Member & {

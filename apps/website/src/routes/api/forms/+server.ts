@@ -1,5 +1,5 @@
-import db from '$lib/server/drizzle/db';
-import schema from '$lib/server/drizzle/schema';
+import db from '@repo/db';
+import schema from '@repo/db/schema';
 import { ZodCustomForm } from '$lib/types/forms';
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';

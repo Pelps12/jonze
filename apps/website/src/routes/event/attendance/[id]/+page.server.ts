@@ -1,10 +1,10 @@
-import db from '$lib/server/drizzle/db';
+import db from '@repo/db';
 import { and, eq } from 'drizzle-orm';
 import type { PageServerLoad } from './$types';
-import schema from '$lib/server/drizzle/schema';
+import schema from '@repo/db/schema';
 import { error, redirect, type Actions, fail } from '@sveltejs/kit';
-import { newId } from '$lib/server/drizzle/utils/createId';
 import { objectsHaveSameKeys } from '$lib/server/helpers';
+import { newId } from '@repo/db/utils/createId';
 
 export const load: PageServerLoad = async ({ locals, params, url }) => {
 	const event = await db.query.event.findFirst({

@@ -1,5 +1,5 @@
-import db from '$lib/server/drizzle/db';
-import schema from '$lib/server/drizzle/schema';
+import db from '@repo/db';
+import schema from '@repo/db/schema';
 import { signJWT } from '$lib/server/helpers';
 import workos from '$lib/server/workos';
 import { redirect, type Actions, error } from '@sveltejs/kit';

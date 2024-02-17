@@ -1,5 +1,5 @@
-import db from '$lib/server/drizzle/db';
-import schema from '$lib/server/drizzle/schema';
+import db from '@repo/db';
+import schema from '@repo/db/schema';
 import { verifyJwtToken } from '$lib/server/workos';
 import { error, type Handle } from '@sveltejs/kit';
 import type { Organization, User } from '@workos-inc/node';

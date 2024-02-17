@@ -2,8 +2,8 @@ import { superValidate } from 'sveltekit-superforms/server';
 import type { Actions, PageServerLoad } from './$types';
 import { eventCreationSchema, eventUpdationSchema } from './schema';
 import { fail, redirect } from '@sveltejs/kit';
-import db from '$lib/server/drizzle/db';
-import schema from '$lib/server/drizzle/schema';
+import db from '@repo/db';
+import schema from '@repo/db/schema';
 import { eq } from 'drizzle-orm';
 
 export const load: PageServerLoad = async ({ params }) => {

@@ -1,7 +1,7 @@
-import db from '$lib/server/drizzle/db';
+import db from '@repo/db';
 import { and, eq, or } from 'drizzle-orm';
 import type { PageServerLoad } from './$types';
-import schema from '$lib/server/drizzle/schema';
+import schema from '@repo/db/schema';
 import { error, redirect } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ params, locals }) => {

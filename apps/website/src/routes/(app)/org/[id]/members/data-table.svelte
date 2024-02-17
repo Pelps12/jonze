@@ -3,7 +3,7 @@
     import Actions from "./data-table-actions.svelte";
     import { readable } from "svelte/store";
     import * as Table from "$lib/components/ui/table";
-	  import type { FormResponse, Member, OrgForm, User } from "$lib/server/drizzle/types";
+	  import type { FormResponse, Member, OrgForm, User } from "@repo/db/types";
     export let members: (Member & {user: Omit<User, "createdAt"| "updatedAt"|"id">; organization: {
         forms: OrgForm[]}; additionalInfo: FormResponse| null})[];
     type Payment = {

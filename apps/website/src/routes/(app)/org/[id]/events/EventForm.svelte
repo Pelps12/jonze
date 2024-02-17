@@ -9,7 +9,7 @@
     import { parseISO, format } from 'date-fns';
     import enUS from 'date-fns/locale/en-US'
     import { formatInTimeZone } from 'date-fns-tz';
-	  import type { OrgForm, Event as dbEvent } from "$lib/server/drizzle/types";
+	  import type { OrgForm, Event as dbEvent } from "@repo/db/types";
 	import { onMount } from "svelte";
     export let event: dbEvent & {form: OrgForm|null}| undefined;
     export let actionType: "create" | "update" = "create";

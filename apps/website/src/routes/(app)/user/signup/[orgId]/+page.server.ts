@@ -1,10 +1,10 @@
 import { fail, type Actions, redirect, error } from '@sveltejs/kit';
-import db from '$lib/server/drizzle/db';
+import db from '@repo/db';
 import { and, eq } from 'drizzle-orm';
-import schema from '$lib/server/drizzle/schema';
+import schema from '@repo/db/schema';
 import workos, { clientId } from '$lib/server/workos';
 import { WORKOS_REDIRECT_URI } from '$env/static/private';
-import { newId } from '$lib/server/drizzle/utils/createId';
+import { newId } from '@repo/db/utils/createId';
 import { objectsHaveSameKeys } from '$lib/server/helpers';
 import type { PageServerLoad } from './$types';
 
