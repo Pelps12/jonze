@@ -14,7 +14,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	const payload = await request.json();
 
-	const webhook = workos.webhooks.constructEvent({
+	const webhook = await workos.webhooks.constructEvent({
 		payload: payload,
 		sigHeader: sigHeader,
 		secret: WORKOS_WEBHOOK_SECRET
