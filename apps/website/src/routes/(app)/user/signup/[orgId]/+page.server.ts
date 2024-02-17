@@ -1,5 +1,5 @@
 import { fail, type Actions, redirect, error } from '@sveltejs/kit';
-import db from '@repo/db';
+import db from '$lib/server/db';
 import { and, eq } from 'drizzle-orm';
 import schema from '@repo/db/schema';
 import workos, { clientId } from '$lib/server/workos';

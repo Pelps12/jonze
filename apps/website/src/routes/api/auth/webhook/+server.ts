@@ -1,5 +1,5 @@
 import { WORKOS_WEBHOOK_SECRET } from '$env/static/private';
-import db from '@repo/db';
+import db from '$lib/server/db';
 import schema from '@repo/db/schema';
 import workos from '$lib/server/workos';
 import { error, type RequestHandler } from '@sveltejs/kit';

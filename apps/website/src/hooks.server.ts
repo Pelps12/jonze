@@ -1,4 +1,4 @@
-import db from '@repo/db';
+import db from '$lib/server/db';
 import schema from '@repo/db/schema';
 import { verifyJwtToken } from '$lib/server/workos';
 import { error, type Handle } from '@sveltejs/kit';

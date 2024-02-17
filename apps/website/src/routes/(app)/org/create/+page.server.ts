@@ -1,4 +1,4 @@
-import db from '@repo/db';
+import db from '$lib/server/db';
 import schema from '@repo/db/schema';
 import { signJWT } from '$lib/server/helpers';
 import workos from '$lib/server/workos';

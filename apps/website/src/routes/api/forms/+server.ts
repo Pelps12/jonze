@@ -1,4 +1,4 @@
-import db from '@repo/db';
+import db from '$lib/server/db';
 import schema from '@repo/db/schema';
 import { ZodCustomForm } from '$lib/types/forms';
 import { error, json, type RequestHandler } from '@sveltejs/kit';

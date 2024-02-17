@@ -1,4 +1,4 @@
-import db from '@repo/db';
+import db from '$lib/server/db';
 import { and, eq } from 'drizzle-orm';
 import type { PageServerLoad } from '../$types';
 import schema from '@repo/db/schema';

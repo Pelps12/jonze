@@ -2,7 +2,7 @@ import { superValidate } from 'sveltekit-superforms/server';
 import type { Actions, PageServerLoad } from './$types';
 import { eventCreationSchema, eventUpdationSchema } from './schema';
 import { fail, redirect } from '@sveltejs/kit';
-import db from '@repo/db';
+import db from '$lib/server/db';
 import schema from '@repo/db/schema';
 import { eq } from 'drizzle-orm';
 
