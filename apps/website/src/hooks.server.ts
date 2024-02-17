@@ -4,6 +4,7 @@ import { verifyJwtToken } from '$lib/server/workos';
 import { error, type Handle } from '@sveltejs/kit';
 import type { Organization, User } from '@workos-inc/node';
 import { eq, and, or } from 'drizzle-orm';
+import { PUBLIC_URL } from '$env/static/public';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const token = event.cookies.get('token');
@@ -14,7 +15,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	if (verifiedToken) {
 		// @ts-expect-error: Already valid
 		event.locals.user = verifiedToken as User & { orgs: Organization[] };
-		if (event.request.url.includes('/org')) {
+		if (event.request.url.includes(`${PUBLIC_URL}/org`)) {
 			const authorized = await db.query.member.findFirst({
 				where: and(
 					eq(schema.member.orgId, event.params.id ?? ''),
