@@ -13,12 +13,15 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	const payload = await request.json();
+	console.log('16');
 
 	const webhook = await workos.webhooks.constructEvent({
 		payload: payload,
 		sigHeader: sigHeader,
 		secret: WORKOS_WEBHOOK_SECRET
 	});
+
+	console.log('24');
 
 	switch (webhook.event) {
 		case 'user.created': {
