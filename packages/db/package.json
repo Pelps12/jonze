@@ -1,0 +1,24 @@
+{
+	"name": "@repo/db",
+	"main": "./index.ts",
+	"types": "./index.ts",
+	"author": "retconned <retcnned@gmail.com>",
+	"version": "0.0.0",
+	"private": true,
+	"dependencies": {
+		"mysql2": "^3.9.1"
+	},
+	"scripts": {
+		"db:push": "drizzle-kit push:mysql"
+	},
+	"devDependencies": {
+		"@types/node": "^18.15.5",
+		"dotenv": "^16.0.3",
+		"drizzle-orm": "^0.29.3",
+		"drizzle-kit": "^0.20.14",
+		"nanoid": "^5.0.5",
+		"@planetscale/database": "^1.16.0",
+		"@repo/eslint-config": "^0.0.0",
+		"typescript": "^5.0.2"
+	}
+}
