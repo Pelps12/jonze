@@ -4,6 +4,7 @@ import schema from '@repo/db/schema';
 import workos from '$lib/server/workos';
 import { error, type RequestHandler } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
+import { Webhooks } from './helper';
 
 export const POST: RequestHandler = async ({ request }) => {
 	const sigHeader = request.headers.get('WorkOS-Signature');
@@ -15,9 +16,10 @@ export const POST: RequestHandler = async ({ request }) => {
 	const payload = await request.json();
 	console.log('16');
 
-	const webhook = await workos.webhooks.constructEvent({
-		payload: payload,
-		sigHeader: sigHeader,
+	const webhookInstance = new Webhooks();
+	const webhook = await webhookInstance.constructEvent({
+		payload,
+		sigHeader,
 		secret: WORKOS_WEBHOOK_SECRET
 	});
 
@@ -59,7 +61,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			break;
 		}
 	}
-
+	console.log('64');
 	return new Response(null, {
 		status: 200
 	});
