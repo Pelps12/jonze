@@ -16,8 +16,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	const payload = await request.json();
 	console.log('16');
 
-	const webhookInstance = new Webhooks();
-	const webhook = await webhookInstance.constructEvent({
+	const webhook = await workos.webhooks.constructEvent({
 		payload,
 		sigHeader,
 		secret: WORKOS_WEBHOOK_SECRET

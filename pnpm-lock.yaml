@@ -73,8 +73,8 @@ importers:
         specifier: ^6.13.0
         version: 6.13.0
       '@workos-inc/node':
-        specifier: ^6.0.0
-        version: 6.0.0
+        specifier: ^6.0.2
+        version: 6.0.2
       bits-ui:
         specifier: ^0.17.0
         version: 0.17.0(svelte@4.2.10)
@@ -1733,8 +1733,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@workos-inc/node@6.0.0:
-    resolution: {integrity: sha512-CtIoBmEhgkgrIhs+uDg8XT5wad67B2t4+kpM5L6dOiyhakE869GCyvyXDEyLmYGv7Cjgfm5ndTZ5TCf6PIoEjA==}
+  /@workos-inc/node@6.0.2:
+    resolution: {integrity: sha512-O22BE3C/Voq1ErpdWoex7Wwn2CYUuXoOq5sy6E/wzEqpHLO33JzgGIPtCKlJRfvntIPM1o5lckU1Xq1s8hbe1w==}
     dependencies:
       pluralize: 8.0.0
     dev: false
