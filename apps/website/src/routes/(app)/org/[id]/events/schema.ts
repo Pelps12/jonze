@@ -13,7 +13,8 @@ export const eventCreationSchema = z.object({
 	end: z.string(),
 	image: z.string().nullable(),
 	description: z.string().nullable(),
-	name: z.string()
+	name: z.string(),
+	timezone: z.string()
 });
 
 export const eventUpdationSchema = z.object({

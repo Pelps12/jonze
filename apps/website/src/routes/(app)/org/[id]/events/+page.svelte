@@ -29,7 +29,9 @@
         if(browser){
             const aElement = document.createElement('a');
             aElement.setAttribute('download', fileName);
-            const href = await QRCode.toDataURL(link);
+            const href = await QRCode.toDataURL(link,{
+                width: 800
+            });
             aElement.href = href;
             aElement.setAttribute('target', '_blank');
             aElement.click();
@@ -168,7 +170,7 @@
                 </p>
                 </Card.Content>
                 <Card.Footer class="flex justify-end">
-                    {#if $isDesktop}
+<!--                     {#if $isDesktop}
                         <Dialog.Root bind:open={editFormOpen} >
                             <Dialog.Trigger asChild let:builder>
                             <Button variant="outline" builders={[builder]} class="hidden">Edit</Button>
@@ -203,7 +205,7 @@
                             </Drawer.Footer>
                             </Drawer.Content>
                         </Drawer.Root>
-                    {/if}
+                    {/if} -->
                     <Button variant="destructive">Delete</Button>
                 </Card.Footer>
             </Card.Root>

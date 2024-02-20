@@ -1,7 +1,8 @@
 import type { Config } from 'drizzle-kit';
+import 'dotenv/config';
 export default {
-	schema: './src/lib/server/drizzle/schema/*.ts',
-	out: './src/lib/server/drizzle',
+	schema: './schema/*.ts',
+	out: './',
 	dbCredentials: {
 		uri: process.env.DATABASE_URL as string
 	},

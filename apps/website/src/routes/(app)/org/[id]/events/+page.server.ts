@@ -5,6 +5,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import db from '$lib/server/db';
 import schema from '@repo/db/schema';
 import { eq } from 'drizzle-orm';
+import { parseZonedDateTime } from '@internationalized/date';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const events = await db.query.event.findMany({
@@ -34,8 +35,8 @@ export const actions: Actions = {
 		}
 		console.log(form.data);
 		const newEvent = await db.insert(schema.event).values({
-			start: new Date(form.data.start),
-			end: new Date(form.data.end),
+			start: parseZonedDateTime(`${form.data.start}[${form.data.timezone}]`).toDate(),
+			end: parseZonedDateTime(`${form.data.end}[${form.data.timezone}]`).toDate(),
 			image: form.data.image,
 			description: form.data.description,
 			orgId: event.params.id,

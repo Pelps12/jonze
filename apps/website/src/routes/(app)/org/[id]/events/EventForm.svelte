@@ -3,7 +3,7 @@
     import { ACCEPTED_IMAGE_TYPES, eventCreationSchema, type EventUpdationSchema, type EventCreationSchema } from "./schema";
     import type { SuperValidated } from "sveltekit-superforms";
     
-    export let form: SuperValidated<EventCreationSchema> | SuperValidated<EventUpdationSchema>;
+    export let form: SuperValidated<EventCreationSchema>;
     import { Input } from "$lib/components/ui/input";
     import { client } from "$lib/client/uploadcare";
     import { parseISO, format } from 'date-fns';
@@ -11,6 +11,7 @@
     import { formatInTimeZone } from 'date-fns-tz';
 	  import type { OrgForm, Event as dbEvent } from "@repo/db/types";
 	import { onMount } from "svelte";
+	import { browser } from "$app/environment";
     export let event: dbEvent & {form: OrgForm|null}| undefined;
     export let actionType: "create" | "update" = "create";
 
@@ -24,22 +25,10 @@
 
     $: form.data, console.log(form.data);
 
-    onMount(() => {
-      if(event){
-        console.log("SHOULD DO SOMETHING")
-        form.data = {
-          id: event.id,
-          name: event.name,
-          start: formatToBrowserTimeZone(event.start),
-          end: formatToBrowserTimeZone(event.end),
-          image: event.image,
-          description: event.description
-        }
-      }
-    })
 
-
-
+    if(browser){
+      form.data.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+    }
 
 
 
@@ -73,6 +62,8 @@
         </Form.Item>
     </Form.Field>
 
+
+
     <div class="grid grid-cols-2 gap-2 w-full">
         <Form.Field {config} name="start">
             <Form.Item class="w-full">
@@ -90,6 +81,14 @@
             </Form.Item>
         </Form.Field>
     </div>
+
+    <Form.Field {config} name="timezone">
+      <Form.Item class="hidden">
+          <Form.Label>User's Timezone</Form.Label>
+          <Form.Input type="text" value={"GABAS GBOS"}/>
+          <Form.Validation />
+      </Form.Item>
+  </Form.Field>
     <Form.Field {config} name="image" let:setValue>
       <Form.Item>
         <Form.Label>Image {form.data.image ? "(Image already present)": ""}</Form.Label>

@@ -8,7 +8,7 @@
 </script>
 
 <div class="flex justify-between items-center mb-6">
-    <h2 class="text-xl font-semibold">Events</h2>
+    <h2 class="text-xl font-semibold">Forms</h2>
     <div class="flex space-x-2">
         <Button variant="outline" href={`forms/create`}>Add Form</Button>
 

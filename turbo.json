@@ -13,6 +13,16 @@
 			"cache": false,
 			"persistent": true,
 			"dotEnv": [".env.development.local", ".env.development", ".env.local", ".env"]
+		},
+		"db:push": {
+			"inputs": ["schema/index.ts"],
+			"dotEnv": [".env.production.local", ".env.production", ".env.local", ".env"],
+			"cache": false
+		},
+		"db:studio": {
+			"inputs": ["schema/index.ts"],
+			"dotEnv": [".env.production.local", ".env.production", ".env.local", ".env"],
+			"cache": false
 		}
 	}
 }
