@@ -22,6 +22,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		where: eq(schema.organization.id, params.id),
 		with: {
 			members: {
+				where: or(eq(schema.member.role, 'ADMIN'), eq(schema.member.role, 'OWNER')),
 				with: {
 					keys: true,
 					user: {
@@ -43,7 +44,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	}
 	const keys = organization.members.flatMap((member) => member.keys);
 	console.log(keys.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()));
-	return { keys };
+	return { keys, members: organization.members };
 };
 
 export const actions: Actions = {
