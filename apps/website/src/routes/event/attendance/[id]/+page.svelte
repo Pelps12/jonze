@@ -7,8 +7,20 @@
 	import { page } from "$app/stores";
 	import { toast } from "svelte-sonner";
 	import { goto } from "$app/navigation";
+	import { onMount } from "svelte";
     export let data;
-    let filled = data.formFilled
+    let filled = data.formFilled;
+
+    const invalid = data.formFilled || new Date() > data.event.end || new Date() < data.event.start
+
+    onMount(() => {
+      setTimeout(() => {
+        const callbackUrl = $page.url.searchParams.get("callbackUrl")
+        if(invalid && callbackUrl){
+          window.location.href = callbackUrl
+        }
+      }, 7000)
+    })
 
 
 </script>
@@ -69,7 +81,7 @@
 
             </Card.Content>
             <Card.Footer class="flex justify-center">
-            <Button disabled={filled || new Date() > data.event.end || new Date() < data.event.start} type="submit">Mark Attendance</Button>
+            <Button disabled={invalid} type="submit">Mark Attendance</Button>
             </Card.Footer>
         </Card.Root>
     </form>
