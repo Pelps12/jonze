@@ -18,8 +18,10 @@
     <div class="max-w-[100rem] mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-10">
       <!-- Announcement Banner -->
       <div class="flex justify-center">
-        <Button variant="outline" disabled class="inline-flex items-center gap-x-2 bg-white border border-gray-200 text-sm text-gray-800 p-2  rounded-full transition hover:border-gray-300 ">We are in beta. Be Nice
-         </Button>
+          <Button variant="outline" disabled 
+            class="inline-flex items-center gap-x-2 bg-white border border-gray-200 text-sm text-gray-800 p-2  rounded-full transition hover:border-gray-300 ">
+            Event metrics, Paid memberships, and APIs coming soon
+          </Button>
 
         
       </div>

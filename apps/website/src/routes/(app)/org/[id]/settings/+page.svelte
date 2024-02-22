@@ -2,11 +2,13 @@
 
 	import { Button } from "$lib/components/ui/button";
     import * as Card from "$lib/components/ui/card";
-	import { CopyIcon, PlusCircle, TrashIcon } from "lucide-svelte";
+	import { ChevronDown, CopyIcon, PlusCircle, TrashIcon } from "lucide-svelte";
     import {enhance} from "$app/forms"
 	import { page } from "$app/stores";
     import * as Dialog from "$lib/components/ui/alert-dialog";
 	import { Input } from "$lib/components/ui/input";
+    import * as Popover from "$lib/components/ui/popover";
+    import * as Command from "$lib/components/ui/command";
 	import { browser } from "$app/environment";
 	import { toast } from "svelte-sonner";
     import * as Avatar from "$lib/components/ui/avatar";
@@ -48,7 +50,62 @@
 <div class="flex justify-start items-center mb-6">
     <h2 class="text-xl font-semibold">Settings</h2>
 </div>
-<div class="p-6 grid grid-cols-1  gap-4">
+<div class="p-6 grid grid-cols-1 lg:grid-cols-2 items-start gap-4">
+
+    <Card.Root>
+        <Card.Header>
+            <Card.Title>Team Members</Card.Title>
+            <Card.Description>Invite your team members to collaborate</Card.Description>
+        </Card.Header>
+        <Card.Content class="grid gap-6">
+            {#each data.members as member}
+                <div class="flex items-center justify-between space-x-4">
+                    <div class="flex items-center space-x-4">
+                        <Avatar.Root>
+                            <Avatar.Image src={member.user.profilePictureUrl} alt="Sofia Davis" />
+                            <Avatar.Fallback>U</Avatar.Fallback>
+                        </Avatar.Root>
+                        <div>
+                            <p class="text-sm font-medium leading-none">{member.user.firstName} {member.user.lastName}</p>
+                            <p class="text-sm text-muted-foreground">{member.user.email}</p>
+                        </div>
+                    </div>
+                    <Popover.Root>
+                        <Popover.Trigger asChild let:builder>
+                            <Button builders={[builder]} variant="outline" class="ml-auto">
+                                {member.role}
+                                <ChevronDown class="ml-2 h-4 w-4 text-muted-foreground" />
+                            </Button>
+                        </Popover.Trigger>
+                        <Popover.Content class="p-0" align="end">
+                            <Command.Root>
+                                <Command.Input placeholder="Select new role..." />
+                                <Command.List>
+                                    <Command.Empty>No roles found.</Command.Empty>
+                                    <Command.Group>
+                                        <Command.Item class="flex flex-col items-start space-y-1 px-4 py-2">
+                                            <p>Admin</p>
+                                            <p class="text-sm text-muted-foreground">
+                                                Can view, comment and manage resources.
+                                            </p>
+                                        </Command.Item>
+                                        <Command.Item class="flex flex-col items-start space-y-1 px-4 py-2">
+                                            <p>Owner</p>
+                                            <p class="text-sm text-muted-foreground">
+                                                Admin-level access to all resources. Can delete org
+                                            </p>
+                                        </Command.Item>
+                                    </Command.Group>
+                                </Command.List>
+                            </Command.Root>
+                        </Popover.Content>
+                    </Popover.Root>
+                </div>
+            {/each}
+
+        </Card.Content>
+    </Card.Root>
+
     <form method="post" action="?/create" use:enhance={() => {
     
         return async ({ result, update }) => {
@@ -105,6 +162,9 @@
             
         </Card.Root>
     </form>
+
+
+
 
      {#if typeof $page.form?.key === "string"}
         <Dialog.Root bind:open closeOnOutsideClick={false}>
