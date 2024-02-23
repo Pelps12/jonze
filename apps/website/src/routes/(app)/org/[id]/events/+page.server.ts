@@ -1,11 +1,13 @@
 import { superValidate } from 'sveltekit-superforms/server';
 import type { Actions, PageServerLoad } from './$types';
 import { eventCreationSchema, eventUpdationSchema } from './schema';
-import { fail, redirect } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
 import db from '$lib/server/db';
 import schema from '@repo/db/schema';
 import { eq } from 'drizzle-orm';
 import { parseZonedDateTime } from '@internationalized/date';
+import posthog from '$lib/server/posthog';
+import { newId } from '@repo/db/utils/createId';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const events = await db.query.event.findMany({
@@ -33,8 +35,12 @@ export const actions: Actions = {
 				form
 			});
 		}
+
 		console.log(form.data);
+
+		const eventId = newId('event');
 		const newEvent = await db.insert(schema.event).values({
+			id: eventId,
 			start: parseZonedDateTime(`${form.data.start}[${form.data.timezone}]`).toDate(),
 			end: parseZonedDateTime(`${form.data.end}[${form.data.timezone}]`).toDate(),
 			image: form.data.image,
@@ -42,7 +48,19 @@ export const actions: Actions = {
 			orgId: event.params.id,
 			name: form.data.name
 		});
+		event.locals.user &&
+			posthog.capture({
+				distinctId: event.locals.user.id,
+				event: 'event created',
+				properties: {
+					$ip: event.getClientAddress(),
+					eventId: eventId,
+					orgId: event.params.id,
+					name: form.data.name
+				}
+			});
 		if (newEvent) {
+			event.platform?.context.waitUntil(posthog.shutdownAsync());
 			redirect(302, event.url);
 		}
 
@@ -70,7 +88,21 @@ export const actions: Actions = {
 				updatedAt: new Date()
 			})
 			.where(eq(schema.event.id, form.data.id));
+
+		//Capture event updated
+		event.locals.user &&
+			posthog.capture({
+				distinctId: event.locals.user.id,
+				event: 'event updated',
+				properties: {
+					$ip: event.getClientAddress(),
+					eventId: schema.event.id,
+					orgId: event.params.id,
+					name: form.data.name
+				}
+			});
 		if (newEvent) {
+			event.platform?.context.waitUntil(posthog.shutdownAsync());
 			redirect(302, event.url);
 		}
 

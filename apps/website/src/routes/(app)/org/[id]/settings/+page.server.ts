@@ -2,10 +2,11 @@ import { UNKEY_API_KEY } from '$env/static/private';
 import db from '$lib/server/db';
 import unkey from '$lib/server/unkey';
 import schema from '@repo/db/schema';
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import { and, eq, or } from 'drizzle-orm';
 import type { PageServerLoad, Actions } from './$types';
 import { PUBLIC_APIKEY_PREFIX } from '$env/static/public';
+import posthog from '$lib/server/posthog';
 
 export const load: PageServerLoad = async ({ locals, params }) => {
 	if (!locals.user) {
@@ -48,7 +49,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 };
 
 export const actions: Actions = {
-	create: async ({ request, locals, params }) => {
+	create: async ({ locals, params, getClientAddress, platform }) => {
 		if (!params.id) error(400, 'Organization ID Required');
 
 		if (!locals.member) {
@@ -67,11 +68,24 @@ export const actions: Actions = {
 			error(500, 'Error creating API Key');
 		}
 
+		console.log(createdKey.result);
+
 		const insertedApiKey = await db.insert(schema.apiKey).values({
 			keyId: createdKey.result.keyId,
 			memId: locals.member.id,
-			hint: createdKey.result.key.split('-')[1].slice(0, 4)
+			hint: createdKey.result.key.split('_')[2].slice(0, 4)
 		});
+
+		posthog.capture({
+			distinctId: locals.member.userId,
+			event: 'API Key Created',
+			properties: {
+				$ip: getClientAddress(),
+				orgId: params.id
+			}
+		});
+
+		platform?.context.waitUntil(posthog.shutdownAsync());
 
 		return { key: createdKey.result.key };
 	}

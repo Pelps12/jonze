@@ -5,6 +5,7 @@ import schema from '@repo/db/schema';
 import { error, redirect, type Actions, fail } from '@sveltejs/kit';
 import { objectsHaveSameKeys } from '$lib/server/helpers';
 import { newId } from '@repo/db/utils/createId';
+import posthog from '$lib/server/posthog';
 
 export const load: PageServerLoad = async ({ locals, params, url }) => {
 	const event = await db.query.event.findFirst({
@@ -42,7 +43,7 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ request, locals, params, url }) => {
+	default: async ({ request, locals, params, url, getClientAddress, platform }) => {
 		const callbackUrl = url.searchParams.get('callbackUrl');
 
 		if (!params.id) error(400, 'Event ID Required');
@@ -123,6 +124,18 @@ export const actions: Actions = {
 			memId: member.id,
 			eventId: event.id
 		});
+
+		posthog.capture({
+			distinctId: locals.user.id,
+			event: 'attendance marked',
+			properties: {
+				$ip: getClientAddress(),
+				eventId: event.id,
+				orgId: event.orgId
+			}
+		});
+
+		platform?.context.waitUntil(posthog.shutdownAsync());
 		redirect(302, callbackUrl ?? '/');
 	}
 };

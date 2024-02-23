@@ -3,9 +3,10 @@ import schema from '@repo/db/schema';
 import { signJWT } from '$lib/server/helpers';
 import workos from '$lib/server/workos';
 import { redirect, type Actions, error } from '@sveltejs/kit';
+import posthog from '$lib/server/posthog';
 
 export const actions: Actions = {
-	create: async ({ locals, request, cookies }) => {
+	create: async ({ locals, request, cookies, getClientAddress, platform }) => {
 		// TODO register the user
 		if (!locals.user) {
 			error(401, 'Not Logged In');
@@ -43,6 +44,16 @@ export const actions: Actions = {
 		};
 		const token = await signJWT(newUser);
 
+		posthog.capture({
+			distinctId: locals.user.id,
+			event: 'organization created',
+			properties: {
+				$ip: getClientAddress(),
+				orgId: organization.id,
+				name: name
+			}
+		});
+
 		const url = new URL(request.url);
 
 		// Cleanup params
@@ -55,6 +66,8 @@ export const actions: Actions = {
 			path: '/',
 			httpOnly: true
 		});
+
+		platform?.context.waitUntil(posthog.shutdownAsync());
 		redirect(302, `/org/${organization.id}`);
 	}
 };

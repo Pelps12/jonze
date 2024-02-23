@@ -13,7 +13,6 @@
 
   import { mediaQuery } from "svelte-legos";
 	import type { Organization, User } from "@workos-inc/node";
-	import { currentOrg } from "$lib/stores/organization";
 	import { page } from "$app/stores";
   let open = false;
   const isDesktop = mediaQuery("(min-width: 768px)");
@@ -25,7 +24,12 @@
   })
 
   
+  let currentOrg = user?.orgs.find(org => org.id === $page.params.id);
 
+  page.subscribe(() => {
+    currentOrg = user?.orgs.find(org => org.id === $page.params.id);
+  })
+  $: currentOrg, console.log(currentOrg)
   const handleLogout = () => {
     fetch("/api/auth/logout", {
       method: "POST"
@@ -41,7 +45,7 @@
   <header class="flex flex-wrap sm:justify-start sm:flex-nowrap z-50 w-full border-b text-sm py-2.5 sm:py-4 ">
     <nav class=" flex basis-full items-center w-full mx-auto px-4 sm:px-6 lg:px-8" aria-label="Global">
       <div class="w-full">
-        <a class="flex-none text-xl font-semibold dark:text-white d " href="/" aria-label="Jonze">{user?.orgs.find(org => org.id === $page.params.id)?.name ?? "Jonze"}</a>
+        <a class="flex-none text-xl font-semibold dark:text-white d " href={currentOrg ? `/org/${currentOrg.id}`: "/"} aria-label="Jonze">{currentOrg?.name ?? "Jonze"}</a>
       </div>
 
       <div class="w-full flex items-center justify-end ms-auto sm:gap-x-3 sm:order-3">
