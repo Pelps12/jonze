@@ -7,6 +7,7 @@ import { WORKOS_REDIRECT_URI } from '$env/static/private';
 import { newId } from '@repo/db/utils/createId';
 import { objectsHaveSameKeys } from '$lib/server/helpers';
 import type { PageServerLoad } from './$types';
+import posthog from '$lib/server/posthog';
 
 export const load: PageServerLoad = async ({ params, locals, url }) => {
 	const orgId = params.orgId;
@@ -62,7 +63,7 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ request, locals, url, params }) => {
+	default: async ({ request, locals, url, params, getClientAddress, platform }) => {
 		const callbackUrl = url.searchParams.get('callbackUrl');
 		if (!locals.user) {
 			redirect(302, '/');
@@ -162,6 +163,17 @@ export const actions: Actions = {
 					updatedAt: new Date()
 				}
 			});
+
+		posthog.capture({
+			distinctId: locals.user.id,
+			event: 'member added',
+			properties: {
+				$ip: getClientAddress(),
+				orgId: om.organizationId
+			}
+		});
+
+		platform?.context.waitUntil(posthog.shutdownAsync());
 
 		redirect(302, callbackUrl ?? '/');
 	}

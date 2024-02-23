@@ -18,28 +18,30 @@
     <div class="max-w-[100rem] mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-10">
       <!-- Announcement Banner -->
       <div class="flex justify-center">
-        <Button variant="outline" disabled class="inline-flex items-center gap-x-2 bg-white border border-gray-200 text-sm text-gray-800 p-2  rounded-full transition hover:border-gray-300 ">We are in beta. Be Nice
-         </Button>
+          <Button variant="outline" disabled 
+            class="inline-flex items-center gap-x-2 bg-white border border-gray-200 text-sm text-gray-800 p-2  rounded-full transition hover:border-gray-300 ">
+            Event metrics, Paid memberships, and APIs coming soon
+          </Button>
 
         
       </div>
       <!-- End Announcement Banner -->
   
       <!-- Title -->
-      <div class="mt-5 max-w-2xl text-center mx-auto">
+      <div class="mt-5 max-w-2xl text-center mx-auto z-20 relative">
         <h1 class="block font-bold text-4xl md:text-5xl lg:text-6xl ">
           Organization management made
-          <span class="bg-clip-text text-primary">easy</span>
+          <span class="bg-clip-text text-primary drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,1)]">easy</span>
         </h1>
       </div>
       <!-- End Title -->
   
-      <div class="mt-5 max-w-3xl text-center mx-auto">
+      <div class="mt-5 max-w-3xl text-center mx-auto z-20 relative">
         <p class="text-lg  ">The all-in-one platform for handling member statistics and event data. Let your org focus on what matters most: <span class=" text-primary font-semibold">running</span>.</p>
       </div>
   
       <!-- Buttons -->
-      <div class="mt-8 gap-3 flex justify-center">
+      <div class="mt-8 gap-3 flex justify-center z-20 relative">
 
         <Button variant="secondary" class="gap-2" href="https://github.com/Pelps12/diff">
             <svg class="flex-shrink-0 w-4.5 h-4.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">

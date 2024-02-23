@@ -4,6 +4,7 @@ import { user } from './user';
 import { organization } from './organization';
 import { formResponse } from './formResponse';
 import { attendance } from './attendance';
+import { apiKey } from './apikey';
 
 export const member = mysqlTable('Member', {
 	id: varchar('id', { length: 128 }).primaryKey(),
@@ -26,5 +27,6 @@ export const memberRelations = relations(member, ({ one, many }) => ({
 		fields: [member.additionalInfoId],
 		references: [formResponse.id]
 	}),
-	attendances: many(attendance)
+	attendances: many(attendance),
+	keys: many(apiKey)
 }));

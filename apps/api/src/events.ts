@@ -16,9 +16,11 @@ app.get('/', async (c) => {
 			message: 'Bad API Key'
 		});
 	}
+	const limit = c.req.query('limit');
 	const events = await c.get('db').query.event.findMany({
 		where: eq(schema.event.orgId, metadata.orgId),
-		orderBy: (event, { desc }) => [desc(event.start)]
+		orderBy: (event, { desc }) => [desc(event.start)],
+		limit: limit ? parseInt(limit) : 100
 	});
 
 	return c.json(events);
@@ -33,13 +35,19 @@ app.get('/:id', async (c) => {
 	}
 
 	const event = await c.get('db').query.event.findFirst({
-		where: and(eq(schema.event.orgId, metadata.orgId), eq(schema.event.id, c.req.param('id'))),
+		where: and(eq(schema.event.id, c.req.param('id'))),
 		orderBy: (event, { desc }) => [desc(event.start)]
 	});
 
 	if (!event) {
 		throw new HTTPException(404, {
 			message: 'Event not found'
+		});
+	}
+
+	if (event.orgId !== metadata.orgId) {
+		throw new HTTPException(401, {
+			message: 'Invalide API Token'
 		});
 	}
 

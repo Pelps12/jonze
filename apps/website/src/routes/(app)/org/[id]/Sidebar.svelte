@@ -4,7 +4,6 @@
 	import { Button, type ButtonEvents } from "$lib/components/ui/button";
 	import { cn } from "$lib/utils";
 	import { CalendarIcon, FileText, FolderIcon, HomeIcon, SettingsIcon, UsersIcon } from "lucide-svelte";
-
 	let className: string | null | undefined = undefined;
 
 	export { className as class };
@@ -48,7 +47,7 @@
         </Button>
         <Button
           class="w-full justify-center lg:justify-start gap-2"
-          href="#"
+          href="/org/{$page.params.id}/settings"
           variant="ghost"
         >
           <SettingsIcon class="h-4 w-4" />

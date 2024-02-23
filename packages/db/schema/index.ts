@@ -1,3 +1,4 @@
+import * as apiKey from '././apikey';
 import * as attendance from './attendance';
 import * as event from './event';
 import * as formResponse from './formResponse';
@@ -8,6 +9,7 @@ import * as organizationForm from './organizationForm';
 import * as user from './user';
 
 const schema = {
+	...apiKey,
 	...attendance,
 	...event,
 	...formResponse,

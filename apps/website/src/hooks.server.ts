@@ -27,6 +27,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			if (!authorized) {
 				error(401, 'User are not an admin for this org');
 			}
+			event.locals.member = authorized;
 		}
 	}
 	const response = await resolve(event);

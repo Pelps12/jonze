@@ -5,6 +5,7 @@ import schema from '@repo/db/schema';
 import { error, redirect } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
+	console.log('888888', locals.user);
 	if (!locals.user) {
 		redirect(302, '/');
 	}

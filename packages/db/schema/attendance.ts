@@ -10,9 +10,7 @@ export const attendance = mysqlTable('Attendance', {
 	id: varchar('id', { length: 128 })
 		.$defaultFn(() => newId('attendance'))
 		.primaryKey(),
-	memId: varchar('memId', { length: 128 })
-		.$defaultFn(() => newId('attendance'))
-		.notNull(),
+	memId: varchar('memId', { length: 128 }).notNull(),
 	eventId: varchar('eventId', { length: 128 }).notNull(),
 	responseId: varchar('responseId', { length: 128 }),
 	createdAt: datetime('createdAt', { mode: 'date', fsp: 3 })

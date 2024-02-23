@@ -1,8 +1,9 @@
 import { signJWT } from '$lib/server/helpers';
+import posthog from '$lib/server/posthog';
 import workos, { clientId } from '$lib/server/workos';
 import { error, redirect, type RequestHandler } from '@sveltejs/kit';
 
-export const GET: RequestHandler = async ({ request, cookies }) => {
+export const GET: RequestHandler = async ({ request, cookies, platform, getClientAddress }) => {
 	const url = new URL(request.url);
 	const code = url.searchParams.get('code');
 	const callbackUrl = url.searchParams.get('state');
@@ -41,6 +42,15 @@ export const GET: RequestHandler = async ({ request, cookies }) => {
 			httpOnly: true
 		});
 
+		posthog.capture({
+			distinctId: user.id,
+			event: 'user logged in',
+			properties: {
+				$ip: getClientAddress()
+			}
+		});
+
+		platform?.context.waitUntil(posthog.shutdownAsync());
 		redirect(302, url.toString());
 	}
 
