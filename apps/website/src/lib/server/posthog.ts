@@ -4,7 +4,8 @@ import { PostHog } from 'posthog-node';
 const client = new PostHog(PUBLIC_POSTHOG_KEY, {
 	host: PUBLIC_POSTHOG_HOST,
 	flushAt: 1,
-	flushInterval: 0
+	flushInterval: 0,
+	disableGeoip: false
 });
 if (PUBLIC_URL.includes('localhost') || PUBLIC_URL.includes('dev')) {
 	console.log('IGNORED');
