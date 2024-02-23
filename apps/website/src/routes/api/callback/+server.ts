@@ -32,6 +32,9 @@ export const GET: RequestHandler = async ({ request, cookies, platform, getClien
 		// Cleanup params
 		url.searchParams.delete('code');
 
+		//Add identifying query param
+		url.searchParams.set('signedIn', 'true');
+
 		// Redirect to the requested path and store the session
 		if (!callbackUrl) {
 			url.pathname = '/';
