@@ -65,7 +65,7 @@
 		"mysql2": "^3.9.1",
 		"nanoid": "^5.0.5",
 		"posthog-js": "^1.108.2",
-		"posthog-node": "^3.1.2",
+		"posthog-node": "^3.6.3",
 		"qrcode": "^1.5.3",
 		"svelte-legos": "^0.2.2",
 		"svelte-sonner": "^0.3.17",
