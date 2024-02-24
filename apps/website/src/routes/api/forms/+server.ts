@@ -74,9 +74,10 @@ export const PUT: RequestHandler = async ({ request, locals, getClientAddress, p
 				orgId: data.organizationId
 			}
 		});
+		await posthog.shutdownAsync();
 	}
 
-	platform?.context.waitUntil(posthog.shutdownAsync());
+	platform?.context.waitUntil(Promise.resolve(console.log('HELLO WORLD')));
 
 	return json(orgForm);
 };
