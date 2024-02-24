@@ -47,7 +47,7 @@
         </Card.Root>
     </Resizable.Pane>
     <Resizable.Handle withHandle />
-    <Resizable.Pane defaultSize={layout ? layout[0] : 40} minSize={25} collapsedSize={0}>
+    <Resizable.Pane defaultSize={layout ? layout[0] : 40} minSize={30} collapsedSize={0} collapsible={true}>
         <Card.Root class=" m-2 h-auto">
             <Card.Header class="p-4">
                 <div class="grid gap-4">

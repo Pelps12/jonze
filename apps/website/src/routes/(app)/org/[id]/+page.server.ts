@@ -9,9 +9,11 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 	if (!locals.user) {
 		redirect(302, '/');
 	}
-	let layout = cookies.get('PaneForge:layout');
-	if (layout) {
-		layout = JSON.parse(layout);
+	let layout: number[] | undefined;
+	const rawLayoutCookie = cookies.get('PaneForge:layout');
+	if (rawLayoutCookie) {
+		console.log(rawLayoutCookie);
+		layout = JSON.parse(rawLayoutCookie);
 	}
 	const authorized = await db.query.member.findFirst({
 		where: and(
@@ -39,7 +41,7 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 						}
 					}
 				},
-				limit: 3,
+				limit: 5,
 				orderBy: (member, { desc }) => [desc(member.createdAt)]
 			}
 		}
