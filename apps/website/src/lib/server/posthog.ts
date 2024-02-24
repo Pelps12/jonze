@@ -7,6 +7,8 @@ const client = new PostHog(PUBLIC_POSTHOG_KEY, {
 	flushInterval: 0,
 	disableGeoip: false
 });
+
+client.debug(true);
 if (PUBLIC_URL.includes('localhost') || PUBLIC_URL.includes('dev')) {
 	console.log('IGNORED');
 	client.optOut();
