@@ -4,10 +4,14 @@ import type { PageServerLoad } from './$types';
 import schema from '@repo/db/schema';
 import { error, redirect } from '@sveltejs/kit';
 
-export const load: PageServerLoad = async ({ params, locals }) => {
+export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 	console.log('888888', locals.user);
 	if (!locals.user) {
 		redirect(302, '/');
+	}
+	let layout = cookies.get('PaneForge:layout');
+	if (layout) {
+		layout = JSON.parse(layout);
 	}
 	const authorized = await db.query.member.findFirst({
 		where: and(
@@ -45,5 +49,5 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		error(404, 'Organization not Found');
 	}
 
-	return { organization };
+	return { organization, layout };
 };
