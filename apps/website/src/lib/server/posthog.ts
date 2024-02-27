@@ -1,4 +1,4 @@
-import { PUBLIC_POSTHOG_HOST, PUBLIC_POSTHOG_KEY, PUBLIC_URL } from '$env/static/public';
+import { PUBLIC_POSTHOG_KEY, PUBLIC_URL } from '$env/static/public';
 import { PostHog } from 'posthog-node';
 
 const client = new PostHog(PUBLIC_POSTHOG_KEY, {

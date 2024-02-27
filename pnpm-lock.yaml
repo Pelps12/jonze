@@ -123,6 +123,9 @@ importers:
       nanoid:
         specifier: ^5.0.5
         version: 5.0.5
+      paneforge:
+        specifier: ^0.0.2
+        version: 0.0.2(svelte@4.2.10)
       posthog-js:
         specifier: ^1.108.2
         version: 1.108.2
@@ -3705,6 +3708,15 @@ packages:
   /p-try@2.2.0:
     resolution: {integrity: sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ==}
     engines: {node: '>=6'}
+    dev: false
+
+  /paneforge@0.0.2(svelte@4.2.10):
+    resolution: {integrity: sha512-1xNMq+uslstqum4D8CzzkPGqnTWUlevjYtMjUhuEOiuz7E0fJHFuM8ogk8+LJnVbAg3hMJJ/9Mu4A1KaxK38oQ==}
+    peerDependencies:
+      svelte: ^4.0.0
+    dependencies:
+      nanoid: 5.0.5
+      svelte: 4.2.10
     dev: false
 
   /parent-module@1.0.1:

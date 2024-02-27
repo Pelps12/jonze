@@ -7,7 +7,7 @@
     export let handleDelete: () => void;
   </script>
 
-<Card.Root class="w-[200px] relative mx-auto">
+<Card.Root class="w-full relative mx-auto">
 
     <Card.Header>
         <div class="absolute top-0 right-0 m-4 flex gap-2">
