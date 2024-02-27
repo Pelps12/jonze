@@ -24,14 +24,15 @@ jobs:
           cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install Dependencies
-        run: pnpm install -w
+      - run: pnpm install
+      - run: pnpm build
 
-      - name: Configure pnpm to ignore workspace root check
-        run: echo "ignore-workspace-root-check=true" > ~/.pnpmrc
-
-      - name: Deploy
-        run: pnpm run deploy --name=dev-api
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Deploy Dev API Server Subtask
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: wrangler deploy --minify src/index.ts
+          workingDirectory: 'apps/api'
+          packageManager: 'pnpm'
+          wranglerVersion: '3.23.0'
