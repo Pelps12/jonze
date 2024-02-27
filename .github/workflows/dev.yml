@@ -31,7 +31,7 @@ jobs:
         run: echo "ignore-workspace-root-check=true" > ~/.pnpmrc
 
       - name: Deploy
-        uses: cloudflare/wrangler-action@v3
+        run: pnpm run deploy
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
