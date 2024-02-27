@@ -25,7 +25,6 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - run: pnpm install
-      - run: pnpm build
 
       - name: Deploy Dev API Server Subtask
         uses: cloudflare/wrangler-action@v3
