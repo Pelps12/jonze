@@ -1,8 +1,6 @@
 name = "api"
 compatibility_date = "2023-12-01"
-
-#[vars]
-
+route="dev.api.jonze.co/*"
 
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"
