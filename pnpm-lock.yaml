@@ -31,10 +31,10 @@ importers:
     dependencies:
       '@unkey/hono':
         specifier: ^0.11.0
-        version: 0.11.0(hono@4.0.3)
+        version: 0.11.0(hono@3.7.2)
       hono:
-        specifier: ^4.0.3
-        version: 4.0.3
+        specifier: ^3.7.2
+        version: 3.7.2
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20240208.0
@@ -1729,13 +1729,13 @@ packages:
     resolution: {integrity: sha512-/rpzSG6VkDo+s/vr9Vz+94zNARrwsuDaqghQQlQ5aHlRR3TR+O8ikOF/hMYDV14k7ksOnvbBZ8lsq970kX23lw==}
     dev: false
 
-  /@unkey/hono@0.11.0(hono@4.0.3):
+  /@unkey/hono@0.11.0(hono@3.7.2):
     resolution: {integrity: sha512-9q2l1odDkPry8EG+4QA2seuIItzW0dAP7kgrce/0PXw5lGe7syHHduffEz40jI/W0jS8jx/Gd28YiOF0qNQ7qw==}
     peerDependencies:
       hono: ^3.7.2
     dependencies:
       '@unkey/api': 0.17.0
-      hono: 4.0.3
+      hono: 3.7.2
     dev: false
 
   /@uploadcare/blocks@0.32.1:
@@ -3205,8 +3205,8 @@ packages:
     resolution: {integrity: sha512-2bsegYkkHO+h/9MGbn6KWcE45cHZgPANo5LXF7EvWdT0yT2EguSVO1nDgU5c8+ZOPwp2vMNa7YFsJhVcDR9Sdg==}
     dev: true
 
-  /hono@4.0.3:
-    resolution: {integrity: sha512-LLZFvqiksAO6Hf080XCUbsEjRxIrqEoiIN1HUzL0xtYP+BZUxGfeWg8yB5Dvp/sI7T0Lt4XdtGTGLwpIzAsl8w==}
+  /hono@3.7.2:
+    resolution: {integrity: sha512-5SWYrAQJlfjHggcDTnmKZd5zlUEXmoUiBjnmL6C1W8MX39/bUw6ZIvfEJZgpo7d7Z/vCJ5FRfkjIQPRH5yV/dQ==}
     engines: {node: '>=16.0.0'}
     dev: false
 
