@@ -4,6 +4,7 @@ import schema from '@repo/db/schema';
 import { connect, drizzle, eq } from '@repo/db';
 import type { DbType } from '@repo/db/typeaid';
 import { HTTPException } from 'hono/http-exception';
+import { logger } from 'hono/logger';
 import events from './events';
 import members from './members';
 type Bindings = {
@@ -14,6 +15,7 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings; Variables: { unkey: UnkeyContext; db: DbType } }>();
 
+app.use(logger());
 app.get('/', async (c) => {
 	return c.text('Welcome to Jonze API');
 });
