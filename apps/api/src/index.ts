@@ -47,6 +47,7 @@ app.use('*', async (c, next) => {
 			return fetch(url, init);
 		}
 	});
+	console.log('PLEASE', connection.config);
 	const db = drizzle(connection, { schema });
 	c.set('db', db);
 	return await next();

@@ -1,6 +1,5 @@
 name = "api"
-compatibility_date = "2023-12-01"
-route="dev.api.jonze.co/*"
+compatibility_date = "2022-04-05"
 
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"
