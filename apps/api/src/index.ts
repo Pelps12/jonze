@@ -11,6 +11,7 @@ export type Bindings = {
 	DATABASE_HOST: string;
 	DATABASE_USERNAME: string;
 	DATABASE_PASSWORD: string;
+	TEST_SECRET: string;
 };
 
 const app = new Hono<{ Bindings: Bindings; Variables: { unkey: UnkeyContext; db: DbType } }>();
@@ -38,6 +39,7 @@ app.use('*', (c, next) => {
 
 app.use('*', async (c, next) => {
 	console.log(c.env.DATABASE_HOST, c.env.DATABASE_PASSWORD, c.env.DATABASE_USERNAME);
+	console.log('abc', c.env.TEST_SECRET);
 	const connection = connect({
 		host: c.env.DATABASE_HOST,
 		username: c.env.DATABASE_USERNAME,
