@@ -7,7 +7,7 @@ import { HTTPException } from 'hono/http-exception';
 import { logger } from 'hono/logger';
 import events from './events';
 import members from './members';
-type Bindings = {
+export type Bindings = {
 	DATABASE_HOST: string;
 	DATABASE_USERNAME: string;
 	DATABASE_PASSWORD: string;
@@ -37,12 +37,13 @@ app.use('*', (c, next) => {
 });
 
 app.use('*', async (c, next) => {
+	console.log(c.env.DATABASE_HOST, c.env.DATABASE_PASSWORD, c.env.DATABASE_USERNAME);
 	const connection = connect({
 		host: c.env.DATABASE_HOST,
 		username: c.env.DATABASE_USERNAME,
 		password: c.env.DATABASE_PASSWORD,
 		fetch: (url: string, init: any) => {
-			delete (init as any)['cache']; // Remove cache header
+			delete (init as any)['cache'];
 			return fetch(url, init);
 		}
 	});
