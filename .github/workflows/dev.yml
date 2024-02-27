@@ -31,7 +31,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: wrangler deploy --minify src/index.ts
+          command: deploy --minify src/index.ts
           workingDirectory: 'apps/api'
           packageManager: 'pnpm'
           wranglerVersion: '3.23.0'
