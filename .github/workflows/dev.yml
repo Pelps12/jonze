@@ -35,3 +35,11 @@ jobs:
           workingDirectory: 'apps/api'
           packageManager: 'pnpm'
           wranglerVersion: '3.23.0'
+          secrets: |
+            DATABASE_HOST
+            DATABASE_PASSWORD
+            DATABASE_USERNAME
+      env:
+        DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+        DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }} 
+        DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
