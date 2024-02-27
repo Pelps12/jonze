@@ -31,15 +31,16 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy --minify src/index.ts --name=dev-api
-          workingDirectory: 'apps/api'
-          packageManager: 'pnpm'
-          wranglerVersion: '3.23.0'
           secrets: |
             DATABASE_HOST
             DATABASE_PASSWORD
             DATABASE_USERNAME
             TEST_SECRET
+          command: deploy --minify src/index.ts --name=dev-api
+          workingDirectory: 'apps/api'
+          packageManager: 'pnpm'
+          wranglerVersion: '3.23.0'
+
         env:
           DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
           DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
