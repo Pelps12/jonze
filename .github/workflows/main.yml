@@ -31,12 +31,13 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          environment: production
           secrets: |
             DATABASE_HOST
             DATABASE_PASSWORD
             DATABASE_USERNAME
             TEST_SECRET
-          command: deploy --minify src/index.ts --env production
+          command: deploy --minify src/index.ts
           workingDirectory: 'apps/api'
           packageManager: 'pnpm'
           wranglerVersion: '3.23.0'
