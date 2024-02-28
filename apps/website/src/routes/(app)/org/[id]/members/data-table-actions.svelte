@@ -7,8 +7,11 @@
 	import { Input } from "$lib/components/ui/input";
 	import Preview from "$lib/components/custom/form/UI/Preview.svelte";
 	import type { CustomForm } from "$lib/types/forms";
+    import {page} from "$app/stores"
     export let form: CustomForm;
-    export let response: Record<string, string>
+    export let response: Record<string, string>;
+    export let memberId: string;
+
 
 </script>
 
@@ -37,7 +40,7 @@
                 
 
             
-            <DropdownMenu.Item>Make a copy</DropdownMenu.Item>
+            <DropdownMenu.Item href={`/org/${$page.params.id}/members/${memberId}`}>Details</DropdownMenu.Item>
             <DropdownMenu.Item>Favorite</DropdownMenu.Item>
             <DropdownMenu.Separator />
             <DropdownMenu.Separator />

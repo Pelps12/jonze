@@ -3,6 +3,7 @@ import { and, eq, or } from 'drizzle-orm';
 import type { PageServerLoad } from './$types';
 import schema from '@repo/db/schema';
 import { error, redirect } from '@sveltejs/kit';
+import { attendance } from '@repo/db/schema/attendance';
 
 export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 	console.log('888888', locals.user);
@@ -43,13 +44,29 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 				},
 				limit: 5,
 				orderBy: (member, { desc }) => [desc(member.createdAt)]
+			},
+			events: {
+				with: {
+					attendances: {
+						columns: {
+							id: true
+						}
+					}
+				},
+				limit: 5
 			}
 		}
 	});
 
+	const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
 	if (!organization) {
 		error(404, 'Organization not Found');
 	}
 
-	return { organization, layout };
+	const chartData = {
+		labels: organization.events.map((event) => event.name),
+		data: organization.events.map((event) => event.attendances.length)
+	};
+
+	return { organization, layout, chartData };
 };

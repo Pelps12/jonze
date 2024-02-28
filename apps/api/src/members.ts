@@ -5,7 +5,7 @@ import { DbType } from '@repo/db/typeaid';
 import { UnkeyContext } from '@unkey/hono';
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
-import { Bindings } from 'hono/types';
+import { Bindings } from '.';
 
 const app = new Hono<{ Bindings: Bindings; Variables: { unkey: UnkeyContext; db: DbType } }>();
 

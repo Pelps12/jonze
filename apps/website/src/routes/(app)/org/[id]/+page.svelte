@@ -16,6 +16,54 @@
             document.cookie = `PaneForge:layout=${JSON.stringify(sizes)}`;
         }	
 	}
+
+    import {
+    Chart,
+    Title,
+    Tooltip,
+    Legend,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+  } from 'chart.js';
+  import {Bar} from "svelte-chartjs"
+  import { derived } from 'svelte/store';
+
+	import { mode } from "mode-watcher";
+
+        
+    Chart.register(
+    Title,
+    Tooltip,
+    Legend,
+    BarElement,
+    CategoryScale,
+    LinearScale
+  );
+
+  Chart.defaults.font.family = "Onest"
+
+  
+
+    const isLight = derived(mode, ($mode) =>$mode === "light");
+
+    isLight.subscribe(a => console.log(a))
+
+    const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
+	const chartData = {
+		labels: data.chartData.labels,
+		datasets: [
+			{
+				label: 'Attendance',
+				data: data.chartData.data,
+				borderColor: $isLight ? '#000': '#fff',
+				backgroundColor: $isLight ? '#000': '#fff',
+				borderWidth: 0,
+				borderRadius: 5,
+				borderSkipped: false
+			}
+		]
+	};
 </script>
 
 
@@ -23,25 +71,17 @@
     
 
 <Resizable.PaneGroup direction="horizontal" class=" rounded-lg border" {onLayoutChange}>
-    <Resizable.Pane defaultSize={layout ? layout[0] : 60} collapsedSize={0} collapsible={true} minSize={50}>
+    <Resizable.Pane defaultSize={layout ? layout[0] : 60} collapsedSize={0} collapsible={true} minSize={50}  onResize={(e) => Chart.getChart("")?.resize(10,10)}>
         <Card.Root class=" m-2">
             <Card.Header class="p-4">
                 <div class="grid gap-4">
                 <Card.Title class="text-lg font-semibold">Event Metrics</Card.Title>
                 </div>
             </Card.Header>
-            <Card.Content class="grid gap-4">
-                <div class="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
-                    <div class="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-    
-                
-                        <h3 class="mt-4 text-lg font-semibold">Coming soon</h3>
-                        <p class="mb-4 mt-2 text-sm text-muted-foreground">
-                            Event analytics are currently unavailable but are in the works
-                        </p>
-    
-                    </div>
-                </div>
+            <Card.Content class="grid gap-4 h-auto">
+               
+                <Bar data={chartData}  options={{maintainAspectRatio: false, aspectRatio: 1, scales:{x: {display: false}, y: {ticks: {stepSize: 1}}}}}/>
+                 
     
             </Card.Content>
         </Card.Root>
