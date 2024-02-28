@@ -1,10 +1,10 @@
 name = "api"
 compatibility_date = "2022-04-05"
-route = { pattern = "api.jonze.co", custom_domain = true }
+route = { pattern = "dev.api.jonze.co", custom_domain = true }
 vars = { ENVIRONMENT = "dev" }
 
 [env.production]
-route = { pattern = "dev.api.jonze.co", custom_domain = true }
+route = { pattern = "api.jonze.co", custom_domain = true }
 vars = { ENVIRONMENT = "production" }
 
 # [[kv_namespaces]]
