@@ -51,7 +51,8 @@
           if (row.isData() && row.original && row.original.additionalInfo) {
             return createRender(Actions, {
               form: row.original.organization.forms[0].form ?? {},
-              response: row.original.additionalInfo?.response ?? {}
+              response: row.original.additionalInfo?.response ?? {},
+              memberId: row.original.id
             });
           }
           return "";
