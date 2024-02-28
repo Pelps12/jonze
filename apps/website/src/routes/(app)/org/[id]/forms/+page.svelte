@@ -32,7 +32,7 @@
 
       <Card.Footer class="flex justify-between">
         <Button variant="outline" href={`/org/${$page.params.id}/forms/${form.id}`}>Edit</Button>
-        <Button href={`/org/${$page.params.id}/forms/${form.id}?preview=true`}>Preview</Button>
+        <Button href={`/org/${$page.params.id}/forms/${form.id}/responses`}>Responses</Button>
         
       </Card.Footer>
     </Card.Root>
