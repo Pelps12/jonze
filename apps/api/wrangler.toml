@@ -1,6 +1,11 @@
 name = "api"
 compatibility_date = "2022-04-05"
 
+vars = { ENVIRONMENT = "dev" }
+
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"
 # id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"

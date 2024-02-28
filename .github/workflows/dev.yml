@@ -36,6 +36,7 @@ jobs:
             DATABASE_PASSWORD
             DATABASE_USERNAME
             TEST_SECRET
+          command: deploy --minify src/index.ts
           workingDirectory: 'apps/api'
           packageManager: 'pnpm'
           wranglerVersion: '3.23.0'
