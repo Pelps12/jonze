@@ -65,7 +65,7 @@ app.route('/events', events);
 app.route('/members', members);
 
 app.doc('/doc', (c) => ({
-	openapi: '3.1.0',
+	openapi: '3.0.0',
 	info: {
 		version: '1.0.0',
 		title: 'My API'
