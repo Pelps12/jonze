@@ -26,6 +26,15 @@ type ZodObj<T extends AnyObj> = {
 // zObject function remains the same
 const zObject = <T extends AnyObj>(arg: ZodObj<T>) => z.object(arg);
 
+export const zodOpenAPIUnauthorized = z.object({
+	code: z.number().openapi({
+		example: 401
+	}),
+	message: z.string().openapi({
+		example: 'Unauthorized'
+	})
+});
+
 export const zodOpenAPIEvent = zObject<Event>({
 	id: z.string().openapi({
 		example: 'evt_SP6prmGnMzt5spsr'

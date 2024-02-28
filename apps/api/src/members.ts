@@ -7,12 +7,23 @@ import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { Bindings } from '.';
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
-import { zodOpenAPIFormResponse, zodOpenAPIMember, zodOpenAPIUser } from './utils/helper';
+import {
+	zodOpenAPIFormResponse,
+	zodOpenAPIMember,
+	zodOpenAPIUnauthorized,
+	zodOpenAPIUser
+} from './utils/helper';
 
 const app = new OpenAPIHono<{
 	Bindings: Bindings;
 	Variables: { unkey: UnkeyContext; db: DbType };
 }>();
+
+const security = app.openAPIRegistry.registerComponent('securitySchemes', 'API Key', {
+	type: 'apiKey',
+	in: 'header',
+	name: 'x-api-key'
+});
 
 app.use(
 	'*',
@@ -33,11 +44,7 @@ app.use('*', (c, next) => {
 const listMembersRoute = createRoute({
 	method: 'get',
 	path: '/',
-	request: {
-		headers: z.object({
-			'x-api-key': z.string()
-		})
-	},
+	security: [{ [security.name]: [] }],
 	responses: {
 		200: {
 			content: {
@@ -46,8 +53,17 @@ const listMembersRoute = createRoute({
 				}
 			},
 			description: 'Retrieve members'
+		},
+		401: {
+			content: {
+				'application/json': {
+					schema: zodOpenAPIUnauthorized
+				}
+			},
+			description: 'Returns an error'
 		}
-	}
+	},
+	tags: ['Members']
 });
 
 app.openapi(listMembersRoute, async (c) => {
@@ -68,10 +84,8 @@ app.openapi(listMembersRoute, async (c) => {
 const getMemberRoute = createRoute({
 	method: 'get',
 	path: '/{id}',
+	security: [{ [security.name]: [] }],
 	request: {
-		headers: z.object({
-			'x-api-key': z.string()
-		}),
 		params: z.object({
 			id: z.string().openapi({
 				param: {
@@ -100,8 +114,17 @@ const getMemberRoute = createRoute({
 				}
 			},
 			description: 'Retrieve member by ID'
+		},
+		401: {
+			content: {
+				'application/json': {
+					schema: zodOpenAPIUnauthorized
+				}
+			},
+			description: 'Returns an error'
 		}
-	}
+	},
+	tags: ['Members']
 });
 app.openapi(getMemberRoute, async (c) => {
 	console.log(c.get('unkey'));

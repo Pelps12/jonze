@@ -6,12 +6,18 @@ import { UnkeyContext, unkey } from '@unkey/hono';
 import { HTTPException } from 'hono/http-exception';
 import { Bindings } from '.';
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
-import { createZodObject, zodOpenAPIEvent } from './utils/helper';
+import { createZodObject, zodOpenAPIEvent, zodOpenAPIUnauthorized } from './utils/helper';
 
 const app = new OpenAPIHono<{
 	Bindings: Bindings;
 	Variables: { unkey: UnkeyContext; db: DbType };
 }>();
+
+const security = app.openAPIRegistry.registerComponent('securitySchemes', 'API Key', {
+	type: 'apiKey',
+	in: 'header',
+	name: 'x-api-key'
+});
 
 app.use(
 	'*',
@@ -32,6 +38,7 @@ app.use('*', (c, next) => {
 const listEventsRoute = createRoute({
 	method: 'get',
 	path: '/',
+	security: [{ [security.name]: [] }],
 	request: {
 		query: z.object({
 			limit: z
@@ -46,9 +53,6 @@ const listEventsRoute = createRoute({
 					example: '10',
 					description: 'Limit of event returned'
 				})
-		}),
-		headers: z.object({
-			'x-api-key': z.string()
 		})
 	},
 	responses: {
@@ -59,8 +63,17 @@ const listEventsRoute = createRoute({
 				}
 			},
 			description: 'Retrieve events'
+		},
+		401: {
+			content: {
+				'application/json': {
+					schema: zodOpenAPIUnauthorized
+				}
+			},
+			description: 'Returns an error'
 		}
-	}
+	},
+	tags: ['Events']
 });
 
 app.openapi(listEventsRoute, async (c) => {
@@ -83,10 +96,8 @@ app.openapi(listEventsRoute, async (c) => {
 const getEventRoute = createRoute({
 	method: 'get',
 	path: '/{id}',
+	security: [{ [security.name]: [] }],
 	request: {
-		headers: z.object({
-			'x-api-key': z.string()
-		}),
 		params: z.object({
 			id: z.string().openapi({
 				param: {
@@ -106,8 +117,17 @@ const getEventRoute = createRoute({
 				}
 			},
 			description: 'Retrieve events'
+		},
+		401: {
+			content: {
+				'application/json': {
+					schema: zodOpenAPIUnauthorized
+				}
+			},
+			description: 'Returns an error'
 		}
-	}
+	},
+	tags: ['Events']
 });
 
 app.openapi(getEventRoute, async (c) => {
