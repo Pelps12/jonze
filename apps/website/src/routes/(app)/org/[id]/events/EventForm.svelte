@@ -1,17 +1,27 @@
 <script lang="ts">
     import * as Form from "$lib/components/ui/form";
     import { ACCEPTED_IMAGE_TYPES, eventCreationSchema, type EventUpdationSchema, type EventCreationSchema } from "./schema";
-    import type { SuperValidated } from "sveltekit-superforms";
+    import { type SuperValidated, type Infer, superForm } from "sveltekit-superforms";
     
-    export let form: SuperValidated<EventCreationSchema>;
+    export let data: SuperValidated<Infer<EventCreationSchema>>;
+    export let forms: {id: string; name: string}[] = [];
     import { Input } from "$lib/components/ui/input";
     import { client } from "$lib/client/uploadcare";
     import { parseISO, format } from 'date-fns';
     import enUS from 'date-fns/locale/en-US'
     import { formatInTimeZone } from 'date-fns-tz';
 	  import type { OrgForm, Event as dbEvent } from "@repo/db/types";
-	import { onMount } from "svelte";
-	import { browser } from "$app/environment";
+    import { onMount, tick } from "svelte";
+    import { browser } from "$app/environment";
+    import { zodClient } from "sveltekit-superforms/adapters";
+    import { Textarea } from "$lib/components/ui/textarea";
+    import * as Popover from "$lib/components/ui/popover";
+    import * as Command from "$lib/components/ui/command";
+    import { buttonVariants } from "$lib/components/ui/button";
+
+	import { getAttrs } from "bits-ui";
+	import { cn } from "$lib/utils";
+	import { Check, ChevronsUpDown } from "lucide-svelte";
     export let event: dbEvent & {form: OrgForm|null}| undefined;
     export let actionType: "create" | "update" = "create";
 
@@ -23,84 +33,153 @@
       return formattedDate;
     }
 
-    $: form.data, console.log(form.data);
+    const form = superForm(data, {
+    validators: zodClient(eventCreationSchema),
+  });
 
 
     if(browser){
-      form.data.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+      data.data.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
     }
 
 
 
   
 
-	async function handleUpload(e: Event & { currentTarget: EventTarget & HTMLInputElement; }, setValue: (value: unknown) => void): Promise<void> {
+	async function handleUpload(e: Event & { currentTarget: EventTarget & HTMLInputElement; }): Promise<void> {
     if(!e.currentTarget.files) return
     const file = e.currentTarget.files[0]
-    client.uploadFile(file).then((file) => {console.log(file); setValue(file.cdnUrl)})
+    client.uploadFile(file).then((file) => {console.log(file); $formData.image = file.cdnUrl})
     console.log(form)
 	}
+
+ 
+  const { form: formData, enhance } = form;
+
+
+  let open = false;
+
+  function closeAndFocusTrigger(triggerId: string) {
+    open = false;
+    tick().then(() => {
+      document.getElementById(triggerId)?.focus();
+    });
+  }
 </script>
   
 
-  <Form.Root method="POST" {form} schema={eventCreationSchema} let:config enctype="multipart/form-data" class="p-4" action={actionType === "update" ? "?/update": "?/create"}>
-    <Form.Field {config} name="name">
-      <Form.Item>
+  <form method="POST" use:enhance enctype="multipart/form-data" class="p-4" action={actionType === "update" ? "?/update": "?/create"}>
+    <Form.Field {form} name="name">
+      <Form.Control let:attrs>
         <Form.Label>Name</Form.Label>
-        <Form.Input placeholder="Name of the Event"/>
-        <Form.Validation />
-      </Form.Item>
+        <Input {...attrs} bind:value={$formData.name} placeholder="Name of the Event"/>
+        
+      </Form.Control>
     </Form.Field>
 
-    <Form.Field {config} name="description">
-        <Form.Item>
+    <Form.Field {form} name="description">
+        <Form.Control let:attrs>
             <Form.Label>Description</Form.Label>
-            <Form.Textarea
+            <Textarea
+              {...attrs}
+              bind:value={$formData.description}
               placeholder="Tell your members a bit more about the event"
             />
-            <Form.Validation />
-        </Form.Item>
+        </Form.Control>
     </Form.Field>
 
 
 
     <div class="grid grid-cols-2 gap-2 w-full">
-        <Form.Field {config} name="start">
-            <Form.Item class="w-full">
+        <Form.Field {form} name="start" class="w-full">
+            <Form.Control let:attrs >
                 <Form.Label>Start Time</Form.Label>
-                <Form.Input type="datetime-local"/>
-                <Form.Validation />
-            </Form.Item>
+                <Input {...attrs} 
+                  type="datetime-local" 
+                  bind:value={$formData.start}/>
+            </Form.Control>
         </Form.Field>
     
-        <Form.Field {config} name="end">
-            <Form.Item class="w-full">
+        <Form.Field {form} name="end" class="w-full">
+            <Form.Control let:attrs>
                 <Form.Label>End Time</Form.Label>
-                <Form.Input type="datetime-local"/>
-                <Form.Validation />
-            </Form.Item>
+                <Input {...attrs} 
+                  type="datetime-local" 
+                  bind:value={$formData.end}/>
+            </Form.Control>
         </Form.Field>
     </div>
 
-    <Form.Field {config} name="timezone">
-      <Form.Item class="hidden">
+    <Form.Field {form} name="timezone" class="hidden">
+      <Form.Control let:attrs>
           <Form.Label>User's Timezone</Form.Label>
-          <Form.Input type="text" value={"GABAS GBOS"}/>
-          <Form.Validation />
-      </Form.Item>
-  </Form.Field>
-    <Form.Field {config} name="image" let:setValue>
-      <Form.Item>
-        <Form.Label>Image {form.data.image ? "(Image already present)": ""}</Form.Label>
-        <Input type="file" on:input={(e) => handleUpload(e, setValue)}/>
-        <Form.Input  class="hidden"/>
-        <Form.Validation />
-      </Form.Item>
+          <Input {...attrs} 
+            type="text" 
+            bind:value={$formData.timezone}/>
+      </Form.Control>
     </Form.Field>
-    
-    
-    
 
-    
+    <Form.Field {form} name="image" class="mb-2">
+      <Form.Control let:attrs>
+        <Form.Label>Image {$formData.image ? "(Image uploaded)": ""}</Form.Label>
+        <Input type="file" on:input={(e) => handleUpload(e)}/>
+        <Input  class="hidden" {...attrs} bind:value={$formData.image}/>
+      </Form.Control>
+    </Form.Field>
+
+
+      <Form.Field {form} name="formId" class="flex flex-col">
+        <Popover.Root bind:open let:ids>
+          <Form.Control let:attrs>
+            <Form.Label>Form</Form.Label>
+            <Popover.Trigger
+              class={cn(
+                buttonVariants({ variant: "outline" }),
+                "w-[200px] justify-between",
+                !$formData.formId && "text-muted-foreground"
+              )}
+              role="combobox"
+              {...attrs}
+            >
+              {forms.find((f) => f.id === $formData.formId)?.name ??
+                "Select form"}
+              <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Popover.Trigger>
+            <input hidden value={$formData.formId} name={attrs.name} />
+          </Form.Control>
+          <Popover.Content class="w-[200px] p-0">
+            <Command.Root>
+              <Command.Input
+                autofocus
+                placeholder="Search form..."
+                class="h-9"
+              />
+              <Command.Empty>No form found.</Command.Empty>
+              <Command.Group>
+                {#each forms as userForm}
+                  <Command.Item
+                    value={userForm.id}
+                    onSelect={() => {
+                      $formData.formId = userForm.id;
+                      closeAndFocusTrigger(ids.trigger);
+                    }}
+                  >
+                    {userForm.name}
+                    <Check
+                      class={cn(
+                        "ml-auto h-4 w-4",
+                        userForm.id !== $formData.formId && "text-transparent"
+                      )}
+                    />
+                  </Command.Item>
+                {/each}
+              </Command.Group>
+            </Command.Root>
+          </Popover.Content>
+        </Popover.Root>
+      </Form.Field>
+
+
+
     <Form.Button>{actionType === "create" ? "Create": "Update"}</Form.Button>
-  </Form.Root>
+  </form>

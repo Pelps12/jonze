@@ -51,42 +51,48 @@
 <div class="flex justify-between items-center mb-6">
     <h2 class="text-xl font-semibold">Events</h2>
     <div class="flex space-x-2">
-        {#if $isDesktop}
-            <Dialog.Root bind:open={newFormOpen} >
-                <Dialog.Trigger asChild let:builder>
-                <Button variant="outline" builders={[builder]}>Add Event</Button>
-                </Dialog.Trigger>
-                <Dialog.Content class="sm:max-w-[425px]">
-                <Dialog.Header>
-                    <Dialog.Title>Create your Event</Dialog.Title>
-                    <Dialog.Description>
-                        Allow members mark attendance on your events
-                    </Dialog.Description>
-                </Dialog.Header>
-                    <EventForm form={data.form} event={undefined}/>
-                </Dialog.Content>
-            </Dialog.Root>
-        {:else}
-            <Drawer.Root bind:open={newFormOpen}>
-                <Drawer.Trigger asChild let:builder>
-                <Button variant="outline" builders={[builder]}>Add Event</Button>
-                </Drawer.Trigger>
-                <Drawer.Content class="p-4">
-                <Drawer.Header class="text-left">
-                    <Drawer.Title>Create your Event</Drawer.Title>
-                    <Drawer.Description>
-                        Allow members mark attendance on your events
-                    </Drawer.Description>
-                </Drawer.Header>
-                    <EventForm form={data.form} event={undefined}/>
-                <Drawer.Footer class="pt-2">
-                    <Drawer.Close asChild let:builder>
-                    <Button variant="outline" builders={[builder]}>Cancel</Button>
-                    </Drawer.Close>
-                </Drawer.Footer>
-                </Drawer.Content>
-            </Drawer.Root>
-        {/if}
+        {#await data.forms}
+            <Button variant="outline" disabled>Add Event</Button>
+        {:then forms} 
+            
+        
+            {#if $isDesktop}
+                <Dialog.Root bind:open={newFormOpen} >
+                    <Dialog.Trigger asChild let:builder>
+                    <Button variant="outline" builders={[builder]}>Add Event</Button>
+                    </Dialog.Trigger>
+                    <Dialog.Content class="sm:max-w-[425px]">
+                    <Dialog.Header>
+                        <Dialog.Title>Create your Event</Dialog.Title>
+                        <Dialog.Description>
+                            Allow members mark attendance on your events
+                        </Dialog.Description>
+                    </Dialog.Header>
+                        <EventForm data={data.form} event={undefined} forms={forms}/>
+                    </Dialog.Content>
+                </Dialog.Root>
+            {:else}
+                <Drawer.Root bind:open={newFormOpen}>
+                    <Drawer.Trigger asChild let:builder>
+                    <Button variant="outline" builders={[builder]}>Add Event</Button>
+                    </Drawer.Trigger>
+                    <Drawer.Content class="p-4">
+                    <Drawer.Header class="text-left">
+                        <Drawer.Title>Create your Event</Drawer.Title>
+                        <Drawer.Description>
+                            Allow members mark attendance on your events
+                        </Drawer.Description>
+                    </Drawer.Header>
+                        <EventForm data={data.form} event={undefined} forms={forms}/>
+                    <Drawer.Footer class="pt-2">
+                        <Drawer.Close asChild let:builder>
+                        <Button variant="outline" builders={[builder]}>Cancel</Button>
+                        </Drawer.Close>
+                    </Drawer.Footer>
+                    </Drawer.Content>
+                </Drawer.Root>
+            {/if}
+        {/await}
     </div>
   </div>
   <div class=" shadow rounded-lg p-6">

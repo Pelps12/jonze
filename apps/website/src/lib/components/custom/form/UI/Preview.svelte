@@ -5,7 +5,6 @@
 	import * as Select from "$lib/components/ui/select";
 	import { Textarea } from "$lib/components/ui/textarea";
 	import type { CustomForm } from "$lib/types/forms";
-    import type { SuperValidated } from "sveltekit-superforms";
     export let form: CustomForm;
     export let userResponse: Record<string, string>|undefined;
     $: userResponse, console.log(userResponse);

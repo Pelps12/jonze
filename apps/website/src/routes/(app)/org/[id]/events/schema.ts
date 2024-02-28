@@ -14,7 +14,8 @@ export const eventCreationSchema = z.object({
 	image: z.string().nullable(),
 	description: z.string().nullable(),
 	name: z.string(),
-	timezone: z.string()
+	timezone: z.string(),
+	formId: z.string().nullable()
 });
 
 export const eventUpdationSchema = z.object({

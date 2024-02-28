@@ -4,10 +4,11 @@ import { eventCreationSchema, eventUpdationSchema } from './schema';
 import { error, fail, redirect } from '@sveltejs/kit';
 import db from '$lib/server/db';
 import schema from '@repo/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and, not } from 'drizzle-orm';
 import { parseZonedDateTime } from '@internationalized/date';
 import posthog from '$lib/server/posthog';
 import { newId } from '@repo/db/utils/createId';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const events = await db.query.event.findMany({
@@ -17,19 +18,31 @@ export const load: PageServerLoad = async ({ params }) => {
 			form: true
 		}
 	});
+
+	const availableForms = db.query.organizationForm.findMany({
+		where: and(
+			eq(schema.organizationForm.orgId, params.id),
+			not(eq(schema.organizationForm.name, 'User Info'))
+		),
+		columns: {
+			id: true,
+			name: true
+		}
+	});
 	console.log(events);
 	return {
 		events,
-		form: await superValidate(eventCreationSchema),
-		updateForm: await superValidate(eventUpdationSchema, {
+		form: await superValidate(zod(eventCreationSchema)),
+		updateForm: await superValidate(zod(eventUpdationSchema), {
 			id: '79j98009'
-		})
+		}),
+		forms: availableForms
 	};
 };
 
 export const actions: Actions = {
 	create: async (event) => {
-		const form = await superValidate(event, eventCreationSchema);
+		const form = await superValidate(event, zod(eventCreationSchema));
 		if (!form.valid) {
 			return fail(400, {
 				form
@@ -46,7 +59,8 @@ export const actions: Actions = {
 			image: form.data.image,
 			description: form.data.description,
 			orgId: event.params.id,
-			name: form.data.name
+			name: form.data.name,
+			formId: form.data.formId
 		});
 		event.locals.user &&
 			posthog.capture({
@@ -69,7 +83,7 @@ export const actions: Actions = {
 		};
 	},
 	update: async (event) => {
-		const form = await superValidate(event, eventUpdationSchema);
+		const form = await superValidate(event, zod(eventUpdationSchema));
 		if (!form.valid) {
 			return fail(400, {
 				form
