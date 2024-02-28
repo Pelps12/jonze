@@ -48,5 +48,5 @@
 		"github": "https://github.com/mintlify",
 		"linkedin": "https://www.linkedin.com/company/mintsearch"
 	},
-	"openapi": "https://dev-api.jonze.co/doc"
+	"openapi": "https://api.jonze.co/doc"
 }
