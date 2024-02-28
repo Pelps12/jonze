@@ -7,8 +7,11 @@
 		"deploy": "wrangler deploy --minify src/index.ts"
 	},
 	"dependencies": {
+		"@hono/swagger-ui": "^0.2.1",
+		"@hono/zod-openapi": "^0.9.6",
 		"@unkey/hono": "^0.11.0",
-		"hono": "^4.0.7"
+		"hono": "^4.0.7",
+		"zod": "^3.22.4"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20240208.0",

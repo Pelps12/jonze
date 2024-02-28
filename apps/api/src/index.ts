@@ -1,4 +1,4 @@
-import { Hono } from 'hono';
+import { OpenAPIHono, z } from '@hono/zod-openapi';
 import { UnkeyContext, unkey } from '@unkey/hono';
 import schema from '@repo/db/schema';
 import { connect, drizzle, eq } from '@repo/db';
@@ -7,6 +7,8 @@ import { HTTPException } from 'hono/http-exception';
 import { logger } from 'hono/logger';
 import events from './events';
 import members from './members';
+import { swaggerUI } from '@hono/swagger-ui';
+
 export type Bindings = {
 	DATABASE_HOST: string;
 	DATABASE_USERNAME: string;
@@ -14,27 +16,15 @@ export type Bindings = {
 	TEST_SECRET: string;
 };
 
-const app = new Hono<{ Bindings: Bindings; Variables: { unkey: UnkeyContext; db: DbType } }>();
+const app = new OpenAPIHono<{
+	Bindings: Bindings;
+	Variables: { unkey: UnkeyContext; db: DbType };
+}>();
 
 app.use(logger());
+
 app.get('/', async (c) => {
 	return c.text('Welcome to Jonze API');
-});
-
-app.use(
-	'*',
-	unkey({
-		getKey: (c) => c.req.header('x-api-key')
-	})
-);
-
-app.use('*', (c, next) => {
-	if (c.get('unkey').valid === false) {
-		throw new HTTPException(401, {
-			message: 'Invalid API Key'
-		});
-	}
-	return next();
 });
 
 app.use('*', async (c, next) => {
@@ -57,5 +47,15 @@ app.use('*', async (c, next) => {
 
 app.route('/events', events);
 app.route('/members', members);
+
+app.doc('/doc', {
+	openapi: '3.0.0',
+	info: {
+		version: '1.0.0',
+		title: 'My API'
+	}
+});
+
+app.get('/ui', swaggerUI({ url: '/doc' }));
 
 export default app;

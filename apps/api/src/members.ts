@@ -2,14 +2,55 @@
 import { and, eq } from '@repo/db';
 import schema from '@repo/db/schema';
 import { DbType } from '@repo/db/typeaid';
-import { UnkeyContext } from '@unkey/hono';
+import { UnkeyContext, unkey } from '@unkey/hono';
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { Bindings } from '.';
+import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
+import { zodOpenAPIFormResponse, zodOpenAPIMember, zodOpenAPIUser } from './utils/helper';
 
-const app = new Hono<{ Bindings: Bindings; Variables: { unkey: UnkeyContext; db: DbType } }>();
+const app = new OpenAPIHono<{
+	Bindings: Bindings;
+	Variables: { unkey: UnkeyContext; db: DbType };
+}>();
 
-app.get('/', async (c) => {
+app.use(
+	'*',
+	unkey({
+		getKey: (c) => c.req.header('x-api-key')
+	})
+);
+
+app.use('*', (c, next) => {
+	if (c.get('unkey').valid === false) {
+		throw new HTTPException(401, {
+			message: 'Invalid API Key'
+		});
+	}
+	return next();
+});
+
+const listMembersRoute = createRoute({
+	method: 'get',
+	path: '/',
+	request: {
+		headers: z.object({
+			'x-api-key': z.string()
+		})
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: z.array(zodOpenAPIMember)
+				}
+			},
+			description: 'Retrieve members'
+		}
+	}
+});
+
+app.openapi(listMembersRoute, async (c) => {
 	const metadata = c.get('unkey').meta as Record<string, string | undefined>;
 	if (!metadata.orgId) {
 		throw new HTTPException(400, {
@@ -23,7 +64,46 @@ app.get('/', async (c) => {
 
 	return c.json(members);
 });
-app.get('/:id', async (c) => {
+
+const getMemberRoute = createRoute({
+	method: 'get',
+	path: '/{id}',
+	request: {
+		headers: z.object({
+			'x-api-key': z.string()
+		}),
+		params: z.object({
+			id: z.string().openapi({
+				param: {
+					name: 'id',
+					in: 'path'
+				},
+				example: 'om_01HPCN296XBAKD6QYVKNMARD4N',
+				description: 'ID of member'
+			})
+		})
+	},
+	responses: {
+		200: {
+			content: {
+				'application/json': {
+					schema: zodOpenAPIMember.extend({
+						user: zodOpenAPIUser.pick({
+							id: true,
+							firstName: true,
+							lastName: true,
+							email: true,
+							profilePictureUrl: true
+						}),
+						addtionalInfo: zodOpenAPIFormResponse.nullish()
+					})
+				}
+			},
+			description: 'Retrieve member by ID'
+		}
+	}
+});
+app.openapi(getMemberRoute, async (c) => {
 	console.log(c.get('unkey'));
 	const metadata = c.get('unkey').meta as Record<string, string | undefined>;
 	if (!metadata.orgId) {
@@ -33,16 +113,21 @@ app.get('/:id', async (c) => {
 	}
 
 	const member = await c.get('db').query.member.findFirst({
-		where: and(eq(schema.member.orgId, metadata.orgId), eq(schema.member.id, c.req.param('id'))),
+		where: and(
+			eq(schema.member.orgId, metadata.orgId),
+			eq(schema.member.id, c.req.valid('param').id)
+		),
 		with: {
 			user: {
 				columns: {
+					id: true,
 					firstName: true,
 					lastName: true,
 					email: true,
 					profilePictureUrl: true
 				}
-			}
+			},
+			additionalInfo: true
 		},
 		orderBy: (member, { desc }) => [desc(member.createdAt)]
 	});
