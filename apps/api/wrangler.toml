@@ -1,6 +1,6 @@
 name = "api"
 compatibility_date = "2022-04-05"
-route = { pattern = "dev.api.jonze.co", custom_domain = true }
+route = { pattern = "dev-api.jonze.co", custom_domain = true }
 vars = { ENVIRONMENT = "dev" }
 
 [env.production]
