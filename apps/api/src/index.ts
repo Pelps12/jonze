@@ -1,4 +1,5 @@
 import { OpenAPIHono, z } from '@hono/zod-openapi';
+import { cors } from 'hono/cors';
 import { UnkeyContext, unkey } from '@unkey/hono';
 import schema from '@repo/db/schema';
 import { connect, drizzle, eq } from '@repo/db';
@@ -14,12 +15,27 @@ export type Bindings = {
 	DATABASE_USERNAME: string;
 	DATABASE_PASSWORD: string;
 	TEST_SECRET: string;
+	ENVIRONMENT: string;
 };
 
 const app = new OpenAPIHono<{
 	Bindings: Bindings;
 	Variables: { unkey: UnkeyContext; db: DbType };
 }>();
+
+app.use('*', async (c, next) =>
+	cors({
+		origin:
+			c.env.ENVIRONMENT === 'production'
+				? 'https://jonze.co'
+				: ['https://dev.jonze.co', 'http://localhost:5173'],
+		allowHeaders: ['X-Custom-Header', 'Upgrade-Insecure-Requests'],
+		allowMethods: ['POST', 'GET', 'OPTIONS'],
+		exposeHeaders: ['Content-Length', 'X-Kuma-Revision'],
+		maxAge: 600,
+		credentials: true
+	})(c, next)
+);
 
 app.use(logger());
 
@@ -48,13 +64,18 @@ app.use('*', async (c, next) => {
 app.route('/events', events);
 app.route('/members', members);
 
-app.doc('/doc', {
-	openapi: '3.0.0',
+app.doc('/doc', (c) => ({
+	openapi: '3.1.0',
 	info: {
 		version: '1.0.0',
 		title: 'My API'
-	}
-});
+	},
+	servers: [
+		{
+			url: new URL(c.req.url).origin
+		}
+	]
+}));
 
 app.get('/ui', swaggerUI({ url: '/doc' }));
 

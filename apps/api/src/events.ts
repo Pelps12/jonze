@@ -38,6 +38,7 @@ app.use('*', (c, next) => {
 const listEventsRoute = createRoute({
 	method: 'get',
 	path: '/',
+	description: 'List Events',
 	security: [{ [security.name]: [] }],
 	request: {
 		query: z.object({
@@ -96,6 +97,7 @@ app.openapi(listEventsRoute, async (c) => {
 const getEventRoute = createRoute({
 	method: 'get',
 	path: '/{id}',
+	description: 'Get Event',
 	security: [{ [security.name]: [] }],
 	request: {
 		params: z.object({
@@ -116,7 +118,7 @@ const getEventRoute = createRoute({
 					schema: zodOpenAPIEvent
 				}
 			},
-			description: 'Retrieve events'
+			description: 'Retrieve event by ID'
 		},
 		401: {
 			content: {

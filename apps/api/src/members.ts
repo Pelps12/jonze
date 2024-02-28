@@ -44,6 +44,7 @@ app.use('*', (c, next) => {
 const listMembersRoute = createRoute({
 	method: 'get',
 	path: '/',
+	description: 'List Members',
 	security: [{ [security.name]: [] }],
 	responses: {
 		200: {
@@ -84,6 +85,7 @@ app.openapi(listMembersRoute, async (c) => {
 const getMemberRoute = createRoute({
 	method: 'get',
 	path: '/{id}',
+	description: 'Get Member',
 	security: [{ [security.name]: [] }],
 	request: {
 		params: z.object({
