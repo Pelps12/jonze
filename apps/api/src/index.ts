@@ -1,4 +1,5 @@
-import { Hono } from 'hono';
+import { OpenAPIHono, z } from '@hono/zod-openapi';
+import { cors } from 'hono/cors';
 import { UnkeyContext, unkey } from '@unkey/hono';
 import schema from '@repo/db/schema';
 import { connect, drizzle, eq } from '@repo/db';
@@ -7,34 +8,39 @@ import { HTTPException } from 'hono/http-exception';
 import { logger } from 'hono/logger';
 import events from './events';
 import members from './members';
+import { swaggerUI } from '@hono/swagger-ui';
+
 export type Bindings = {
 	DATABASE_HOST: string;
 	DATABASE_USERNAME: string;
 	DATABASE_PASSWORD: string;
 	TEST_SECRET: string;
+	ENVIRONMENT: string;
 };
 
-const app = new Hono<{ Bindings: Bindings; Variables: { unkey: UnkeyContext; db: DbType } }>();
+const app = new OpenAPIHono<{
+	Bindings: Bindings;
+	Variables: { unkey: UnkeyContext; db: DbType };
+}>();
 
-app.use(logger());
-app.get('/', async (c) => {
-	return c.text('Welcome to Jonze API');
-});
-
-app.use(
-	'*',
-	unkey({
-		getKey: (c) => c.req.header('x-api-key')
-	})
+app.use('*', async (c, next) =>
+	cors({
+		origin:
+			c.env.ENVIRONMENT === 'production'
+				? 'https://jonze.co'
+				: ['https://dev.jonze.co', 'http://localhost:5173'],
+		allowHeaders: ['X-Custom-Header', 'Upgrade-Insecure-Requests'],
+		allowMethods: ['POST', 'GET', 'OPTIONS'],
+		exposeHeaders: ['Content-Length', 'X-Kuma-Revision'],
+		maxAge: 600,
+		credentials: true
+	})(c, next)
 );
 
-app.use('*', (c, next) => {
-	if (c.get('unkey').valid === false) {
-		throw new HTTPException(401, {
-			message: 'Invalid API Key'
-		});
-	}
-	return next();
+app.use(logger());
+
+app.get('/', async (c) => {
+	return c.text('Welcome to Jonze API');
 });
 
 app.use('*', async (c, next) => {
@@ -57,5 +63,20 @@ app.use('*', async (c, next) => {
 
 app.route('/events', events);
 app.route('/members', members);
+
+app.doc('/doc', (c) => ({
+	openapi: '3.0.0',
+	info: {
+		version: '1.0.0',
+		title: 'Jonze API'
+	},
+	servers: [
+		{
+			url: new URL(c.req.url).origin
+		}
+	]
+}));
+
+app.get('/ui', swaggerUI({ url: '/doc' }));
 
 export default app;
