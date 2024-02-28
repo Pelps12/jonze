@@ -1,9 +1,10 @@
 name = "api"
 compatibility_date = "2022-04-05"
-
+route = "dev.api.jonze.co/*"
 vars = { ENVIRONMENT = "dev" }
 
 [env.production]
+route = "api.jonze.co/*"
 vars = { ENVIRONMENT = "production" }
 
 # [[kv_namespaces]]
