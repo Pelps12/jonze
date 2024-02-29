@@ -44,7 +44,7 @@ const getAttendanceRoute = createRoute({
 		params: z.object({
 			eventId: z.string().openapi({
 				param: {
-					name: 'id',
+					name: 'eventId',
 					in: 'path'
 				},
 				example: 'evt_SP6prmGnMzt5spsr',
