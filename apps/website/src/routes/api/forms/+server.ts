@@ -4,7 +4,7 @@ import { ZodCustomForm } from '$lib/types/forms';
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
-import posthog from '$lib/server/posthog';
+import posthog, { dummyClient } from '$lib/server/posthog';
 
 export const POST: RequestHandler = async ({ request, locals, getClientAddress, platform }) => {
 	const result = await z
@@ -65,7 +65,7 @@ export const PUT: RequestHandler = async ({ request, locals, getClientAddress, p
 		.where(eq(schema.organizationForm.id, data.formId));
 
 	if (locals.user) {
-		posthog.capture({
+		dummyClient.capture({
 			distinctId: locals.user.id,
 			event: 'form updated',
 			properties: {
@@ -74,12 +74,9 @@ export const PUT: RequestHandler = async ({ request, locals, getClientAddress, p
 				orgId: data.organizationId
 			}
 		});
-
-		console.log(await posthog.flushAsync());
-		await posthog.shutdownAsync();
 	}
 
-	platform?.context.waitUntil(Promise.resolve(console.log('HELLO WORLD')));
+	platform?.context.waitUntil(Promise.resolve(dummyClient.flushAsync()));
 
 	return json(orgForm);
 };
