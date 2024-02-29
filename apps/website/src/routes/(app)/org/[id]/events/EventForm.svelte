@@ -90,8 +90,8 @@
 
 
 
-    <div class="grid grid-cols-2 gap-2 w-full">
-        <Form.Field {form} name="start" class="w-full">
+    
+        <Form.Field {form} name="start">
             <Form.Control let:attrs >
                 <Form.Label>Start Time</Form.Label>
                 <Input {...attrs} 
@@ -100,7 +100,7 @@
             </Form.Control>
         </Form.Field>
     
-        <Form.Field {form} name="end" class="w-full">
+        <Form.Field {form} name="end">
             <Form.Control let:attrs>
                 <Form.Label>End Time</Form.Label>
                 <Input {...attrs} 
@@ -108,7 +108,7 @@
                   bind:value={$formData.end}/>
             </Form.Control>
         </Form.Field>
-    </div>
+    
 
     <Form.Field {form} name="timezone" class="hidden">
       <Form.Control let:attrs>
