@@ -28,5 +28,6 @@ export const memberRelations = relations(member, ({ one, many }) => ({
 		references: [formResponse.id]
 	}),
 	attendances: many(attendance),
-	keys: many(apiKey)
+	keys: many(apiKey),
+	responses: many(formResponse)
 }));

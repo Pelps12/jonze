@@ -8,6 +8,7 @@ import { HTTPException } from 'hono/http-exception';
 import { logger } from 'hono/logger';
 import events from './events';
 import members from './members';
+import attendance from './attendance';
 import { swaggerUI } from '@hono/swagger-ui';
 
 export type Bindings = {
@@ -63,6 +64,7 @@ app.use('*', async (c, next) => {
 
 app.route('/events', events);
 app.route('/members', members);
+app.route('/attendance', attendance);
 
 app.doc('/doc', (c) => ({
 	openapi: '3.0.0',
@@ -72,7 +74,7 @@ app.doc('/doc', (c) => ({
 	},
 	servers: [
 		{
-			url: new URL(c.req.url).origin
+			url: 'https://api.jonze.co'
 		}
 	]
 }));

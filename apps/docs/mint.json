@@ -41,6 +41,10 @@
 		{
 			"group": "Members",
 			"pages": ["api-reference/members/list-members", "api-reference/members/get-member"]
+		},
+		{
+			"group": "Attendance",
+			"pages": ["api-reference/attendance/get-attendance"]
 		}
 	],
 	"footerSocials": {
