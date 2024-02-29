@@ -74,7 +74,7 @@ app.doc('/doc', (c) => ({
 	},
 	servers: [
 		{
-			url: new URL(c.req.url).origin
+			url: 'https://api.jonze.co'
 		}
 	]
 }));
