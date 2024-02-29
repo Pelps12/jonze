@@ -70,7 +70,7 @@ const getAttendanceRoute = createRoute({
 			description: 'Returns an error'
 		}
 	},
-	tags: ['Events']
+	tags: ['Attendance']
 });
 
 app.openapi(getAttendanceRoute, async (c) => {
