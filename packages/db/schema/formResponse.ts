@@ -12,6 +12,7 @@ export const formResponse = mysqlTable('FormResponse', {
 		.primaryKey(),
 	formId: varchar('formId', { length: 128 }).notNull(),
 	response: json('response').$type<Record<string, string>>().notNull(),
+	memId: varchar('memId', { length: 128 }),
 	createdAt: datetime('createdAt', { mode: 'date', fsp: 3 })
 		.default(sql`CURRENT_TIMESTAMP(3)`)
 		.notNull(),
@@ -21,7 +22,8 @@ export const formResponse = mysqlTable('FormResponse', {
 });
 
 export const responseRelations = relations(formResponse, ({ one }) => ({
-	member: one(member, { fields: [formResponse.id], references: [member.additionalInfoId] }),
+	member: one(member, { fields: [formResponse.id], references: [member.additionalInfoId] }), //Solely for Additional Info
 	form: one(organizationForm, { fields: [formResponse.formId], references: [organizationForm.id] }),
-	attendance: one(attendance, { fields: [formResponse.id], references: [attendance.responseId] })
+	attendance: one(attendance, { fields: [formResponse.id], references: [attendance.responseId] }),
+	responder: one(member, { fields: [formResponse.memId], references: [member.id] }) //For all forms
 }));
