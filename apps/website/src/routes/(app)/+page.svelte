@@ -1,16 +1,5 @@
 <script lang="ts">
     import { Button } from "$lib/components/ui/button";
-
-    import { pushState } from '$app/navigation';
-
-    import * as Dialog from "$lib/components/ui/dialog";
-  import * as Drawer from "$lib/components/ui/drawer";
-  import { Input } from "$lib/components/ui/input";
-  import { Label } from "$lib/components/ui/label";
-
-  import { mediaQuery } from "svelte-legos";
-  let open = false;
-  const isDesktop = mediaQuery("(min-width: 768px)");
 </script>
 
 <!-- Hero -->
@@ -20,7 +9,7 @@
       <div class="flex justify-center">
           <Button variant="outline" disabled 
             class="inline-flex items-center gap-x-2 bg-white border border-gray-200 text-sm text-gray-800 p-2  rounded-full transition hover:border-gray-300 ">
-            Event metrics, Paid memberships, and APIs coming soon
+            More event metrics and memberships soon
           </Button>
 
         

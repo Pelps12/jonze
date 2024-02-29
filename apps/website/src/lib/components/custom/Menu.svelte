@@ -6,10 +6,7 @@
   import { setMode, resetMode } from "mode-watcher";
 	import { onMount } from "svelte";
 	import * as Avatar from "$lib/components/ui/avatar";
-  import * as Dialog from "$lib/components/ui/dialog";
-  import * as Drawer from "$lib/components/ui/drawer";
-  import { Input } from "$lib/components/ui/input";
-  import { Label } from "$lib/components/ui/label";
+  import {Badge} from "$lib/components/ui/badge"
 
   import { mediaQuery } from "svelte-legos";
 	import type { Organization, User } from "@workos-inc/node";
@@ -52,6 +49,12 @@
 
 
         <div class="flex flex-row items-center justify-end gap-2">
+          <Button variant="ghost" href="https://docs.jonze.co" class="text-zinc-800 dark:text-zinc-100 gap-2">
+            Docs
+            <Badge>New</Badge>
+          </Button>
+          
+          
           <DropdownMenu.Root closeOnItemClick={false}>
             <DropdownMenu.Trigger asChild let:builder>
               <Button builders={[builder]} variant="outline" size="icon">
