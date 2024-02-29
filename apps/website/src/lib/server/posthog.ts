@@ -30,18 +30,26 @@ class DummyPostHog {
 		this.store = [];
 		this.enabled = enabled;
 	}
-	capture(body: { distinctId: string; event: string; properties: Record<string, string> }) {
+	capture(body: {
+		distinctId: string;
+		event: string;
+		properties: Record<string, string | Record<string, string>>;
+	}) {
 		if (this.enabled) {
+			const { distinctId, ...otherFields } = body;
 			this.store.push(
 				fetch(`${this.host}/capture/`, {
 					headers: {
 						'Content-Type': 'application/json'
 					},
 					body: JSON.stringify({
-						...body,
-						'api-key': this.apiKey,
-						timestamp: new Date().toISOString()
-					})
+						distinct_id: distinctId,
+						...otherFields,
+						api_key: this.apiKey,
+						timestamp: new Date().toISOString(),
+						$lib: 'posthog-node'
+					}),
+					method: 'POST'
 				})
 			);
 		}
@@ -49,7 +57,14 @@ class DummyPostHog {
 
 	async flushAsync() {
 		const result = await Promise.allSettled(this.store);
-		console.log(result);
+
+		result.map((val) => {
+			if (val.status === 'rejected') {
+				console.log(val.reason);
+			} else {
+				console.log(val.value.text(), 'RESULT OF POSTHOG THING');
+			}
+		});
 	}
 }
 

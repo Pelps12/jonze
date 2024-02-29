@@ -5,7 +5,7 @@ import workos from '$lib/server/workos';
 import { error, type RequestHandler } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { Webhooks } from './helper';
-import posthog from '$lib/server/posthog';
+import posthog, { dummyClient } from '$lib/server/posthog';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const sigHeader = request.headers.get('WorkOS-Signature');
@@ -22,6 +22,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		sigHeader,
 		secret: WORKOS_WEBHOOK_SECRET
 	});
+	const useragent = request.headers.get('user-agent');
 
 	console.log('24');
 
@@ -37,11 +38,12 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 				emailVerified: newUser.emailVerified
 			});
 
-			posthog.capture({
+			dummyClient.capture({
 				distinctId: newUser.id,
 				event: 'user signed up',
 				properties: {
-					$set: { name: `${newUser.firstName} ${newUser.lastName}`, email: newUser.email }
+					$set: { name: `${newUser.firstName} ${newUser.lastName}`, email: newUser.email },
+					...(useragent && { $useragent: useragent })
 				}
 			});
 			break;
@@ -61,13 +63,14 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 				})
 				.where(eq(schema.user.id, updatedUser.id));
 
-			posthog.capture({
+			dummyClient.capture({
 				distinctId: updatedUser.id,
 				event: 'user updated',
 				properties: {
 					$set: {
 						name: `${updatedUser.firstName} ${updatedUser.lastName}`,
-						email: updatedUser.email
+						email: updatedUser.email,
+						...(useragent && { $useragent: useragent })
 					}
 				}
 			});
@@ -82,7 +85,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	}
 	console.log('64');
 
-	platform?.context.waitUntil(posthog.shutdownAsync());
+	platform?.context.waitUntil(dummyClient.flushAsync());
 	return new Response(null, {
 		status: 200
 	});
