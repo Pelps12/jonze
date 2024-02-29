@@ -1,5 +1,5 @@
 import { z } from '@hono/zod-openapi';
-import { Event, FormResponse, Member, User } from '@repo/db';
+import { Attendance, Event, FormResponse, Member, User } from '@repo/db';
 
 export type TypeToZod<T> = Required<{
 	[K in keyof T]: T[K] extends Date
@@ -42,8 +42,12 @@ export const zodOpenAPIEvent = zObject<Event>({
 	name: z.string().openapi({
 		example: 'Example Event'
 	}),
-	createdAt: z.coerce.string(),
-	updatedAt: z.coerce.string(),
+	createdAt: z.coerce.string().openapi({
+		example: new Date().toISOString()
+	}),
+	updatedAt: z.coerce.string().openapi({
+		example: new Date().toISOString()
+	}),
 	description: z.string().openapi({
 		example: 'Description of Example Event'
 	}),
@@ -53,8 +57,12 @@ export const zodOpenAPIEvent = zObject<Event>({
 	formId: z.string().openapi({
 		example: 'form_ZLLS9w1V6ioZq7rk'
 	}),
-	start: z.coerce.string(),
-	end: z.coerce.string(),
+	start: z.coerce.string().openapi({
+		example: new Date().toISOString()
+	}),
+	end: z.coerce.string().openapi({
+		example: new Date().toISOString()
+	}),
 	image: z.string().openapi({
 		example: 'https://ucarecdn.com/7b2c6de8-a255-4cf6-aee3-1c788fd59135/'
 	})
@@ -62,11 +70,15 @@ export const zodOpenAPIEvent = zObject<Event>({
 
 export const zodOpenAPIMember = zObject<Member>({
 	id: z.string().openapi({
-		example: 'evt_SP6prmGnMzt5spsr'
+		example: 'om_01HPCN296XBAKD6QYVKNMARD4N'
 	}),
 	role: z.union([z.literal('ADMIN'), z.literal('MEMBER'), z.literal('OWNER')]),
-	createdAt: z.coerce.string(),
-	updatedAt: z.coerce.string(),
+	createdAt: z.coerce.string().openapi({
+		example: new Date().toISOString()
+	}),
+	updatedAt: z.coerce.string().openapi({
+		example: new Date().toISOString()
+	}),
 	userId: z.string().openapi({
 		example: 'user_01HPK4QTN24PB9NFRB2WWDBKZP'
 	}),
@@ -88,8 +100,12 @@ export const zodOpenAPIUser = zObject<User>({
 	lastName: z.string().openapi({
 		example: 'Doe'
 	}),
-	createdAt: z.coerce.string(),
-	updatedAt: z.coerce.string(),
+	createdAt: z.coerce.string().openapi({
+		example: new Date().toISOString()
+	}),
+	updatedAt: z.coerce.string().openapi({
+		example: new Date().toISOString()
+	}),
 	email: z.string().openapi({
 		example: 'johndoe@gmail.com'
 	}),
@@ -113,6 +129,32 @@ export const zodOpenAPIFormResponse = zObject<FormResponse>({
 			name: 'Happt'
 		}
 	}),
-	createdAt: z.coerce.string(),
-	updatedAt: z.coerce.string()
+	memId: z.string().openapi({
+		example: 'om_01HPCN296XBAKD6QYVKNMARD4N'
+	}),
+	createdAt: z.coerce.string().openapi({
+		example: new Date().toISOString()
+	}),
+	updatedAt: z.coerce.string().openapi({
+		example: new Date().toISOString()
+	})
+});
+
+export const zodOpenAPIAttendance = zObject<Attendance>({
+	id: z.string().openapi({
+		example: 'atnd_j9Ubudy7YpRd1od3'
+	}),
+	memId: z.string().openapi({
+		example: 'om_01HPCN296XBAKD6QYVKNMARD4N'
+	}),
+	eventId: z.string().openapi({
+		example: 'evt_SP6prmGnMzt5spsr'
+	}),
+	createdAt: z.coerce.string().openapi({
+		example: new Date().toISOString()
+	}),
+	updatedAt: z.coerce.string().openapi({
+		example: new Date().toISOString()
+	}),
+	responseId: z.string().nullable()
 });
