@@ -74,6 +74,8 @@ export const PUT: RequestHandler = async ({ request, locals, getClientAddress, p
 				orgId: data.organizationId
 			}
 		});
+
+		console.log(await posthog.flushAsync());
 		await posthog.shutdownAsync();
 	}
 
