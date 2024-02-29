@@ -1,5 +1,5 @@
 import { signJWT } from '$lib/server/helpers';
-import posthog from '$lib/server/posthog';
+import posthog, { dummyClient } from '$lib/server/posthog';
 import workos, { clientId } from '$lib/server/workos';
 import { error, redirect, type RequestHandler } from '@sveltejs/kit';
 
@@ -45,15 +45,17 @@ export const GET: RequestHandler = async ({ request, cookies, platform, getClien
 			httpOnly: true
 		});
 
-		posthog.capture({
+		const useragent = request.headers.get('user-agent');
+		dummyClient.capture({
 			distinctId: user.id,
 			event: 'user logged in',
 			properties: {
-				$ip: getClientAddress()
+				$ip: getClientAddress(),
+				...(useragent && { $useragent: useragent })
 			}
 		});
 
-		platform?.context.waitUntil(posthog.shutdownAsync());
+		platform?.context.waitUntil(dummyClient.flushAsync());
 		redirect(302, url.toString());
 	}
 

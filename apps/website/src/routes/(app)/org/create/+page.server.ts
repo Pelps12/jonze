@@ -3,7 +3,7 @@ import schema from '@repo/db/schema';
 import { signJWT } from '$lib/server/helpers';
 import workos from '$lib/server/workos';
 import { redirect, type Actions, error } from '@sveltejs/kit';
-import posthog from '$lib/server/posthog';
+import posthog, { dummyClient } from '$lib/server/posthog';
 
 export const actions: Actions = {
 	create: async ({ locals, request, cookies, getClientAddress, platform }) => {
@@ -44,13 +44,15 @@ export const actions: Actions = {
 		};
 		const token = await signJWT(newUser);
 
-		posthog.capture({
+		const useragent = request.headers.get('user-agent');
+		dummyClient.capture({
 			distinctId: locals.user.id,
 			event: 'organization created',
 			properties: {
 				$ip: getClientAddress(),
 				orgId: organization.id,
-				name: name
+				name: name.toString(),
+				...(useragent && { $useragent: useragent })
 			}
 		});
 
@@ -67,7 +69,7 @@ export const actions: Actions = {
 			httpOnly: true
 		});
 
-		platform?.context.waitUntil(posthog.shutdownAsync());
+		platform?.context.waitUntil(dummyClient.flushAsync());
 		redirect(302, `/org/${organization.id}`);
 	}
 };

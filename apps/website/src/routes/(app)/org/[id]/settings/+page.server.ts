@@ -6,7 +6,7 @@ import { error, redirect } from '@sveltejs/kit';
 import { and, eq, or } from 'drizzle-orm';
 import type { PageServerLoad, Actions } from './$types';
 import { PUBLIC_APIKEY_PREFIX } from '$env/static/public';
-import posthog from '$lib/server/posthog';
+import posthog, { dummyClient } from '$lib/server/posthog';
 
 export const load: PageServerLoad = async ({ locals, params }) => {
 	if (!locals.user) {
@@ -49,7 +49,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 };
 
 export const actions: Actions = {
-	create: async ({ locals, params, getClientAddress, platform }) => {
+	create: async ({ locals, params, getClientAddress, platform, request }) => {
 		if (!params.id) error(400, 'Organization ID Required');
 
 		if (!locals.member) {
@@ -76,16 +76,18 @@ export const actions: Actions = {
 			hint: createdKey.result.key.split('_')[2].slice(0, 4)
 		});
 
-		posthog.capture({
+		const useragent = request.headers.get('user-agent');
+		dummyClient.capture({
 			distinctId: locals.member.userId,
 			event: 'API Key Created',
 			properties: {
 				$ip: getClientAddress(),
-				orgId: params.id
+				orgId: params.id,
+				...(useragent && { $useragent: useragent })
 			}
 		});
 
-		platform?.context.waitUntil(posthog.shutdownAsync());
+		platform?.context.waitUntil(dummyClient.flushAsync());
 
 		return { key: createdKey.result.key };
 	}

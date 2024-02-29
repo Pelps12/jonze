@@ -5,7 +5,7 @@ import schema from '@repo/db/schema';
 import { error, redirect, type Actions, fail } from '@sveltejs/kit';
 import { objectsHaveSameKeys } from '$lib/server/helpers';
 import { newId } from '@repo/db/utils/createId';
-import posthog from '$lib/server/posthog';
+import posthog, { dummyClient } from '$lib/server/posthog';
 
 export const load: PageServerLoad = async ({ locals, params, url }) => {
 	const event = await db.query.event.findFirst({
@@ -125,7 +125,7 @@ export const actions: Actions = {
 			eventId: event.id
 		});
 
-		posthog.capture({
+		dummyClient.capture({
 			distinctId: locals.user.id,
 			event: 'attendance marked',
 			properties: {
@@ -135,7 +135,7 @@ export const actions: Actions = {
 			}
 		});
 
-		platform?.context.waitUntil(posthog.shutdownAsync());
+		platform?.context.waitUntil(dummyClient.flushAsync());
 		redirect(302, callbackUrl ?? '/');
 	}
 };

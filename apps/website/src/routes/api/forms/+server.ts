@@ -25,18 +25,20 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress, 
 	});
 
 	if (locals.user) {
-		posthog.capture({
+		const useragent = request.headers.get('user-agent');
+		dummyClient.capture({
 			distinctId: locals.user.id,
 			event: 'form created',
 			properties: {
 				$ip: getClientAddress(),
 				name: data.formName,
-				orgId: data.organizationId
+				orgId: data.organizationId,
+				...(useragent && { $useragent: useragent })
 			}
 		});
 	}
 
-	platform?.context.waitUntil(posthog.shutdownAsync());
+	platform?.context.waitUntil(dummyClient.flushAsync());
 
 	return json(orgForm);
 };
@@ -65,13 +67,15 @@ export const PUT: RequestHandler = async ({ request, locals, getClientAddress, p
 		.where(eq(schema.organizationForm.id, data.formId));
 
 	if (locals.user) {
+		const useragent = request.headers.get('user-agent');
 		dummyClient.capture({
 			distinctId: locals.user.id,
 			event: 'form updated',
 			properties: {
 				$ip: getClientAddress(),
 				name: data.formName,
-				orgId: data.organizationId
+				orgId: data.organizationId,
+				...(useragent && { $useragent: useragent })
 			}
 		});
 	}
