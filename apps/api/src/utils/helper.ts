@@ -43,7 +43,8 @@ export const zodOpenAPIEvent = zObject<Event>({
 		example: 'Example Event'
 	}),
 	createdAt: z.coerce.string().openapi({
-		example: new Date().toISOString()
+		example: new Date().toISOString(),
+		format: 'date-time'
 	}),
 	updatedAt: z.coerce.string().openapi({
 		example: new Date().toISOString()
@@ -156,5 +157,7 @@ export const zodOpenAPIAttendance = zObject<Attendance>({
 	updatedAt: z.coerce.string().openapi({
 		example: new Date().toISOString()
 	}),
-	responseId: z.string().nullable()
+	responseId: z.string().nullable().openapi({
+		example: 'resp_6eLeCr7epn7b8Uhe'
+	})
 });
