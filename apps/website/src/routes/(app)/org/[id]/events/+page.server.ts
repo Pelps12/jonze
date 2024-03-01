@@ -54,8 +54,8 @@ export const actions: Actions = {
 		const eventId = newId('event');
 		const newEvent = await db.insert(schema.event).values({
 			id: eventId,
-			start: parseZonedDateTime(`${form.data.start}[${form.data.timezone}]`).toDate(),
-			end: parseZonedDateTime(`${form.data.end}[${form.data.timezone}]`).toDate(),
+			start: form.data.start,
+			end: form.data.end,
 			image: form.data.image,
 			description: form.data.description,
 			orgId: event.params.id,

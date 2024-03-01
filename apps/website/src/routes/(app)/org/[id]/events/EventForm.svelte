@@ -1,7 +1,7 @@
 <script lang="ts">
   import * as Form from "$lib/components/ui/form";
   import { ACCEPTED_IMAGE_TYPES, eventCreationSchema, type EventUpdationSchema, type EventCreationSchema } from "./schema";
-  import { type SuperValidated, type Infer, superForm } from "sveltekit-superforms";
+  import { type SuperValidated, type Infer, superForm, dateProxy } from "sveltekit-superforms";
   import { Input } from "$lib/components/ui/input";
   import { client } from "$lib/client/uploadcare";
   import { parseISO, format } from 'date-fns';
@@ -40,14 +40,6 @@
     validators: zodClient(eventCreationSchema),
   });
 
-  data.data.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-  formOpen.subscribe(() => {
-    console.log("FORM STATE CHANGED")
-    data.data.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    console.log(data.data)
-  })
-
 
 
 
@@ -61,7 +53,7 @@
 	}
 
  
-  const { form: formData, enhance } = form;
+  const { form: formData, enhance, constraints } = form;
 
 
   let open = false;
@@ -72,6 +64,8 @@
       document.getElementById(triggerId)?.focus();
     });
   }
+  const startProxy = dateProxy(form, 'start', { format: "datetime-local" });
+  const endProxy = dateProxy(form, 'end', {format: "datetime-local"});
 </script>
   
 
@@ -103,7 +97,8 @@
                 <Form.Label>Start Time</Form.Label>
                 <Input {...attrs} 
                   type="datetime-local" 
-                  bind:value={$formData.start}/>
+                  bind:value={$startProxy}
+                  min={$constraints.start?.min?.toString().slice(0, 16)}/>
             </Form.Control>
         </Form.Field>
     
@@ -112,19 +107,10 @@
                 <Form.Label>End Time</Form.Label>
                 <Input {...attrs} 
                   type="datetime-local" 
-                  bind:value={$formData.end}/>
+                  bind:value={$endProxy}
+                  min={$constraints.end?.min?.toString().slice(0, 16)}/>
             </Form.Control>
         </Form.Field>
-    
-
-    <Form.Field {form} name="timezone" class="hidden">
-      <Form.Control let:attrs>
-          <Form.Label>User's Timezone</Form.Label>
-          <Input {...attrs} 
-            type="text" 
-            bind:value={$formData.timezone}/>
-      </Form.Control>
-    </Form.Field>
 
     <Form.Field {form} name="image" class="mb-2">
       <Form.Control let:attrs>
