@@ -133,7 +133,8 @@ export const actions: Actions = {
 			const insertResult = await db.insert(schema.formResponse).values({
 				id: responseId,
 				formId: orgForm.id,
-				response: userResponse.additionalFields
+				response: userResponse.additionalFields,
+				memId: locals.user.id
 			});
 			console.log(insertResult);
 		}
