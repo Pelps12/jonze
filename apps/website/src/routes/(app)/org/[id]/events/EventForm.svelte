@@ -1,46 +1,53 @@
 <script lang="ts">
-    import * as Form from "$lib/components/ui/form";
-    import { ACCEPTED_IMAGE_TYPES, eventCreationSchema, type EventUpdationSchema, type EventCreationSchema } from "./schema";
-    import { type SuperValidated, type Infer, superForm } from "sveltekit-superforms";
-    
-    export let data: SuperValidated<Infer<EventCreationSchema>>;
-    export let forms: {id: string; name: string}[] = [];
-    import { Input } from "$lib/components/ui/input";
-    import { client } from "$lib/client/uploadcare";
-    import { parseISO, format } from 'date-fns';
-    import enUS from 'date-fns/locale/en-US'
-    import { formatInTimeZone } from 'date-fns-tz';
-	  import type { OrgForm, Event as dbEvent } from "@repo/db/types";
-    import { onMount, tick } from "svelte";
-    import { browser } from "$app/environment";
-    import { zodClient } from "sveltekit-superforms/adapters";
-    import { Textarea } from "$lib/components/ui/textarea";
-    import * as Popover from "$lib/components/ui/popover";
-    import * as Command from "$lib/components/ui/command";
-    import { buttonVariants } from "$lib/components/ui/button";
+  import * as Form from "$lib/components/ui/form";
+  import { ACCEPTED_IMAGE_TYPES, eventCreationSchema, type EventUpdationSchema, type EventCreationSchema } from "./schema";
+  import { type SuperValidated, type Infer, superForm } from "sveltekit-superforms";
+  import { Input } from "$lib/components/ui/input";
+  import { client } from "$lib/client/uploadcare";
+  import { parseISO, format } from 'date-fns';
+  import enUS from 'date-fns/locale/en-US'
+  import { formatInTimeZone } from 'date-fns-tz';
+  import type { OrgForm, Event as dbEvent } from "@repo/db/types";
+  import { onMount, tick } from "svelte";
+  import { browser } from "$app/environment";
+  import { zodClient } from "sveltekit-superforms/adapters";
+  import { Textarea } from "$lib/components/ui/textarea";
+  import * as Popover from "$lib/components/ui/popover";
+  import * as Command from "$lib/components/ui/command";
+  import { buttonVariants } from "$lib/components/ui/button";
 
-	import { getAttrs } from "bits-ui";
-	import { cn } from "$lib/utils";
-	import { Check, ChevronsUpDown } from "lucide-svelte";
-    export let event: dbEvent & {form: OrgForm|null}| undefined;
-    export let actionType: "create" | "update" = "create";
+  import { getAttrs } from "bits-ui";
+  import { cn } from "$lib/utils";
+  import { Check, ChevronsUpDown } from "lucide-svelte";
+  import type { Writable } from "svelte/store";
+
+      
+  export let data: SuperValidated<Infer<EventCreationSchema>>;
+  export let forms: {id: string; name: string}[] = [];
+  export let formOpen: Writable<boolean>;
+  export let event: dbEvent & {form: OrgForm|null}| undefined;
+  export let actionType: "create" | "update" = "create";
 
 
-    function formatToBrowserTimeZone(date: Date) {
-      // Format the date and time in the desired format, using the browser's timezone
-      const formattedDate = formatInTimeZone(date, Intl.DateTimeFormat().resolvedOptions().timeZone, 'yyyy-MM-dd\'T\'HH:mm');
-      console.log(formattedDate);
-      return formattedDate;
-    }
+  function formatToBrowserTimeZone(date: Date) {
+    // Format the date and time in the desired format, using the browser's timezone
+    const formattedDate = formatInTimeZone(date, Intl.DateTimeFormat().resolvedOptions().timeZone, 'yyyy-MM-dd\'T\'HH:mm');
+    console.log(formattedDate);
+    return formattedDate;
+  }
 
-    const form = superForm(data, {
+  const form = superForm(data, {
     validators: zodClient(eventCreationSchema),
   });
 
+  data.data.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    if(browser){
-      data.data.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-    }
+  formOpen.subscribe(() => {
+    console.log("FORM STATE CHANGED")
+    data.data.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    console.log(data.data)
+  })
+
 
 
 

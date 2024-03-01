@@ -14,7 +14,8 @@
 	import { toast } from "svelte-sonner";
 	import Preview from "$lib/components/custom/form/UI/Preview.svelte";
     import QRCode from 'qrcode'
-    let newFormOpen = false;
+	import { writable } from "svelte/store";
+    let newFormOpen = writable(false);
     let editFormOpen = false;
     const isDesktop = mediaQuery("(min-width: 768px)");
     const handleCopyAttendance = (eventId: string) => {
@@ -55,9 +56,8 @@
             <Button variant="outline" disabled>Add Event</Button>
         {:then forms} 
             
-        
             {#if $isDesktop}
-                <Dialog.Root bind:open={newFormOpen} >
+                <Dialog.Root bind:open={$newFormOpen} >
                     <Dialog.Trigger asChild let:builder>
                     <Button variant="outline" builders={[builder]}>Add Event</Button>
                     </Dialog.Trigger>
@@ -68,11 +68,11 @@
                             Allow members mark attendance on your events
                         </Dialog.Description>
                     </Dialog.Header>
-                        <EventForm data={data.form} event={undefined} forms={forms}/>
+                        <EventForm data={data.form} event={undefined} forms={forms} formOpen={newFormOpen}/>
                     </Dialog.Content>
                 </Dialog.Root>
             {:else}
-                <Drawer.Root bind:open={newFormOpen}>
+                <Drawer.Root bind:open={$newFormOpen}>
                     <Drawer.Trigger asChild let:builder>
                     <Button variant="outline" builders={[builder]}>Add Event</Button>
                     </Drawer.Trigger>
@@ -83,7 +83,7 @@
                             Allow members mark attendance on your events
                         </Drawer.Description>
                     </Drawer.Header>
-                        <EventForm data={data.form} event={undefined} forms={forms}/>
+                        <EventForm data={data.form} event={undefined} forms={forms} formOpen={newFormOpen}/>
                     <Drawer.Footer class="pt-2">
                         <Drawer.Close asChild let:builder>
                         <Button variant="outline" builders={[builder]}>Cancel</Button>
