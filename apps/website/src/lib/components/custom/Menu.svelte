@@ -41,7 +41,10 @@
   <!-- ========== HEADER ========== -->
   <header class="flex flex-wrap sm:justify-start sm:flex-nowrap z-50 w-full border-b text-sm py-2.5 sm:py-4 ">
     <nav class=" flex basis-full items-center w-full mx-auto px-4 sm:px-6 lg:px-8" aria-label="Global">
-      <div class="w-full">
+      <div class="w-full flex  items-end">
+        {#if !currentOrg}
+          <img src="/logo.svg" class="w-8 h-8" alt="Logo"/>
+        {/if}
         <a class="flex-none text-xl font-semibold dark:text-white d " href={currentOrg ? `/org/${currentOrg.id}`: "/"} aria-label="Jonze">{currentOrg?.name ?? "Jonze"}</a>
       </div>
 

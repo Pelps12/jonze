@@ -31,4 +31,9 @@
 
 <ModeWatcher />
 <Toaster />
+
+<svelte:head>
+  <title>Jonze</title>
+</svelte:head>
+
   <slot />
