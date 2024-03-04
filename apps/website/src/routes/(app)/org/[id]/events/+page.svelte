@@ -15,8 +15,10 @@
 	import Preview from "$lib/components/custom/form/UI/Preview.svelte";
     import QRCode from 'qrcode'
 	import { writable } from "svelte/store";
+	import UpdateEventForm from "./UpdateEventForm.svelte";
+	import { onMount } from "svelte";
     let newFormOpen = writable(false);
-    let editFormOpen = false;
+
     const isDesktop = mediaQuery("(min-width: 768px)");
     const handleCopyAttendance = (eventId: string) => {
         if(browser){
@@ -45,6 +47,12 @@
 
   export let data;
 
+  onMount(() => {
+    console.log(data.updateForms)
+  })
+
+  
+  let editFormOpen: Record<string, boolean> = data.events.reduce((o, {id}) => Object.assign(o, {[id]: false}), {});
 
 
 
@@ -175,43 +183,49 @@
                     {event.description}
                 </p>
                 </Card.Content>
-                <Card.Footer class="flex justify-end">
-<!--                     {#if $isDesktop}
-                        <Dialog.Root bind:open={editFormOpen} >
-                            <Dialog.Trigger asChild let:builder>
-                            <Button variant="outline" builders={[builder]} class="hidden">Edit</Button>
-                            </Dialog.Trigger>
-                            <Dialog.Content class="sm:max-w-[425px]">
-                            <Dialog.Header>
-                                <Dialog.Title>Update your Event</Dialog.Title>
-                                <Dialog.Description>
-                                    Allow members mark attendance on your events
-                                </Dialog.Description>
-                            </Dialog.Header>
-                                <EventForm form={data.updateForm} event={event} actionType="update"/>
-                            </Dialog.Content>
-                        </Dialog.Root>
-                    {:else}
-                        <Drawer.Root bind:open={editFormOpen}>
-                            <Drawer.Trigger asChild let:builder>
-                            <Button variant="outline" builders={[builder]} class="hidden">Edit</Button>
-                            </Drawer.Trigger>
-                            <Drawer.Content class="p-4">
-                            <Drawer.Header class="text-left">
-                                <Drawer.Title>Update your Event</Drawer.Title>
-                                <Drawer.Description>
-                                    Allow members mark attendance on your events
-                                </Drawer.Description>
-                            </Drawer.Header>
-                                <EventForm form={data.updateForm} event={event} actionType="update"/>
-                            <Drawer.Footer class="pt-2">
-                                <Drawer.Close asChild let:builder>
-                                <Button variant="outline" builders={[builder]} class="hidden">Cancel</Button>
-                                </Drawer.Close>
-                            </Drawer.Footer>
-                            </Drawer.Content>
-                        </Drawer.Root>
-                    {/if} -->
+                <Card.Footer class="flex justify-between">
+                    {#await data.forms}
+                        <Button variant="outline" disabled>Add Event</Button>
+                    {:then forms} 
+                        {#if $isDesktop}
+                            <Dialog.Root open={editFormOpen[event.id]} onOpenChange={(e) => editFormOpen[event.id] = e}>
+                                <Dialog.Trigger asChild let:builder>
+                                <Button variant="outline" builders={[builder]} >Edit</Button>
+                                </Dialog.Trigger>
+                                <Dialog.Content class="sm:max-w-[425px]">
+                                <Dialog.Header>
+                                    <Dialog.Title>Update your Event</Dialog.Title>
+                                    <Dialog.Description>
+                                        Allow members mark attendance on your events
+                                    </Dialog.Description>
+                                </Dialog.Header>
+                                    
+                                    <UpdateEventForm forms={forms} data={data.updateForms.find(form => form.id === event.id)} event={event} actionType="update" />
+                                </Dialog.Content>
+                            </Dialog.Root>
+                        {:else}
+                            <Drawer.Root open={editFormOpen[event.id]} onOpenChange={(e) => editFormOpen[event.id] = e}>
+                                <Drawer.Trigger asChild let:builder>
+                                <Button variant="outline" builders={[builder]}>Edit</Button>
+                                </Drawer.Trigger>
+                                <Drawer.Content class="p-4">
+                                <Drawer.Header class="text-left">
+                                    <Drawer.Title>Update your Event</Drawer.Title>
+                                    <Drawer.Description>
+                                        Allow members mark attendance on your events
+                                    </Drawer.Description>
+                                </Drawer.Header>
+                                    <UpdateEventForm forms={forms} data={data.updateForms.find(form => form.id === event.id)} event={event} actionType="update"/>
+                                <Drawer.Footer class="pt-2">
+                                    <Drawer.Close asChild let:builder>
+                                    <Button variant="outline" builders={[builder]} >Cancel</Button>
+                                    </Drawer.Close>
+                                </Drawer.Footer>
+                                </Drawer.Content>
+                            </Drawer.Root>
+                        {/if}
+                    {/await}
+
                     <Button variant="destructive">Delete</Button>
                 </Card.Footer>
             </Card.Root>
