@@ -33,9 +33,25 @@ export const load: PageServerLoad = async ({ params }) => {
 	return {
 		events,
 		form: await superValidate(zod(eventCreationSchema)),
-		updateForm: await superValidate(zod(eventUpdationSchema), {
-			id: '79j98009'
-		}),
+		updateForms: await Promise.all(
+			events.map((event) =>
+				superValidate(
+					{
+						id: event.id,
+						name: event.name,
+						description: event.description,
+						start: event.start,
+						end: event.end,
+						image: event.image,
+						formId: event.formId
+					},
+					zod(eventUpdationSchema),
+					{
+						id: event.id
+					}
+				)
+			)
+		),
 		forms: availableForms
 	};
 };
@@ -91,12 +107,12 @@ export const actions: Actions = {
 				form
 			});
 		}
-		console.log(form.data);
+		console.log(form.data, 'Update Data');
 		const newEvent = await db
 			.update(schema.event)
 			.set({
-				start: new Date(form.data.start),
-				end: new Date(form.data.end),
+				start: form.data.start,
+				end: form.data.end,
 				image: form.data.image,
 				description: form.data.description,
 				orgId: event.params.id,

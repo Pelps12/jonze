@@ -19,11 +19,12 @@ export const eventCreationSchema = z.object({
 
 export const eventUpdationSchema = z.object({
 	id: z.string(),
-	start: z.string(),
-	end: z.string(),
+	start: z.date(),
+	end: z.date(),
 	image: z.string().nullable(),
 	description: z.string().nullable(),
-	name: z.string()
+	name: z.string(),
+	formId: z.string().nullable()
 });
 
 export type EventCreationSchema = typeof eventCreationSchema;
