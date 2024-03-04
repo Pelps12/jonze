@@ -13,6 +13,12 @@
 		}
 	},
 
+	"logo": {
+		"light": "/logo/logo.svg",
+		"dark": "/logo/logo.svg",
+		"href": "https://jonze.co"
+	},
+
 	"topbarLinks": [
 		{
 			"name": "Support",
