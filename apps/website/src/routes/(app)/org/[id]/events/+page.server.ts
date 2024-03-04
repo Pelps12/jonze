@@ -115,6 +115,7 @@ export const actions: Actions = {
 				end: form.data.end,
 				image: form.data.image,
 				description: form.data.description,
+				formId: form.data.formId,
 				orgId: event.params.id,
 				name: form.data.name,
 				updatedAt: new Date()
