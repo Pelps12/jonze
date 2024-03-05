@@ -53,7 +53,12 @@
 {/if}
   <div class="flex justify-center items-center h-[100vh]">
     <form method="post">
-        <Card.Root class="w-[350px]">
+        <Card.Root class="w-[350px] relative">
+            <div class=" text-sm bg-secondary rounded-tl-md rounded-br-md font-semibold px-4 py-2 flex items-start w-20 gap-0.5">
+              <img src="/logo.svg" alt="Logo" class="h-4 w-4"/>
+              Jonze
+            </div>
+
             <div class="relative flex items-start space-x-4 p-4">
                 <Avatar.Root class="w-10 h-10 border">
                     <Avatar.Image src={data.user.profilePictureUrl} />
@@ -83,6 +88,8 @@
             <Card.Footer class="flex justify-center">
             <Button disabled={invalid} type="submit">Mark Attendance</Button>
             </Card.Footer>
+
+
         </Card.Root>
     </form>
   </div>
