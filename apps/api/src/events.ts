@@ -6,7 +6,7 @@ import { UnkeyContext, unkey } from '@unkey/hono';
 import { HTTPException } from 'hono/http-exception';
 import { Bindings } from '.';
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
-import { createZodObject, zodOpenAPIEvent, zodOpenAPIUnauthorized } from './utils/helper';
+import { zodOpenAPIEvent, zodOpenAPIUnauthorized } from './utils/helper';
 
 const app = new OpenAPIHono<{
 	Bindings: Bindings;

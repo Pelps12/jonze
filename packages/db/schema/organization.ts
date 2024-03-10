@@ -4,6 +4,7 @@ import { sql } from 'drizzle-orm/sql';
 import { organizationForm } from './organizationForm';
 import { member } from './member';
 import { event } from './event';
+import { plan } from './plan';
 
 export const organization = mysqlTable('Organization', {
 	id: varchar('id', { length: 128 }).primaryKey(),
@@ -19,5 +20,6 @@ export const organization = mysqlTable('Organization', {
 export const organizationRelations = relations(organization, ({ many }) => ({
 	members: many(member),
 	forms: many(organizationForm),
-	events: many(event)
+	events: many(event),
+	plans: many(plan)
 }));
