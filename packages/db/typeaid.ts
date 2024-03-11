@@ -1,15 +1,9 @@
 import { connect } from '@planetscale/database';
-import { drizzle } from 'drizzle-orm/planetscale-serverless';
+import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
 import schema from './schema';
-const connection = connect({
-	host: '',
-	username: '',
-	password: '',
-	fetch: (url: string, init: any) => {
-		if (!process.env.PUBLIC_URL?.includes('localhost')) delete (init as any)['cache']; // Remove cache header
-		return fetch(url, init);
-	}
-});
+
+const connection = neon(process.env.DATABASE_URL!);
 
 const db = drizzle(connection, { schema });
 

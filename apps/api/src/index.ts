@@ -2,7 +2,7 @@ import { OpenAPIHono, z } from '@hono/zod-openapi';
 import { cors } from 'hono/cors';
 import { UnkeyContext, unkey } from '@unkey/hono';
 import schema from '@repo/db/schema';
-import { connect, drizzle, eq } from '@repo/db';
+import { neon, drizzle, eq } from '@repo/db';
 import type { DbType } from '@repo/db/typeaid';
 import { HTTPException } from 'hono/http-exception';
 import { logger } from 'hono/logger';
@@ -15,6 +15,7 @@ export type Bindings = {
 	DATABASE_HOST: string;
 	DATABASE_USERNAME: string;
 	DATABASE_PASSWORD: string;
+	DATABASE_URL: string;
 	TEST_SECRET: string;
 	ENVIRONMENT: string;
 };
@@ -29,7 +30,7 @@ app.use('*', async (c, next) =>
 		origin:
 			c.env.ENVIRONMENT === 'production'
 				? 'https://jonze.co'
-				: ['https://dev.jonze.co', 'http://localhost:5173'],
+				: ['https://dev.jonze.co', 'http://localhost:5173', 'http://localhost:8787'],
 		allowHeaders: ['X-Custom-Header', 'Upgrade-Insecure-Requests'],
 		allowMethods: ['POST', 'GET', 'OPTIONS'],
 		exposeHeaders: ['Content-Length', 'X-Kuma-Revision'],
@@ -47,16 +48,7 @@ app.get('/', async (c) => {
 app.use('*', async (c, next) => {
 	console.log(c.env.DATABASE_HOST, c.env.DATABASE_PASSWORD, c.env.DATABASE_USERNAME);
 	console.log('abc', c.env.TEST_SECRET);
-	const connection = connect({
-		host: c.env.DATABASE_HOST,
-		username: c.env.DATABASE_USERNAME,
-		password: c.env.DATABASE_PASSWORD,
-		fetch: (url: string, init: any) => {
-			delete (init as any)['cache'];
-			return fetch(url, init);
-		}
-	});
-	console.log('PLEASE', connection.config);
+	const connection = neon(c.env.DATABASE_URL);
 	const db = drizzle(connection, { schema });
 	c.set('db', db);
 	return await next();
@@ -74,7 +66,7 @@ app.doc('/doc', (c) => ({
 	},
 	servers: [
 		{
-			url: 'https://api.jonze.co'
+			url: 'http://localhost:8787'
 		}
 	]
 }));

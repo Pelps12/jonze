@@ -4,7 +4,7 @@ export default {
 	schema: './schema/*.ts',
 	out: './',
 	dbCredentials: {
-		uri: process.env.DATABASE_URL as string
+		connectionString: process.env.DATABASE_URL as string
 	},
-	driver: 'mysql2'
+	driver: 'pg'
 } satisfies Config;

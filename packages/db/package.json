@@ -6,20 +6,21 @@
 	"version": "0.0.0",
 	"private": true,
 	"dependencies": {
+		"@neondatabase/serverless": "^0.9.0",
 		"mysql2": "^3.9.1"
 	},
 	"scripts": {
-		"db:push": "drizzle-kit push:mysql",
+		"db:push": "drizzle-kit push:pg",
 		"db:studio": "drizzle-kit studio"
 	},
 	"devDependencies": {
-		"@types/node": "^18.15.5",
-		"dotenv": "^16.0.3",
-		"drizzle-orm": "^0.29.3",
-		"drizzle-kit": "^0.20.14",
-		"nanoid": "^5.0.5",
 		"@planetscale/database": "^1.16.0",
 		"@repo/eslint-config": "^0.0.0",
+		"@types/node": "^18.15.5",
+		"dotenv": "^16.0.3",
+		"drizzle-kit": "^0.20.14",
+		"drizzle-orm": "^0.29.3",
+		"nanoid": "^5.0.5",
 		"typescript": "^5.0.2"
 	}
 }

@@ -1,22 +1,24 @@
 import { relations, sql } from 'drizzle-orm';
-import { datetime, mysqlEnum, mysqlTable, varchar } from 'drizzle-orm/mysql-core';
+import { timestamp, pgEnum, pgTable, varchar } from 'drizzle-orm/pg-core';
 import { user } from './user';
 import { organization } from './organization';
 import { formResponse } from './formResponse';
 import { attendance } from './attendance';
 import { apiKey } from './apikey';
 
-export const member = mysqlTable('Member', {
+export const roleEnum = pgEnum('role', ['OWNER', 'ADMIN', 'MEMBER']);
+
+export const member = pgTable('Member', {
 	id: varchar('id', { length: 128 }).primaryKey(),
 	orgId: varchar('orgId', { length: 128 }).notNull(),
 	userId: varchar('userId', { length: 128 }).notNull(),
-	role: mysqlEnum('role', ['OWNER', 'ADMIN', 'MEMBER']).default('MEMBER').notNull(),
+	role: roleEnum('role').notNull().default('MEMBER'),
 	additionalInfoId: varchar('additionalInfoId', { length: 128 }),
-	createdAt: datetime('createdAt', { mode: 'date', fsp: 3 })
-		.default(sql`CURRENT_TIMESTAMP(3)`)
+	createdAt: timestamp('createdAt', { mode: 'date', precision: 6, withTimezone: true })
+		.defaultNow()
 		.notNull(),
-	updatedAt: datetime('updatedAt', { mode: 'date', fsp: 3 })
-		.default(sql`CURRENT_TIMESTAMP(3)`)
+	updatedAt: timestamp('updatedAt', { mode: 'date', precision: 6, withTimezone: true })
+		.defaultNow()
 		.notNull()
 });
 

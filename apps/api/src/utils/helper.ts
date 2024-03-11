@@ -124,7 +124,8 @@ export const zodOpenAPIFormResponse = createSelectSchema(schema.formResponse, {
 		response.openapi({
 			example: {
 				name: 'Happt'
-			}
+			},
+			type: 'object'
 		}),
 	memId: ({ memId }) =>
 		memId.openapi({

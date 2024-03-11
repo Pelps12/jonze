@@ -159,7 +159,6 @@ export const actions: Actions = {
 				set: {
 					orgId: om.organizationId,
 					userId: om.userId,
-					role: 'MEMBER',
 					additionalInfoId: responseId,
 					updatedAt: new Date()
 				}

@@ -1,33 +1,21 @@
-import {
-	bigint,
-	datetime,
-	decimal,
-	json,
-	mysqlTable,
-	timestamp,
-	varchar
-} from 'drizzle-orm/mysql-core';
-import { sql } from 'drizzle-orm/sql';
+import { timestamp, decimal, json, pgTable, varchar } from 'drizzle-orm/pg-core';
 import { newId } from '../utils/createId';
 import { relations } from 'drizzle-orm';
-import { organization } from './organization';
-import { formResponse } from './formResponse';
-import { event } from './event';
 import { member } from './member';
 import { plan } from './plan';
 
-export const membership = mysqlTable('plan', {
+export const membership = pgTable('plan', {
 	id: varchar('id', { length: 128 })
 		.$defaultFn(() => newId('plan'))
 		.primaryKey(),
 	memId: varchar('memId', { length: 191 }).notNull(),
 	planId: varchar('planId', { length: 191 }).notNull(),
 	amount: decimal('decimal', { scale: 2 }),
-	createdAt: datetime('createdAt', { mode: 'date', fsp: 3 })
-		.default(sql`CURRENT_TIMESTAMP(3)`)
+	createdAt: timestamp('createdAt', { mode: 'date', precision: 6, withTimezone: true })
+		.defaultNow()
 		.notNull(),
-	updatedAt: datetime('updatedAt', { mode: 'date', fsp: 3 })
-		.default(sql`CURRENT_TIMESTAMP(3)`)
+	updatedAt: timestamp('updatedAt', { mode: 'date', precision: 6, withTimezone: true })
+		.defaultNow()
 		.notNull()
 });
 

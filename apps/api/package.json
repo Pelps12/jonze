@@ -8,7 +8,7 @@
 	},
 	"dependencies": {
 		"@hono/swagger-ui": "^0.2.1",
-		"@hono/zod-openapi": "^0.9.6",
+		"@hono/zod-openapi": "^0.9.8",
 		"@unkey/hono": "^0.11.0",
 		"drizzle-zod": "^0.5.1",
 		"hono": "^4.0.7",

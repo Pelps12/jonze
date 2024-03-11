@@ -1,4 +1,4 @@
-import { datetime, mysqlTable, varchar } from 'drizzle-orm/mysql-core';
+import { timestamp, pgTable, varchar } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm/sql';
 import { newId } from '../utils/createId';
 import { relations } from 'drizzle-orm';
@@ -6,18 +6,18 @@ import { formResponse } from './formResponse';
 import { member } from './member';
 import { event } from './event';
 
-export const attendance = mysqlTable('Attendance', {
+export const attendance = pgTable('Attendance', {
 	id: varchar('id', { length: 128 })
 		.$defaultFn(() => newId('attendance'))
 		.primaryKey(),
 	memId: varchar('memId', { length: 128 }).notNull(),
 	eventId: varchar('eventId', { length: 128 }).notNull(),
 	responseId: varchar('responseId', { length: 128 }),
-	createdAt: datetime('createdAt', { mode: 'date', fsp: 3 })
-		.default(sql`CURRENT_TIMESTAMP(3)`)
+	createdAt: timestamp('createdAt', { mode: 'date', precision: 6, withTimezone: true })
+		.defaultNow()
 		.notNull(),
-	updatedAt: datetime('updatedAt', { mode: 'date', fsp: 3 })
-		.default(sql`CURRENT_TIMESTAMP(3)`)
+	updatedAt: timestamp('updatedAt', { mode: 'date', precision: 6, withTimezone: true })
+		.defaultNow()
 		.notNull()
 });
 

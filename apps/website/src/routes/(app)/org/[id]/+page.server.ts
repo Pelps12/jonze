@@ -58,8 +58,6 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 			}
 		}
 	});
-
-	const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
 	if (!organization) {
 		error(404, 'Organization not Found');
 	}

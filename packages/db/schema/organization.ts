@@ -1,19 +1,19 @@
 import { relations } from 'drizzle-orm';
-import { datetime, mysqlTable, varchar } from 'drizzle-orm/mysql-core';
+import { timestamp, pgTable, varchar } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm/sql';
 import { organizationForm } from './organizationForm';
 import { member } from './member';
 import { event } from './event';
 import { plan } from './plan';
 
-export const organization = mysqlTable('Organization', {
+export const organization = pgTable('Organization', {
 	id: varchar('id', { length: 128 }).primaryKey(),
 	name: varchar('name', { length: 191 }).notNull(),
-	createdAt: datetime('createdAt', { mode: 'date', fsp: 3 })
-		.default(sql`CURRENT_TIMESTAMP(3)`)
+	createdAt: timestamp('createdAt', { mode: 'date', precision: 6, withTimezone: true })
+		.defaultNow()
 		.notNull(),
-	updatedAt: datetime('updatedAt', { mode: 'date', fsp: 3 })
-		.default(sql`CURRENT_TIMESTAMP(3)`)
+	updatedAt: timestamp('updatedAt', { mode: 'date', precision: 6, withTimezone: true })
+		.defaultNow()
 		.notNull()
 });
 
