@@ -127,6 +127,12 @@ export const actions: Actions = {
 			});
 		}
 
+		//Create membership in WorkOS
+		const om = await workos.userManagement.createOrganizationMembership({
+			organizationId: orgId,
+			userId: locals.user.id
+		});
+
 		let responseId = null;
 		if (orgForm) {
 			responseId = newId('response');
@@ -134,16 +140,10 @@ export const actions: Actions = {
 				id: responseId,
 				formId: orgForm.id,
 				response: userResponse.additionalFields,
-				memId: locals.user.id
+				memId: om.id
 			});
 			console.log(insertResult);
 		}
-
-		//Create membership in WorkOS
-		const om = await workos.userManagement.createOrganizationMembership({
-			organizationId: orgId,
-			userId: locals.user.id
-		});
 
 		//Add user to our database
 		await db

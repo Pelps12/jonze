@@ -116,7 +116,7 @@ export const actions: Actions = {
 				id: responseId,
 				response: userResponse.additionalFields,
 				formId: event.formId,
-				memId: locals.user.id
+				memId: member.id
 			});
 		}
 

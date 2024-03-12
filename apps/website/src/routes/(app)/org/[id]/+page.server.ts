@@ -53,7 +53,7 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 						}
 					}
 				},
-				orderBy: (member, { desc }) => [desc(member.start)],
+				orderBy: (event, { asc }) => [asc(event.start)],
 				limit: 5
 			}
 		}

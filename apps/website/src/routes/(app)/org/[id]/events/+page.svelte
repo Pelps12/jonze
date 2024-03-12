@@ -17,6 +17,7 @@
 	import { writable } from "svelte/store";
 	import UpdateEventForm from "./UpdateEventForm.svelte";
 	import { onMount } from "svelte";
+	import { page } from "$app/stores";
     let newFormOpen = writable(false);
 
     const isDesktop = mediaQuery("(min-width: 768px)");
@@ -133,11 +134,11 @@
                                     <span>Attendance QRCode</span> 
                                     <QrCode class="ml-2 h-4 w-4"/>
                                 </DropdownMenu.Item>
-                                {#if event.form}
-                                    <DropdownMenu.Item>
-                                        <Dialog.Trigger>
-                                            Event Form
-                                        </Dialog.Trigger>
+                                {#if event.formId}
+                                    <DropdownMenu.Item href={`/org/${$page.params.id}/forms/${event.formId}/responses?eventId=${event.id}`}>
+                                       
+                                            Form Responses
+                                        
                                     </DropdownMenu.Item>
                                 {/if}
                                 <DropdownMenu.Item href={`events/${event.id}`}>View Attendance</DropdownMenu.Item>

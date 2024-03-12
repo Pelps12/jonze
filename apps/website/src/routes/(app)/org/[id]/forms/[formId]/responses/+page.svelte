@@ -8,8 +8,8 @@
 
     console.log(data);
 
-    const table = createTable(readable(data.form.responses));
-    const columns = table.createColumns(Object.keys(data.form.form).map(formField => table.column({
+    const table = createTable(readable(data.form?.responses ?? []));
+    const columns = table.createColumns(Object.keys(data.form?.form ?? {})?.map(formField => table.column({
         accessor: (item) => item.response[formField],
         header: formField,
       })))
@@ -18,7 +18,8 @@
       table.createViewModel(columns);
 </script>
 
-<div class="rounded-md border ">
+{#if data.form}
+  <div class="rounded-md border ">
     <Table.Root {...$tableAttrs}>
       <Table.Header>
         {#each $headerRows as headerRow}
@@ -52,3 +53,4 @@
       </Table.Body>
     </Table.Root>
   </div>
+{/if}
