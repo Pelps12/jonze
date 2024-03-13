@@ -1,0 +1,1 @@
+ALTER TABLE "Membership" DROP COLUMN IF EXISTS "decimal";

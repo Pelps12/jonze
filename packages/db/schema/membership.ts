@@ -1,16 +1,25 @@
-import { timestamp, decimal, json, pgTable, varchar } from 'drizzle-orm/pg-core';
+import { timestamp, decimal, json, pgTable, varchar, pgEnum } from 'drizzle-orm/pg-core';
 import { newId } from '../utils/createId';
 import { relations } from 'drizzle-orm';
 import { member } from './member';
 import { plan } from './plan';
 
-export const membership = pgTable('plan', {
+export const providerEnum = pgEnum('provider', [
+	'Jonze',
+	'Cashapp',
+	'Zelle',
+	'Venmo',
+	'Other',
+	'None'
+]);
+
+export const membership = pgTable('Membership', {
 	id: varchar('id', { length: 128 })
-		.$defaultFn(() => newId('plan'))
+		.$defaultFn(() => newId('membership'))
 		.primaryKey(),
 	memId: varchar('memId', { length: 191 }).notNull(),
 	planId: varchar('planId', { length: 191 }).notNull(),
-	amount: decimal('decimal', { scale: 2 }),
+	provider: providerEnum('provider').notNull().default('None'),
 	createdAt: timestamp('createdAt', { mode: 'date', precision: 6, withTimezone: true })
 		.defaultNow()
 		.notNull(),
@@ -20,7 +29,7 @@ export const membership = pgTable('plan', {
 });
 
 export const membershipRelations = relations(membership, ({ one, many }) => ({
-	organization: one(member, {
+	member: one(member, {
 		fields: [membership.memId],
 		references: [member.id]
 	}),

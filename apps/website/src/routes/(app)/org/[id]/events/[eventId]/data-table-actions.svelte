@@ -7,8 +7,10 @@
 	import { Input } from "$lib/components/ui/input";
 	import Preview from "$lib/components/custom/form/UI/Preview.svelte";
 	import type { CustomForm } from "$lib/types/forms";
+	import { page } from "$app/stores";
     export let form: CustomForm;
     export let response: Record<string, string>
+    export let memId: string| null;
 
 </script>
 
@@ -34,6 +36,15 @@
                     </Dialog.Trigger
                 >
                 </DropdownMenu.Item>
+
+                {#if memId}
+                    <DropdownMenu.Item href={`/org/${$page.params.id}/members/${memId}`}>
+                        User Details
+                    </DropdownMenu.Item>
+
+                {/if}
+
+
                 
 
             

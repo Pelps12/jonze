@@ -59,7 +59,8 @@
           if (row.isData() && form && row.original.response) {
             return createRender(Actions, {
               form: form.form ?? {},
-              response: row.original.response.response ?? {}
+              response: row.original.response.response ?? {},
+              memId: row.original.response.memId
             });
           }
           return "";

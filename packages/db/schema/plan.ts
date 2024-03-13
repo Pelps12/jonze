@@ -1,4 +1,4 @@
-import { bigint, decimal, pgTable, timestamp, varchar } from 'drizzle-orm/pg-core';
+import { bigint, decimal, interval, pgTable, timestamp, varchar } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm/sql';
 import { newId } from '../utils/createId';
 import { relations } from 'drizzle-orm';
@@ -14,8 +14,8 @@ export const plan = pgTable('plan', {
 	orgId: varchar('orgId', { length: 191 }).notNull(),
 	name: varchar('name', { length: 191 }).notNull(),
 	start: timestamp('start', { mode: 'date', withTimezone: true }),
-	interval: bigint('interval', { mode: 'bigint' }),
-	amount: decimal('decimal', { scale: 2 }),
+	interval: interval('interval', { fields: 'year to month' }),
+	amount: decimal('amount', { scale: 2 }),
 	createdAt: timestamp('createdAt', { mode: 'date', precision: 6, withTimezone: true })
 		.defaultNow()
 		.notNull(),

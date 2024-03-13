@@ -45,29 +45,15 @@
       <Command.Group heading="Suggestions">
         <Command.Item>
           <Calendar class="mr-2 h-4 w-4" />
-          <span>Calendar</span>
+          <span>Make Event</span>
         </Command.Item>
         <Command.Item>
           <Smile class="mr-2 h-4 w-4" />
-          <span>Search Emoji</span>
-        </Command.Item>
-        <Command.Item>
-          <Calculator class="mr-2 h-4 w-4" />
-          <span>Calculator</span>
+          <span>Create Membership Plan</span>
         </Command.Item>
       </Command.Group>
       <Command.Separator />
       <Command.Group heading="Settings">
-        <Command.Item>
-          <User class="mr-2 h-4 w-4" />
-          <span>Profile</span>
-          <Command.Shortcut>⌘P</Command.Shortcut>
-        </Command.Item>
-        <Command.Item>
-          <CreditCard class="mr-2 h-4 w-4" />
-          <span>Billing</span>
-          <Command.Shortcut>⌘B</Command.Shortcut>
-        </Command.Item>
         <Command.Item>
           <Settings class="mr-2 h-4 w-4" />
           <span>Settings</span>

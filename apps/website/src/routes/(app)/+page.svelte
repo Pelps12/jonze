@@ -9,7 +9,7 @@
       <div class="flex justify-center">
           <Button variant="outline" disabled 
             class="inline-flex items-center gap-x-2 bg-white border border-gray-200 text-sm text-gray-800 p-2  rounded-full transition hover:border-gray-300 ">
-            More event metrics and memberships soon
+            Memberships in beta. More metrics on the way
           </Button>
 
         

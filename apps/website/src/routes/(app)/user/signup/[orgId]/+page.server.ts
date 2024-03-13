@@ -145,8 +145,15 @@ export const actions: Actions = {
 			console.log(insertResult);
 		}
 
+		const defaultPlan = await db.query.plan.findFirst({
+			where: and(eq(schema.plan.orgId, orgId), eq(schema.plan.name, 'Default Plan')),
+			columns: {
+				id: true
+			}
+		});
+
 		//Add user to our database
-		await db
+		const result = await db
 			.insert(schema.member)
 			.values({
 				id: om.id,
@@ -155,7 +162,9 @@ export const actions: Actions = {
 				role: 'MEMBER',
 				additionalInfoId: responseId
 			})
-			.onDuplicateKeyUpdate({
+			.returning({ insertedId: schema.member.id })
+			.onConflictDoUpdate({
+				target: schema.member.id,
 				set: {
 					orgId: om.organizationId,
 					userId: om.userId,
@@ -163,6 +172,13 @@ export const actions: Actions = {
 					updatedAt: new Date()
 				}
 			});
+		const { insertedId } = result[0];
+		if (defaultPlan) {
+			await db.insert(schema.membership).values({
+				planId: defaultPlan.id,
+				memId: insertedId
+			});
+		}
 
 		const useragent = request.headers.get('user-agent');
 		dummyClient.capture({
