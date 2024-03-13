@@ -49,6 +49,8 @@
         document.getElementById(triggerId)?.focus();
       });
     }
+    const createdAtProxy = dateProxy(form, 'createdAt', { format: "datetime-local" });
+
   </script>
 
 <form method="POST" use:enhance enctype="multipart/form-data" class="p-4" action="?/updatemembership">
@@ -151,6 +153,16 @@
             </Command.Root>
           </Popover.Content>
         </Popover.Root>
+    </Form.Field>
+
+    <Form.Field {form} name="createdAt" class="my-3">
+        <Form.Control let:attrs >
+            <Form.Label>Joined At (Optional)</Form.Label>
+            <Input {...attrs} 
+              type="datetime-local" 
+              bind:value={$createdAtProxy}
+              min={$constraints.createdAt?.min?.toString().slice(0, 16)}/>
+        </Form.Control>
     </Form.Field>
 
     <Form.Button>Change</Form.Button>

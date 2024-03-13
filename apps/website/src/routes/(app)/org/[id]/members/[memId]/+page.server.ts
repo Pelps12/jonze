@@ -87,7 +87,8 @@ export const actions: Actions = {
 			.values({
 				planId: form.data.planId,
 				memId: event.params.memId,
-				provider: form.data.provider
+				provider: form.data.provider,
+				...(form.data.createdAt ? { createdAt: form.data.createdAt } : {})
 			})
 			.returning({ insertedId: schema.membership.id });
 
