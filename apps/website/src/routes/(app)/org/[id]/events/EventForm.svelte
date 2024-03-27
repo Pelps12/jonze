@@ -24,7 +24,7 @@
       
   export let data: SuperValidated<Infer<EventCreationSchema>>;
   export let forms: {id: string; name: string}[] = [];
-  export let formOpen: Writable<boolean>;
+  export let formOpen: boolean;
   export let event: dbEvent & {form: OrgForm|null}| undefined;
   export let actionType: "create" | "update" = "create";
 

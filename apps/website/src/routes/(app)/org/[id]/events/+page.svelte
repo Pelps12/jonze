@@ -18,7 +18,7 @@
 	import UpdateEventForm from "./UpdateEventForm.svelte";
 	import { onMount } from "svelte";
 	import { page } from "$app/stores";
-    let newFormOpen = writable(false);
+    let newFormOpen = $page.url.searchParams.has("newevent");
 
     const isDesktop = mediaQuery("(min-width: 768px)");
     const handleCopyAttendance = (eventId: string) => {
@@ -66,7 +66,7 @@
         {:then forms} 
             
             {#if $isDesktop}
-                <Dialog.Root bind:open={$newFormOpen} >
+                <Dialog.Root bind:open={newFormOpen} >
                     <Dialog.Trigger asChild let:builder>
                     <Button variant="outline" builders={[builder]}>Add Event</Button>
                     </Dialog.Trigger>
@@ -81,7 +81,7 @@
                     </Dialog.Content>
                 </Dialog.Root>
             {:else}
-                <Drawer.Root bind:open={$newFormOpen}>
+                <Drawer.Root bind:open={newFormOpen}>
                     <Drawer.Trigger asChild let:builder>
                     <Button variant="outline" builders={[builder]}>Add Event</Button>
                     </Drawer.Trigger>

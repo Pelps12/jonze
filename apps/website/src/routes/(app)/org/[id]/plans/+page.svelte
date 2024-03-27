@@ -7,7 +7,8 @@
 	import { mediaQuery } from "svelte-legos";
 	import { writable } from "svelte/store";
     import PlanForm  from "./PlanForm.svelte"
-    let newFormOpen = writable(false);
+	import { page } from "$app/stores";
+    let newFormOpen = writable($page.url.searchParams.has("newplan"));
 
     export let data;
 
@@ -24,9 +25,9 @@
             </Dialog.Trigger>
             <Dialog.Content class="sm:max-w-[425px]">
             <Dialog.Header>
-                <Dialog.Title>Create your Event</Dialog.Title>
+                <Dialog.Title>Create your Plan</Dialog.Title>
                 <Dialog.Description>
-                    Allow members mark attendance on your events
+                    Enables tiers for memberships
                 </Dialog.Description>
             </Dialog.Header>
                 <PlanForm data={data.form}/>
@@ -39,9 +40,9 @@
             </Drawer.Trigger>
             <Drawer.Content class="p-4">
             <Drawer.Header class="text-left">
-                <Drawer.Title>Create your Event</Drawer.Title>
+                <Drawer.Title>Create your Plan</Drawer.Title>
                 <Drawer.Description>
-                    Allow members mark attendance on your events
+                    Enables tiers for memberships
                 </Drawer.Description>
             </Drawer.Header>
                 <PlanForm data={data.form}/>
