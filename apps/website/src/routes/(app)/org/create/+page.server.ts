@@ -35,7 +35,8 @@ export const actions: Actions = {
 
 		const om = await workos.userManagement.createOrganizationMembership({
 			organizationId: organization.id,
-			userId: locals.user.id
+			userId: locals.user.id,
+			roleSlug: 'owner'
 		});
 
 		await db.insert(schema.member).values({

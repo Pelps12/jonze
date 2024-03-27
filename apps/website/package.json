@@ -47,7 +47,7 @@
 		"@unkey/api": "^0.17.0",
 		"@uploadcare/blocks": "0.32.1",
 		"@uploadcare/upload-client": "^6.13.0",
-		"@workos-inc/node": "^6.0.2",
+		"@workos-inc/node": "^6.7.0",
 		"bits-ui": "^0.17.0",
 		"chart.js": "^4.4.1",
 		"clsx": "^2.1.0",
