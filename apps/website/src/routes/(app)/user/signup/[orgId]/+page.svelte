@@ -16,7 +16,7 @@
 	<Card.Root class="w-[350px]">
 		<form method="post">
 			<Card.Header>
-				<Card.Title>{data.formName}</Card.Title>
+				<Card.Title>{'Member Onboarding'}</Card.Title>
 			</Card.Header>
 			<Card.Content>
 				<div class="grid w-full items-center gap-4 pb-4">
@@ -40,8 +40,9 @@
 						/>
 					</div>
 				</div>
-
-				<Preview form={data.form} userResponse={undefined} />
+				{#if data.form}
+					<Preview form={data.form.form} userResponse={undefined} />
+				{/if}
 			</Card.Content>
 			<Card.Footer class="flex justify-end">
 				<Button type="submit">Submit</Button>

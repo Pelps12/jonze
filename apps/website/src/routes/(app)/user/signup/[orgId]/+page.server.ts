@@ -12,12 +12,15 @@ import posthog, { dummyClient } from '$lib/server/posthog';
 export const load: PageServerLoad = async ({ params, locals, url }) => {
 	const orgId = params.orgId;
 	const callbackUrl = url.searchParams.get('callbackUrl');
-	const orgForm = await db.query.organizationForm.findFirst({
-		where: and(
-			eq(schema.organizationForm.orgId, orgId),
-			eq(schema.organizationForm.name, 'User Info')
-		)
+	const org = await db.query.organization.findFirst({
+		where: eq(schema.organization.id, orgId),
+		with: {
+			forms: {
+				where: eq(schema.organizationForm.name, 'User Info')
+			}
+		}
 	});
+
 	if (!locals.user) {
 		const loginUrl = workos.userManagement.getAuthorizationUrl({
 			// Specify that we'd like AuthKit to handle the authentication flow
@@ -49,13 +52,13 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 			redirect(302, callbackUrl ?? `/org/${orgId}`);
 		}
 	}
-	if (!orgForm) {
+	if (!org) {
 		error(404, 'Org Not Found');
 	}
 
 	return {
-		form: orgForm.form,
-		formName: orgForm.name,
+		form: org.forms[0],
+		formName: org.forms[0]?.name,
 		defaultFields: {
 			firstName: locals.user.firstName,
 			lastName: locals.user.lastName
