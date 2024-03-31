@@ -68,7 +68,7 @@
                     <p>{plan.name}</p>
                 </Card.Title>
                 {#if plan.start}
-                    <Card.Description>Resets: {new Date(plan.start).toLocaleDateString('en-US', {
+                    <Card.Description>Expires: {new Date(plan.start).toLocaleDateString('en-US', {
                             month: 'long', 
                             day: 'numeric'   
                         })

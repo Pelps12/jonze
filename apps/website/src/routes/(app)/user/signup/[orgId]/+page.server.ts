@@ -52,6 +52,7 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 	if (!orgForm) {
 		error(404, 'Org Not Found');
 	}
+
 	return {
 		form: orgForm.form,
 		formName: orgForm.name,
@@ -114,7 +115,13 @@ export const actions: Actions = {
 		);
 		console.log('userResponse', userResponse);
 		if (orgForm) {
-			if (!objectsHaveSameKeys(userResponse.additionalFields, orgForm.form)) {
+			console.log(orgForm, 'JFBFICNOCNEWIOCW');
+			if (
+				!objectsHaveSameKeys(
+					userResponse.additionalFields,
+					orgForm.form.reduce((o, key) => ({ ...o, [key.label]: 'OOP' }), {})
+				)
+			) {
 				// Again, return { form } and things will just work.
 				return fail(400);
 			}
@@ -139,7 +146,10 @@ export const actions: Actions = {
 			const insertResult = await db.insert(schema.formResponse).values({
 				id: responseId,
 				formId: orgForm.id,
-				response: userResponse.additionalFields,
+				response: Object.keys(userResponse.additionalFields).map((key) => ({
+					label: key,
+					response: userResponse.additionalFields[key]
+				})) as any,
 				memId: om.id
 			});
 			console.log(insertResult);

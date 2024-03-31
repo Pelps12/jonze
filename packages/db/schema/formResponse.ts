@@ -11,7 +11,14 @@ export const formResponse = pgTable('FormResponse', {
 		.$defaultFn(() => newId('response'))
 		.primaryKey(),
 	formId: varchar('formId', { length: 128 }).notNull(),
-	response: json('response').$type<Record<string, string>>().notNull(),
+	response: json('response')
+		.$type<
+			{
+				label: string;
+				response: string | string[];
+			}[]
+		>()
+		.notNull(),
 	memId: varchar('memId', { length: 128 }),
 	createdAt: timestamp('createdAt', { mode: 'date', precision: 6, withTimezone: true })
 		.defaultNow()

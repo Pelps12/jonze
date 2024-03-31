@@ -15,6 +15,7 @@ import type { ArrayElement } from '$lib/types/misc';
 
 export const load: PageServerLoad = async ({ params, url }) => {
 	const eventId = url.searchParams.get('eventId');
+	const memId = url.searchParams.get('memId');
 	const { createdAt, updatedAt, emailVerified, ...userFields } = getTableColumns(schema.user);
 	let query = db
 		.select({
@@ -30,7 +31,8 @@ export const load: PageServerLoad = async ({ params, url }) => {
 		.where(
 			and(
 				eq(schema.formResponse.formId, params.formId),
-				eventId ? eq(schema.event.id, eventId) : undefined
+				eventId ? eq(schema.event.id, eventId) : undefined,
+				memId ? eq(schema.member.id, memId) : undefined
 			)
 		)
 		.orderBy(desc(schema.formResponse.createdAt));

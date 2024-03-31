@@ -1,59 +1,48 @@
-import type { CustomField, CustomForm } from '$lib/types/forms';
+import type {
+	CustomDropDownField,
+	CustomField,
+	CustomForm,
+	CustomRadioGroupField,
+	CustomTextAreaField,
+	CustomTextField
+} from '$lib/types/forms';
 import { writable } from 'svelte/store';
 
-export const form = writable<CustomForm>({});
+export const form = writable<CustomForm>([]);
 export const form_name = writable<string>();
 
 export const add = (value: CustomField) => {
-	form.update((f) => ({ ...f, [value.label]: value }));
+	form.update((f) => [...f, value]);
 };
 
-export const edit = (key: string, value: CustomField) => {
+export const edit = (id: number, value: CustomField) => {
 	const copiedValue = structuredClone(value);
-	form.update((f) => {
-		const el = f[key];
-		console.log(el, copiedValue);
-		if (el) {
-			if (el.type === 'text') {
-				// Here 'value' is inferred as Partial<CustomTextField>
-				if (copiedValue.label && copiedValue.label !== el.label) {
-					delete f[key];
-					return { [copiedValue.label]: { ...copiedValue }, ...f };
+	form.update((data) => {
+		return data.map((el, index) => {
+			if (id === index) {
+				if (el.type === 'text') {
+					// Here 'value' is inferred as Partial<CustomTextField>
+					return { ...el, ...copiedValue } as CustomTextField;
+				} else if (el.type === 'textarea') {
+					// Here 'value' is inferred as Partial<CustomTextAreaField>
+					return { ...el, ...copiedValue } as CustomTextAreaField;
+				} else if (el.type === 'radio') {
+					// Here 'value' is inferred as Partial<CustomRadioGroupField>
+					return { ...el, ...copiedValue } as CustomRadioGroupField;
+				} else if (el.type === 'dropdown') {
+					// Here 'value' is inferred as Partial<CustomRadioGroupField>
+					return { ...el, ...copiedValue } as CustomDropDownField;
 				}
-				return { [key]: { ...el, copiedValue }, ...f };
-			} else if (el.type === 'textarea') {
-				if (copiedValue.label && copiedValue.label !== el.label) {
-					delete f[key];
-					return { [copiedValue.label]: { ...copiedValue }, ...f };
-				}
-				return { [key]: { ...el, copiedValue }, ...f };
-			} else if (el.type === 'radio') {
-				// Here 'value' is inferred as Partial<CustomRadioGroupField>
-				return { ...f, [key]: { ...el, copiedValue } };
-			} else if (el.type === 'dropdown') {
-				// Here 'value' is inferred as Partial<CustomRadioGroupField>
-				if (copiedValue.label && copiedValue.label !== el.label) {
-					delete f[key];
-					return { [copiedValue.label]: { ...copiedValue }, ...f };
-				}
-				return { ...f, [key]: { ...copiedValue } };
 			}
-		}
 
-		return f;
+			return el;
+		});
 	});
 };
 
-export const deleteElement = (key: string) => {
-	form.update((f) => {
-		const newF = Object.keys(f)
-			.filter((undesired_key) => undesired_key !== key) // Keep keys not in keysToRemove
-			.reduce((acc: Record<string, CustomField>, key) => {
-				acc[key] = f[key]; // Add each remaining key-value pair to the accumulator
-				return acc;
-			}, {});
-		console.log(newF);
-		return newF;
+export const deleteElement = (id: number) => {
+	form.update((data) => {
+		return data.filter((_, index) => index !== id);
 	});
 };
 

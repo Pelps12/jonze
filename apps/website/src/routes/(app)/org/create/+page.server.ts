@@ -30,7 +30,8 @@ export const actions: Actions = {
 			name: 'Default Plan',
 			orgId: organization.id,
 			amount: '0.00',
-			start: new Date()
+			start: new Date(),
+			interval: '1 year'
 		});
 
 		const om = await workos.userManagement.createOrganizationMembership({

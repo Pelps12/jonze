@@ -53,15 +53,13 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 						}
 					}
 				},
-				orderBy: (event, { desc }) => [desc(event.start)],
-				limit: 5
+				orderBy: (event, { desc }) => [desc(event.start)]
 			}
 		}
 	});
 	if (!organization) {
 		error(404, 'Organization not Found');
 	}
-	console.log(organization.events);
 
 	const chartData = {
 		labels: organization.events.map((event) => event.name).reverse(),
