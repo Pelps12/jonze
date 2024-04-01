@@ -1,9 +1,8 @@
 import { relations } from 'drizzle-orm';
-import { boolean, datetime, mysqlTable, unique, varchar } from 'drizzle-orm/mysql-core';
-import { sql } from 'drizzle-orm/sql';
+import { boolean, timestamp, pgTable, unique, varchar } from 'drizzle-orm/pg-core';
 import { member } from './member';
 
-export const user = mysqlTable(
+export const user = pgTable(
 	'User',
 	{
 		id: varchar('id', { length: 128 }).primaryKey(),
@@ -12,11 +11,11 @@ export const user = mysqlTable(
 		email: varchar('email', { length: 191 }).notNull(),
 		emailVerified: boolean('emailVerified').notNull(),
 		profilePictureUrl: varchar('profilePictureUrl', { length: 191 }),
-		createdAt: datetime('createdAt', { mode: 'date', fsp: 3 })
-			.default(sql`CURRENT_TIMESTAMP(3)`)
+		createdAt: timestamp('createdAt', { mode: 'date', precision: 6, withTimezone: true })
+			.defaultNow()
 			.notNull(),
-		updatedAt: datetime('updatedAt', { mode: 'date', fsp: 3 })
-			.default(sql`CURRENT_TIMESTAMP(3)`)
+		updatedAt: timestamp('updatedAt', { mode: 'date', precision: 6, withTimezone: true })
+			.defaultNow()
 			.notNull()
 	},
 	(table) => {
@@ -27,5 +26,5 @@ export const user = mysqlTable(
 );
 
 export const userRelations = relations(user, ({ many }) => ({
-	member: many(member)
+	members: many(member)
 }));

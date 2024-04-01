@@ -12,12 +12,15 @@ import posthog, { dummyClient } from '$lib/server/posthog';
 export const load: PageServerLoad = async ({ params, locals, url }) => {
 	const orgId = params.orgId;
 	const callbackUrl = url.searchParams.get('callbackUrl');
-	const orgForm = await db.query.organizationForm.findFirst({
-		where: and(
-			eq(schema.organizationForm.orgId, orgId),
-			eq(schema.organizationForm.name, 'User Info')
-		)
+	const org = await db.query.organization.findFirst({
+		where: eq(schema.organization.id, orgId),
+		with: {
+			forms: {
+				where: eq(schema.organizationForm.name, 'User Info')
+			}
+		}
 	});
+
 	if (!locals.user) {
 		const loginUrl = workos.userManagement.getAuthorizationUrl({
 			// Specify that we'd like AuthKit to handle the authentication flow
@@ -49,12 +52,13 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 			redirect(302, callbackUrl ?? `/org/${orgId}`);
 		}
 	}
-	if (!orgForm) {
+	if (!org) {
 		error(404, 'Org Not Found');
 	}
+
 	return {
-		form: orgForm.form,
-		formName: orgForm.name,
+		form: org.forms[0],
+		formName: org.forms[0]?.name,
 		defaultFields: {
 			firstName: locals.user.firstName,
 			lastName: locals.user.lastName
@@ -114,7 +118,13 @@ export const actions: Actions = {
 		);
 		console.log('userResponse', userResponse);
 		if (orgForm) {
-			if (!objectsHaveSameKeys(userResponse.additionalFields, orgForm.form)) {
+			console.log(orgForm, 'JFBFICNOCNEWIOCW');
+			if (
+				!objectsHaveSameKeys(
+					userResponse.additionalFields,
+					orgForm.form.reduce((o, key) => ({ ...o, [key.label]: 'OOP' }), {})
+				)
+			) {
 				// Again, return { form } and things will just work.
 				return fail(400);
 			}
@@ -127,26 +137,36 @@ export const actions: Actions = {
 			});
 		}
 
-		let responseId = null;
-		if (orgForm) {
-			responseId = newId('response');
-			const insertResult = await db.insert(schema.formResponse).values({
-				id: responseId,
-				formId: orgForm.id,
-				response: userResponse.additionalFields,
-				memId: locals.user.id
-			});
-			console.log(insertResult);
-		}
-
 		//Create membership in WorkOS
 		const om = await workos.userManagement.createOrganizationMembership({
 			organizationId: orgId,
 			userId: locals.user.id
 		});
 
+		let responseId = null;
+		if (orgForm) {
+			responseId = newId('response');
+			const insertResult = await db.insert(schema.formResponse).values({
+				id: responseId,
+				formId: orgForm.id,
+				response: Object.keys(userResponse.additionalFields).map((key) => ({
+					label: key,
+					response: userResponse.additionalFields[key]
+				})) as any,
+				memId: om.id
+			});
+			console.log(insertResult);
+		}
+
+		const defaultPlan = await db.query.plan.findFirst({
+			where: and(eq(schema.plan.orgId, orgId), eq(schema.plan.name, 'Default Plan')),
+			columns: {
+				id: true
+			}
+		});
+
 		//Add user to our database
-		await db
+		const result = await db
 			.insert(schema.member)
 			.values({
 				id: om.id,
@@ -155,15 +175,23 @@ export const actions: Actions = {
 				role: 'MEMBER',
 				additionalInfoId: responseId
 			})
-			.onDuplicateKeyUpdate({
+			.returning({ insertedId: schema.member.id })
+			.onConflictDoUpdate({
+				target: schema.member.id,
 				set: {
 					orgId: om.organizationId,
 					userId: om.userId,
-					role: 'MEMBER',
 					additionalInfoId: responseId,
 					updatedAt: new Date()
 				}
 			});
+		const { insertedId } = result[0];
+		if (defaultPlan) {
+			await db.insert(schema.membership).values({
+				planId: defaultPlan.id,
+				memId: insertedId
+			});
+		}
 
 		const useragent = request.headers.get('user-agent');
 		dummyClient.capture({

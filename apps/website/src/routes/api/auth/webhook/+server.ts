@@ -6,6 +6,7 @@ import { error, type RequestHandler } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { Webhooks } from './helper';
 import posthog, { dummyClient } from '$lib/server/posthog';
+import { roleEnum } from '@repo/db/schema/member';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const sigHeader = request.headers.get('WorkOS-Signature');
@@ -75,6 +76,24 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 				}
 			});
 			break;
+		}
+
+		case 'organization_membership.added': {
+			const newMember = webhook.data;
+			await db
+				.insert(schema.member)
+				.values({
+					id: newMember.id,
+					orgId: newMember.organizationId,
+					userId: newMember.userId,
+					role: newMember.role.slug.toUpperCase() as 'OWNER' | 'ADMIN' | 'MEMBER'
+				})
+				.onConflictDoUpdate({
+					target: schema.member.id,
+					set: {
+						role: newMember.role.slug.toUpperCase() as 'OWNER' | 'ADMIN' | 'MEMBER'
+					}
+				});
 		}
 
 		case 'organization_membership.removed': {

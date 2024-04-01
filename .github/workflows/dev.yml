@@ -35,6 +35,7 @@ jobs:
             DATABASE_HOST
             DATABASE_PASSWORD
             DATABASE_USERNAME
+            DATABASE_URL
             TEST_SECRET
           command: deploy --minify src/index.ts
           workingDirectory: 'apps/api'
@@ -45,4 +46,5 @@ jobs:
           DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
           DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           TEST_SECRET: abc

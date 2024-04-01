@@ -1,19 +1,18 @@
-import { datetime, mysqlTable, primaryKey, varchar } from 'drizzle-orm/mysql-core';
-import { sql } from 'drizzle-orm/sql';
+import { timestamp, pgTable, primaryKey, varchar } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { member } from './member';
 
-export const apiKey = mysqlTable(
+export const apiKey = pgTable(
 	'APIKey',
 	{
 		keyId: varchar('keyId', { length: 128 }).notNull(),
 		memId: varchar('memId', { length: 128 }).notNull(),
 		hint: varchar('hint', { length: 20 }).notNull(),
-		createdAt: datetime('createdAt', { mode: 'date', fsp: 3 })
-			.default(sql`CURRENT_TIMESTAMP(3)`)
+		createdAt: timestamp('createdAt', { mode: 'date', precision: 6, withTimezone: true })
+			.defaultNow()
 			.notNull(),
-		updatedAt: datetime('updatedAt', { mode: 'date', fsp: 3 })
-			.default(sql`CURRENT_TIMESTAMP(3)`)
+		updatedAt: timestamp('updatedAt', { mode: 'date', precision: 6, withTimezone: true })
+			.defaultNow()
 			.notNull()
 	},
 	(table) => {

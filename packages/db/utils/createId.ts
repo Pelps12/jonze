@@ -5,7 +5,9 @@ const prefixes = {
 	form: 'form',
 	response: 'resp',
 	event: 'evt',
-	attendance: 'atnd'
+	attendance: 'atnd',
+	plan: 'plan',
+	membership: 'mshp'
 } as const;
 
 export function newId(prefix: keyof typeof prefixes): string {

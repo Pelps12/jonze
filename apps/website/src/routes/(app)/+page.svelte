@@ -1,5 +1,7 @@
 <script lang="ts">
-    import { Button } from "$lib/components/ui/button";
+    import { browser } from "$app/environment";
+import { Button } from "$lib/components/ui/button";
+    import { mode } from 'mode-watcher';
 </script>
 
 <!-- Hero -->
@@ -9,7 +11,7 @@
       <div class="flex justify-center">
           <Button variant="outline" disabled 
             class="inline-flex items-center gap-x-2 bg-white border border-gray-200 text-sm text-gray-800 p-2  rounded-full transition hover:border-gray-300 ">
-            More event metrics and memberships soon
+            Memberships in beta. More metrics on the way
           </Button>
 
         
@@ -60,7 +62,7 @@
   <!-- End Hero -->
 
 
-  <div class="grid max-w-3xl gap-10 mx-auto md:grid-cols-2 lg:gap-16 my-10">
+<!--   <div class="grid max-w-3xl gap-10 mx-auto md:grid-cols-2 lg:gap-16 my-10">
     <div class="flex flex-col items-center gap-2 text-center">
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -159,18 +161,25 @@
         </p>
       </div>
     </div>
-  </div>
+  </div> -->
+
+  {#if browser}
+     <img src={$mode === "dark" ? "https://r2.oluwapelps.com/demo_dark.png": "https://r2.oluwapelps.com/demo_light.png"} height={1363} width={923} class="mx-auto"/>
+  {/if}
+
+ 
 
 <style>
-  .custom-shape-divider-bottom-1707505390 {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    overflow: hidden;
-    line-height: 0;
-    transform: rotate(180deg);
-}
+    .custom-shape-divider-bottom-1707505390 {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      overflow: hidden;
+      line-height: 0;
+      transform: rotate(180deg);
+  }
+  
 
 .custom-shape-divider-bottom-1707505390 svg {
     position: relative;

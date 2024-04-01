@@ -17,7 +17,8 @@
 	import { writable } from "svelte/store";
 	import UpdateEventForm from "./UpdateEventForm.svelte";
 	import { onMount } from "svelte";
-    let newFormOpen = writable(false);
+	import { page } from "$app/stores";
+    let newFormOpen = $page.url.searchParams.has("newevent");
 
     const isDesktop = mediaQuery("(min-width: 768px)");
     const handleCopyAttendance = (eventId: string) => {
@@ -65,7 +66,7 @@
         {:then forms} 
             
             {#if $isDesktop}
-                <Dialog.Root bind:open={$newFormOpen} >
+                <Dialog.Root bind:open={newFormOpen} >
                     <Dialog.Trigger asChild let:builder>
                     <Button variant="outline" builders={[builder]}>Add Event</Button>
                     </Dialog.Trigger>
@@ -80,7 +81,7 @@
                     </Dialog.Content>
                 </Dialog.Root>
             {:else}
-                <Drawer.Root bind:open={$newFormOpen}>
+                <Drawer.Root bind:open={newFormOpen}>
                     <Drawer.Trigger asChild let:builder>
                     <Button variant="outline" builders={[builder]}>Add Event</Button>
                     </Drawer.Trigger>
@@ -133,11 +134,11 @@
                                     <span>Attendance QRCode</span> 
                                     <QrCode class="ml-2 h-4 w-4"/>
                                 </DropdownMenu.Item>
-                                {#if event.form}
-                                    <DropdownMenu.Item>
-                                        <Dialog.Trigger>
-                                            Event Form
-                                        </Dialog.Trigger>
+                                {#if event.formId}
+                                    <DropdownMenu.Item href={`/org/${$page.params.id}/forms/${event.formId}/responses?eventId=${event.id}`}>
+                                       
+                                            Form Responses
+                                        
                                     </DropdownMenu.Item>
                                 {/if}
                                 <DropdownMenu.Item href={`events/${event.id}`}>View Attendance</DropdownMenu.Item>

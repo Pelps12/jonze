@@ -53,20 +53,17 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 						}
 					}
 				},
-				orderBy: (member, { desc }) => [desc(member.start)],
-				limit: 5
+				orderBy: (event, { desc }) => [desc(event.start)]
 			}
 		}
 	});
-
-	const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
 	if (!organization) {
 		error(404, 'Organization not Found');
 	}
 
 	const chartData = {
-		labels: organization.events.map((event) => event.name),
-		data: organization.events.map((event) => event.attendances.length)
+		labels: organization.events.map((event) => event.name).reverse(),
+		data: organization.events.map((event) => event.attendances.length).reverse()
 	};
 
 	return { organization, layout, chartData };

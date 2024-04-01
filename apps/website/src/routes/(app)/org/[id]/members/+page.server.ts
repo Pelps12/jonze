@@ -17,15 +17,7 @@ export const load: PageServerLoad = async ({ params }) => {
 					profilePictureUrl: true
 				}
 			},
-			additionalInfo: true,
-			organization: {
-				columns: {},
-				with: {
-					forms: {
-						where: eq(schema.organizationForm.name, 'User Info')
-					}
-				}
-			}
+			additionalInfo: true
 		},
 		orderBy: (members, { desc }) => [desc(members.createdAt)]
 	});

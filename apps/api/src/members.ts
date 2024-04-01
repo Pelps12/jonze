@@ -3,7 +3,6 @@ import { and, eq } from '@repo/db';
 import schema from '@repo/db/schema';
 import { DbType } from '@repo/db/typeaid';
 import { UnkeyContext, unkey } from '@unkey/hono';
-import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { Bindings } from '.';
 import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
@@ -128,32 +127,7 @@ const getMemberRoute = createRoute({
 	},
 	tags: ['Members']
 });
-app.get('/test', async (c) => {
-	const responses = await c.get('db').query.formResponse.findMany({
-		with: {
-			attendance: true,
-			member: true
-		}
-	});
 
-	await Promise.all(
-		responses.map(async (response) => {
-			const memId = response.attendance?.memId ?? response.member?.id;
-			if (!memId) {
-				console.log('PWEEEASEEEEE');
-			}
-
-			return c
-				.get('db')
-				.update(schema.formResponse)
-				.set({
-					memId
-				})
-				.where(eq(schema.formResponse.id, response.id));
-		})
-	);
-	return c.text('Changed  summ');
-});
 app.openapi(getMemberRoute, async (c) => {
 	console.log(c.get('unkey'));
 	const metadata = c.get('unkey').meta as Record<string, string | undefined>;

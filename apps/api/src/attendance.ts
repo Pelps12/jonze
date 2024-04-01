@@ -41,15 +41,29 @@ const getAttendanceRoute = createRoute({
 	summary: 'Get Attendance',
 	security: [{ [security.name]: [] }],
 	request: {
-		params: z.object({
-			eventId: z.string().openapi({
-				param: {
-					name: 'eventId',
-					in: 'path'
-				},
-				example: 'evt_SP6prmGnMzt5spsr',
-				description: 'ID of event'
-			})
+		query: z.object({
+			eventId: z
+				.string()
+				.optional()
+				.openapi({
+					param: {
+						name: 'eventId',
+						in: 'query'
+					},
+					example: 'evt_SP6prmGnMzt5spsr',
+					description: 'ID of event'
+				}),
+			memId: z
+				.string()
+				.optional()
+				.openapi({
+					param: {
+						name: 'memId',
+						in: 'query'
+					},
+					example: 'om_01HPCN296XBAKD6QYVKNMARD4N',
+					description: 'ID of member'
+				})
 		})
 	},
 	responses: {
@@ -59,7 +73,7 @@ const getAttendanceRoute = createRoute({
 					schema: z.array(zodOpenAPIAttendance)
 				}
 			},
-			description: 'Retrieve attendance by eventID'
+			description: 'Retrieve attendance by event or member ID'
 		},
 		401: {
 			content: {
@@ -81,32 +95,71 @@ app.openapi(getAttendanceRoute, async (c) => {
 			message: 'Bad API Key'
 		});
 	}
+	const eventId = c.req.valid('query').eventId;
+	const memId = c.req.valid('query').memId;
 
-	const event = await c.get('db').query.event.findFirst({
-		where: and(eq(schema.event.id, c.req.valid('param').eventId)),
-		columns: {
-			orgId: true
+	if (!memId && !eventId) {
+		throw new HTTPException(400, {
+			message: 'Member or Event ID required'
+		});
+	}
+	if (eventId) {
+		const event = await c.get('db').query.event.findFirst({
+			where: and(eq(schema.event.id, eventId)),
+			columns: {
+				orgId: true
+			}
+		});
+
+		if (!event) {
+			throw new HTTPException(404, {
+				message: 'Event not found'
+			});
 		}
-	});
 
-	if (!event) {
-		throw new HTTPException(404, {
-			message: 'Event not found'
+		if (event.orgId !== metadata.orgId) {
+			throw new HTTPException(401, {
+				message: 'Invalide API Token'
+			});
+		}
+
+		const attendance = await c.get('db').query.attendance.findMany({
+			where: and(eq(schema.attendance.eventId, eventId)),
+			orderBy: (attendance, { desc }) => [desc(attendance.createdAt)]
+		});
+
+		return c.json(attendance);
+	} else if (memId) {
+		const member = await c.get('db').query.member.findFirst({
+			where: and(eq(schema.member.id, memId)),
+			columns: {
+				orgId: true
+			}
+		});
+
+		if (!member) {
+			throw new HTTPException(404, {
+				message: 'Event not found'
+			});
+		}
+
+		if (member.orgId !== metadata.orgId) {
+			throw new HTTPException(401, {
+				message: 'Invalide API Token'
+			});
+		}
+
+		const attendance = await c.get('db').query.attendance.findMany({
+			where: and(eq(schema.attendance.memId, memId)),
+			orderBy: (attendance, { desc }) => [desc(attendance.createdAt)]
+		});
+
+		return c.json(attendance);
+	} else {
+		throw new HTTPException(400, {
+			message: 'Member or Event ID required'
 		});
 	}
-
-	if (event.orgId !== metadata.orgId) {
-		throw new HTTPException(401, {
-			message: 'Invalide API Token'
-		});
-	}
-
-	const attendance = await c.get('db').query.attendance.findMany({
-		where: and(eq(schema.attendance.eventId, c.req.valid('param').eventId)),
-		orderBy: (attendance, { desc }) => [desc(attendance.createdAt)]
-	});
-
-	return c.json(attendance);
 });
 
 export default app;

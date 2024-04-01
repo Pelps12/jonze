@@ -1,0 +1,1 @@
+ALTER TABLE "plan" RENAME COLUMN "decimal" TO "amount";

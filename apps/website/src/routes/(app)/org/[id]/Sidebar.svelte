@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { goto, preloadData, pushState } from "$app/navigation";
 	import { page } from "$app/stores";
+	import { Badge } from "$lib/components/ui/badge";
 	import { Button, type ButtonEvents } from "$lib/components/ui/button";
 	import { cn } from "$lib/utils";
-	import { CalendarIcon, FileText, FolderIcon, HomeIcon, SettingsIcon, UsersIcon } from "lucide-svelte";
+	import { CalendarIcon, FileText, FolderIcon, HomeIcon, SettingsIcon, TrendingUp, UsersIcon } from "lucide-svelte";
+	import { twJoin } from "tailwind-merge";
 	let className: string | null | undefined = undefined;
 
 	export { className as class };
@@ -37,6 +39,15 @@
           <UsersIcon class="h-4 w-4" />
           <span class="hidden lg:block">Members</span>
         </Button>
+        <Button
+        class="w-full justify-center lg:justify-start gap-2"
+        href="/org/{$page.params.id}/plans"
+        variant="ghost"
+      >
+        <TrendingUp class={twJoin ("h-4 w-4 ") }/>
+        <span class="hidden lg:block">Plans</span>
+        <Badge class="hidden lg:block">New</Badge>
+      </Button>
         <Button
           class="w-full justify-center lg:justify-start gap-2"
           href="/org/{$page.params.id}/forms"

@@ -108,15 +108,23 @@ export const actions: Actions = {
 				}
 			);
 
-			if (!objectsHaveSameKeys(userResponse.additionalFields, event.form.form)) {
+			if (
+				!objectsHaveSameKeys(
+					userResponse.additionalFields,
+					event.form.form.reduce((o, key) => ({ ...o, [key.label]: 'OOP' }), {})
+				)
+			) {
 				return fail(400);
 			}
 
 			await db.insert(schema.formResponse).values({
 				id: responseId,
-				response: userResponse.additionalFields,
+				response: Object.keys(userResponse.additionalFields).map((key) => ({
+					label: key,
+					response: userResponse.additionalFields[key]
+				})) as any,
 				formId: event.formId,
-				memId: locals.user.id
+				memId: member.id
 			});
 		}
 

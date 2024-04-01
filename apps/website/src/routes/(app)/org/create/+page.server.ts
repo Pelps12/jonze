@@ -26,9 +26,18 @@ export const actions: Actions = {
 			name: organization.name
 		});
 
+		await db.insert(schema.plan).values({
+			name: 'Default Plan',
+			orgId: organization.id,
+			amount: '0.00',
+			start: new Date(),
+			interval: '1 year'
+		});
+
 		const om = await workos.userManagement.createOrganizationMembership({
 			organizationId: organization.id,
-			userId: locals.user.id
+			userId: locals.user.id,
+			roleSlug: 'owner'
 		});
 
 		await db.insert(schema.member).values({

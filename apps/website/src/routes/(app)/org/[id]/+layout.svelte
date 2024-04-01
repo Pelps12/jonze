@@ -10,6 +10,8 @@
     import Smile from "lucide-svelte/icons/smile";
     import User from "lucide-svelte/icons/user";
     import * as Command from "$lib/components/ui/command";
+	import { goto } from "$app/navigation";
+	import { page } from "$app/stores";
 
     let commandBoxOpen = false
 
@@ -43,36 +45,28 @@
     <Command.List>
       <Command.Empty>No results found.</Command.Empty>
       <Command.Group heading="Suggestions">
-        <Command.Item>
-          <Calendar class="mr-2 h-4 w-4" />
-          <span>Calendar</span>
-        </Command.Item>
-        <Command.Item>
-          <Smile class="mr-2 h-4 w-4" />
-          <span>Search Emoji</span>
-        </Command.Item>
-        <Command.Item>
-          <Calculator class="mr-2 h-4 w-4" />
-          <span>Calculator</span>
-        </Command.Item>
+        <a href={`/org/${$page.params.id}/events?newevent=true`}>
+          <Command.Item>
+              <Calendar class="mr-2 h-4 w-4" />
+              <span>Make Event</span>
+          </Command.Item>
+        </a>
+        <a href={`/org/${$page.params.id}/plans?newplan=true`}>
+          <Command.Item>
+            <Smile class="mr-2 h-4 w-4" />
+            <span>Create Membership Plan</span>
+          </Command.Item>
+        </a>
       </Command.Group>
       <Command.Separator />
       <Command.Group heading="Settings">
-        <Command.Item>
-          <User class="mr-2 h-4 w-4" />
-          <span>Profile</span>
-          <Command.Shortcut>⌘P</Command.Shortcut>
-        </Command.Item>
-        <Command.Item>
-          <CreditCard class="mr-2 h-4 w-4" />
-          <span>Billing</span>
-          <Command.Shortcut>⌘B</Command.Shortcut>
-        </Command.Item>
-        <Command.Item>
-          <Settings class="mr-2 h-4 w-4" />
-          <span>Settings</span>
-          <Command.Shortcut>⌘S</Command.Shortcut>
-        </Command.Item>
+        <a href={`/org/${$page.params.id}/settings`}>
+          <Command.Item>
+            <Settings class="mr-2 h-4 w-4" />
+            <span>Settings</span>
+            <Command.Shortcut>⌘S</Command.Shortcut>
+          </Command.Item>
+        </a>
       </Command.Group>
     </Command.List>
   </Command.Dialog>
