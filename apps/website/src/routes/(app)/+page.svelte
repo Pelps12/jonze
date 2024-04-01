@@ -1,10 +1,40 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { PUBLIC_URL } from '$env/static/public';
 	import { Button } from '$lib/components/ui/button';
 	import { mode } from 'mode-watcher';
+	import { MetaTags } from 'svelte-meta-tags';
 </script>
 
 <!-- Hero -->
+
+<MetaTags
+	title="Jonze"
+	description="Member management for campus orgs."
+	openGraph={{
+		url: PUBLIC_URL,
+		title: 'Jonze',
+		description: 'Member management for campus orgs.',
+		images: [
+			{
+				url: 'https://ucarecdn.com/b49dfb27-3d2b-4b3f-a556-e0022c76d2fb/',
+				width: 1000,
+				height: 525,
+				alt: 'Jonze Alt'
+			}
+		],
+		siteName: 'Jonze'
+	}}
+	twitter={{
+		handle: '@Pelps12',
+		site: '@Pelps12',
+		cardType: 'summary_large_image',
+		title: 'Jonze',
+		description: 'Member management for campus orgs.',
+		image: 'https://ucarecdn.com/b49dfb27-3d2b-4b3f-a556-e0022c76d2fb/',
+		imageAlt: 'Twitter image alt'
+	}}
+/>
 <div
 	class="lg:h-[80vh] xl:h-[90vh] relative overflow-hidden before:absolute before:top-0 before:start-1/2 before:bg-[url('/hero_bg.svg')] before:bg-no-repeat before:bg-top before:bg-cover before:w-full before:h-full before:-z-[1] before:transform before:-translate-x-1/2 dark:before:bg-[url('/hero_bg_dark.svg')]"
 >
@@ -212,6 +242,7 @@
 		height={1363}
 		width={923}
 		class="mx-auto"
+		alt="Demo"
 	/>
 {/if}
 
