@@ -1,9 +1,26 @@
 import db from '$lib/server/db';
 import schema from '@repo/db/schema';
 import { signJWT } from '$lib/server/helpers';
-import workos from '$lib/server/workos';
+import workos, { clientId } from '$lib/server/workos';
 import { redirect, type Actions, error } from '@sveltejs/kit';
 import posthog, { dummyClient } from '$lib/server/posthog';
+import type { PageServerLoad } from './$types';
+import { WORKOS_REDIRECT_URI } from '$env/static/private';
+
+export const load: PageServerLoad = async ({ url, locals }) => {
+	if (!locals.user) {
+		const loginUrl = workos.userManagement.getAuthorizationUrl({
+			// Specify that we'd like AuthKit to handle the authentication flow
+			provider: 'authkit',
+			state: url.toString(),
+			// The callback endpoint that WorkOS will redirect to after a user authenticates
+			redirectUri: `${WORKOS_REDIRECT_URI}`,
+			clientId
+		});
+		console.log(`${WORKOS_REDIRECT_URI}`);
+		redirect(302, loginUrl);
+	}
+};
 
 export const actions: Actions = {
 	create: async ({ locals, request, cookies, getClientAddress, platform }) => {
