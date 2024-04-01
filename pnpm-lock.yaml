@@ -72,6 +72,9 @@ importers:
       '@planetscale/database':
         specifier: ^1.16.0
         version: 1.16.0
+      '@stripe/stripe-js':
+        specifier: ^3.1.0
+        version: 3.1.0
       '@sveltejs/adapter-cloudflare':
         specifier: ^4.1.0
         version: 4.1.0(@sveltejs/kit@2.5.0)
@@ -156,6 +159,9 @@ importers:
       qrcode:
         specifier: ^1.5.3
         version: 1.5.3
+      stripe:
+        specifier: ^14.23.0
+        version: 14.23.0
       svelte-chartjs:
         specifier: ^3.1.5
         version: 3.1.5(chart.js@4.4.1)(svelte@4.2.10)
@@ -2032,6 +2038,11 @@ packages:
     requiresBuild: true
     dev: false
     optional: true
+
+  /@stripe/stripe-js@3.1.0:
+    resolution: {integrity: sha512-7+ciE35i8NZ6l4FiO1qFkBoZ64ul6B2ZhBVyygB+e/2EZa2WLUyjoxrP53SagnUW7+/q25nDyDLzQq5F0ebOEw==}
+    engines: {node: '>=12.16'}
+    dev: false
 
   /@sveltejs/adapter-auto@3.1.1(@sveltejs/kit@2.5.0):
     resolution: {integrity: sha512-6LeZft2Fo/4HfmLBi5CucMYmgRxgcETweQl/yQoZo/895K3S9YWYN4Sfm/IhwlIpbJp3QNvhKmwCHbsqQNYQpw==}
@@ -7812,6 +7823,14 @@ packages:
   /strip-json-comments@3.1.1:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
+
+  /stripe@14.23.0:
+    resolution: {integrity: sha512-OPD7LqBmni6uDdqA05GGgMZyyRWxJOehONBNC9tYgY4Uh089EtXd6QLIgRGrqTDlQH3cA2BXo848nxwa/zsQzw==}
+    engines: {node: '>=12.*'}
+    dependencies:
+      '@types/node': 18.19.17
+      qs: 6.11.0
+    dev: false
 
   /style-to-object@0.4.4:
     resolution: {integrity: sha512-HYNoHZa2GorYNyqiCaBgsxvcJIn7OHq6inEga+E6Ke3m5JkoqpQbnFssk4jwe+K7AhGa2fcha4wSOf1Kn01dMg==}

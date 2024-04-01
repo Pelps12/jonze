@@ -3,12 +3,13 @@ import db from '$lib/server/db';
 import unkey from '$lib/server/unkey';
 import schema from '@repo/db/schema';
 import { error, redirect } from '@sveltejs/kit';
-import { and, eq, or } from 'drizzle-orm';
+import { and, eq, or, like } from '@repo/db';
 import type { PageServerLoad, Actions } from './$types';
 import { PUBLIC_APIKEY_PREFIX } from '$env/static/public';
 import posthog, { dummyClient } from '$lib/server/posthog';
+import workos from '$lib/server/workos';
 
-export const load: PageServerLoad = async ({ locals, params }) => {
+export const load: PageServerLoad = async ({ locals, params, url }) => {
 	if (!locals.user) {
 		error(401, 'Unauthorized');
 	}
@@ -90,5 +91,59 @@ export const actions: Actions = {
 		platform?.context.waitUntil(dummyClient.flushAsync());
 
 		return { key: createdKey.result.key };
+	},
+
+	createAdmin: async ({ request, locals, params }) => {
+		if (!params.id) error(400, 'Organization ID Required');
+
+		if (!locals.member) {
+			error(401, 'You are not an admin');
+		}
+		const formData = await request.formData();
+		const memId = formData.get('memId');
+
+		if (typeof memId !== 'string') error(400, 'Invalid form');
+
+		await workos.userManagement.updateOrganizationMembership(memId, {
+			roleSlug: 'admin'
+		});
+
+		await db
+			.update(schema.member)
+			.set({
+				role: 'ADMIN'
+			})
+			.where(eq(schema.member.id, memId));
+	},
+
+	searchMember: async ({ params, locals, url, request }) => {
+		if (!params.id) error(400, 'Organization ID Required');
+
+		if (!locals.member) {
+			error(401, 'You are not an admin');
+		}
+
+		const formData = await request.formData();
+		const userEmail = formData.get('invitee_email');
+
+		const members = await db
+			.select({
+				memId: schema.member.id,
+				userEmail: schema.user.email
+			})
+			.from(schema.member)
+			.innerJoin(schema.user, eq(schema.member.userId, schema.user.id))
+			.where(
+				and(
+					eq(schema.member.orgId, params.id),
+					like(schema.user.email, `%${userEmail}%`),
+					eq(schema.member.role, 'MEMBER')
+				)
+			)
+			.limit(5);
+
+		console.log('bufornfoeifnoer');
+
+		return { members };
 	}
 };
