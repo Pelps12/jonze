@@ -13,7 +13,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	console.log(STRIPE_WEBHOOK_SECRET, sig);
 
 	try {
-		event = stripe.webhooks.constructEvent(buf, sig, STRIPE_WEBHOOK_SECRET);
+		event = await stripe.webhooks.constructEventAsync(buf, sig, STRIPE_WEBHOOK_SECRET);
 	} catch (err: any) {
 		error(400, `Webhook Error: ${err.message}`);
 	}
