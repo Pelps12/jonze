@@ -102,9 +102,7 @@
 			</Card.Header>
 			<Card.Content><p class="text-sm">NOTE: Be sure to call it "User Info"</p></Card.Content>
 			<Card.Footer>
-				<Button href="/org/org_01HTB1NKTEFT7RZXS3CTXJRY4K/forms/create?form_name=User Info"
-					>Build</Button
-				>
+				<Button href={`/org/${$page.params.id}/forms/create?form_name=User Info`}>Build</Button>
 			</Card.Footer>
 		</Card.Root>
 
@@ -118,7 +116,7 @@
 				<p class="text-sm">This can be named anything</p>
 			</Card.Content>
 			<Card.Footer>
-				<Button href="/org/org_01HTB1NKTEFT7RZXS3CTXJRY4K/forms/create">Form</Button>
+				<Button href={`/org/${$page.params.id}/forms/create`}>Form</Button>
 			</Card.Footer>
 		</Card.Root>
 
@@ -135,7 +133,7 @@
 				<p class="text-sm">Copy the link or QR Code and that's it</p>
 			</Card.Content>
 			<Card.Footer>
-				<Button href="/org/org_01HTB1NKTEFT7RZXS3CTXJRY4K/events?newevent=true">Create</Button>
+				<Button href={`/org/${$page.params.id}/events?newevent=true`}>Create</Button>
 			</Card.Footer>
 		</Card.Root>
 
