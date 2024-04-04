@@ -72,6 +72,9 @@ importers:
       '@planetscale/database':
         specifier: ^1.16.0
         version: 1.16.0
+      '@stripe/connect-js':
+        specifier: ^3.3.1
+        version: 3.3.1
       '@stripe/stripe-js':
         specifier: ^3.1.0
         version: 3.1.0
@@ -2041,6 +2044,10 @@ packages:
     requiresBuild: true
     dev: false
     optional: true
+
+  /@stripe/connect-js@3.3.1:
+    resolution: {integrity: sha512-+WVKHkGgtMjfV35R89lAJoG2louQLzIG+VsGRBMiLWSLuaqt9YMUgChLmhIYq1LWh6+dyRXze1qKP4udg+bGKw==}
+    dev: false
 
   /@stripe/stripe-js@3.1.0:
     resolution: {integrity: sha512-7+ciE35i8NZ6l4FiO1qFkBoZ64ul6B2ZhBVyygB+e/2EZa2WLUyjoxrP53SagnUW7+/q25nDyDLzQq5F0ebOEw==}

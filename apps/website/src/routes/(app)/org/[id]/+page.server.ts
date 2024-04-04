@@ -4,6 +4,7 @@ import type { PageServerLoad } from './$types';
 import schema from '@repo/db/schema';
 import { error, redirect } from '@sveltejs/kit';
 import { attendance } from '@repo/db/schema/attendance';
+import { stripe } from '$lib/server/stripe';
 
 export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 	console.log('888888', locals.user);
@@ -54,11 +55,33 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 					}
 				},
 				orderBy: (event, { desc }) => [desc(event.start)]
-			}
+			},
+			forms: {
+				where: eq(schema.organizationForm.name, 'User Info')
+			},
+			subaccount: true
 		}
 	});
 	if (!organization) {
 		error(404, 'Organization not Found');
+	}
+
+	let clientSecret: string | undefined = undefined;
+	if (organization.subaccount) {
+		const accountSession = await stripe.accountSessions.create({
+			account: organization.subaccount.subaccountId,
+			components: {
+				payments: {
+					enabled: true,
+					features: {
+						refund_management: true,
+						dispute_management: true,
+						capture_payments: true
+					}
+				}
+			}
+		});
+		clientSecret = accountSession.client_secret;
 	}
 
 	const chartData = {
@@ -66,5 +89,5 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 		data: organization.events.map((event) => event.attendances.length).reverse()
 	};
 
-	return { organization, layout, chartData };
+	return { organization, layout, chartData, clientSecret };
 };
