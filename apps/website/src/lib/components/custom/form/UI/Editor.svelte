@@ -29,12 +29,16 @@
 	export let initialFormName: string | undefined;
 
 	onMount(() => {
-		if (initialForm && initialFormName) {
+		if (initialForm) {
 			form.set(initialForm);
+		}
+
+		if (initialFormName) {
 			form_name.set(initialFormName);
 		}
 
 		return () => {
+			form_name.set(undefined);
 			form.set([]);
 		};
 	});
@@ -174,15 +178,15 @@
 			<span class="hidden lg:block">Save Changes</span>
 		</Button>
 	</div>
-	{#if Object.keys($form).length > 0}
-		<Card.Root class="w-[350px] p-3">
-			<Card.Header>
-				<Card.Title>
-					<div class="flex flex-col space-y-1.5">
-						<Input id="name" placeholder="Form Name" bind:value={$form_name} />
-					</div>
-				</Card.Title>
-			</Card.Header>
+	<Card.Root class="w-[350px] p-3">
+		<Card.Header>
+			<Card.Title>
+				<div class="flex flex-col space-y-1.5">
+					<Input id="name" placeholder="Form Name" bind:value={$form_name} />
+				</div>
+			</Card.Title>
+		</Card.Header>
+		{#if Object.keys($form).length > 0}
 			<Card.Content>
 				<div
 					class="flex flex-col gap-3"
@@ -205,19 +209,21 @@
 					{/each}
 				</div>
 			</Card.Content>
-		</Card.Root>
-	{:else}
-		<div
-			class="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed"
-		>
-			<div class="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center p-2">
-				<FileText class="h-10 w-10" />
+		{:else}
+			<div
+				class="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed"
+			>
+				<div
+					class="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center p-2"
+				>
+					<FileText class="h-10 w-10" />
 
-				<h3 class="mt-4 text-lg font-semibold">No form fields added</h3>
-				<p class="mb-4 mt-2 text-sm text-muted-foreground">
-					You have not added any fields to this form
-				</p>
+					<h3 class="mt-4 text-lg font-semibold">No form fields added</h3>
+					<p class="mb-4 mt-2 text-sm text-muted-foreground">
+						You have not added any fields to this form
+					</p>
+				</div>
 			</div>
-		</div>
-	{/if}
+		{/if}
+	</Card.Root>
 </div>

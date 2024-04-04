@@ -1,6 +1,7 @@
 import { relations } from 'drizzle-orm';
 import { boolean, timestamp, pgTable, unique, varchar } from 'drizzle-orm/pg-core';
 import { member } from './member';
+import { customer } from './customer';
 
 export const user = pgTable(
 	'User',
@@ -25,6 +26,7 @@ export const user = pgTable(
 	}
 );
 
-export const userRelations = relations(user, ({ many }) => ({
+export const userRelations = relations(user, ({ one, many }) => ({
+	customer: one(customer, { fields: [user.id], references: [customer.userId] }),
 	members: many(member)
 }));

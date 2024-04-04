@@ -9,7 +9,7 @@ import type {
 import { writable } from 'svelte/store';
 
 export const form = writable<CustomForm>([]);
-export const form_name = writable<string>();
+export const form_name = writable<string | undefined>();
 
 export const add = (value: CustomField) => {
 	form.update((f) => [...f, value]);

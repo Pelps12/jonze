@@ -5,6 +5,7 @@ import { organizationForm } from './organizationForm';
 import { member } from './member';
 import { event } from './event';
 import { plan } from './plan';
+import { organizationSubaccount } from './organizationSubacount';
 
 export const organization = pgTable('Organization', {
 	id: varchar('id', { length: 128 }).primaryKey(),
@@ -17,7 +18,11 @@ export const organization = pgTable('Organization', {
 		.notNull()
 });
 
-export const organizationRelations = relations(organization, ({ many }) => ({
+export const organizationRelations = relations(organization, ({ one, many }) => ({
+	subaccount: one(organizationSubaccount, {
+		fields: [organization.id],
+		references: [organizationSubaccount.orgId]
+	}),
 	members: many(member),
 	forms: many(organizationForm),
 	events: many(event),

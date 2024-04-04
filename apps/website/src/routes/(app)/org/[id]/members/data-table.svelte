@@ -75,7 +75,7 @@
 				return '';
 			},
 			cell: ({ row }) => {
-				if (row.isData() && row.original && row.original.additionalInfo) {
+				if (row.isData() && row.original) {
 					return createRender(Actions, {
 						memberId: row.original.id
 					});
