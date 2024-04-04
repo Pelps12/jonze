@@ -9,6 +9,8 @@ import { logger } from 'hono/logger';
 import events from './events';
 import members from './members';
 import attendance from './attendance';
+import forms from './forms';
+import responses from './responses';
 import { swaggerUI } from '@hono/swagger-ui';
 
 export type Bindings = {
@@ -57,6 +59,8 @@ app.use('*', async (c, next) => {
 app.route('/events', events);
 app.route('/members', members);
 app.route('/attendance', attendance);
+app.route('/forms', forms);
+app.route('/responses', responses);
 
 app.doc('/doc', (c) => ({
 	openapi: '3.0.0',
