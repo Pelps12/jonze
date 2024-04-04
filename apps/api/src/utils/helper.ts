@@ -139,6 +139,49 @@ export const zodOpenAPIFormResponse = createSelectSchema(schema.formResponse, {
 	})
 });
 
+export const zodOpenAPIForm = createSelectSchema(schema.organizationForm, {
+	id: ({ id }) =>
+		id.openapi({
+			example: 'form_FDCxyzsw9oBrkEBZ'
+		}),
+	orgId: ({ orgId }) =>
+		orgId.openapi({
+			example: 'org_01HPCN28VR5FQ87N9P4MWXJTHQ'
+		}),
+	name: ({ name }) =>
+		name.openapi({
+			example: 'User Info'
+		}),
+	form: ({ form }) =>
+		form.openapi({
+			example: [
+				{
+					label: 'What org are representing?',
+					type: 'text',
+					placeholder: 'e.g. IEEE, ACM, ASU',
+					id: 0
+				},
+				{
+					label: 'Org Size',
+					type: 'dropdown',
+					id: 1,
+					options: [
+						{ label: 'Small (1 - 20) members' },
+						{ label: 'Medium (21 - 50) members' },
+						{ label: 'Large (51+) members' }
+					]
+				}
+			],
+			type: 'array'
+		}),
+	createdAt: z.coerce.string().openapi({
+		example: new Date().toISOString()
+	}),
+	updatedAt: z.coerce.string().openapi({
+		example: new Date().toISOString()
+	})
+});
+
 export const zodOpenAPIAttendance = createSelectSchema(schema.attendance, {
 	id: ({ id }) =>
 		id.openapi({
