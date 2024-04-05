@@ -1,10 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import Abc from '../abc.svelte';
 
 	export let data;
-	import { compile } from 'mdsvex';
-
 	onMount(async () => {
 		console.log(data.content);
 	});
