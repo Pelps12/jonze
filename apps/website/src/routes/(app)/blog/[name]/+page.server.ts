@@ -2,8 +2,7 @@ import db from '$lib/server/db';
 import schema from '@repo/db/schema';
 import { eq } from '@repo/db';
 import type { PageServerLoad } from './$types';
-import { compile, mdsvex } from 'mdsvex';
-import svelte from 'svelte/compiler';
+import { compile } from 'mdsvex';
 import { error } from '@sveltejs/kit';
 
 export const load: PageServerLoad = async ({ params }) => {
