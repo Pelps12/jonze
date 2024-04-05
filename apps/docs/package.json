@@ -3,7 +3,7 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
-		"update:docs": "pnpm dlx @mintlify/scraping@latest openapi-file https://dev-api.jonze.co/doc -o api-reference",
+		"update:docs": "pnpm dlx @mintlify/scraping@latest openapi-file https://api.jonze.co/doc -o api-reference",
 		"dev": "mintlify dev"
 	},
 	"dependencies": {

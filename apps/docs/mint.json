@@ -51,6 +51,14 @@
 		{
 			"group": "Attendance",
 			"pages": ["api-reference/attendance/get-attendance"]
+		},
+		{
+			"group": "Forms",
+			"pages": ["api-reference/forms/list-forms", "api-reference/forms/get-form"]
+		},
+		{
+			"group": "Responses",
+			"pages": ["api-reference/responses/list-responses"]
 		}
 	],
 	"footerSocials": {
