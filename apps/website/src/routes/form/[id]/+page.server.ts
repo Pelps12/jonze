@@ -9,7 +9,15 @@ import { dummyClient } from '$lib/server/posthog';
 
 export const load: PageServerLoad = async ({ parent, url, locals, params }) => {
 	const form = await db.query.organizationForm.findFirst({
-		where: eq(schema.organizationForm.id, params.id)
+		where: eq(schema.organizationForm.id, params.id),
+		with: {
+			organization: {
+				columns: {
+					logo: true,
+					name: true
+				}
+			}
+		}
 	});
 
 	if (!form) error(404, 'Form Not Found');

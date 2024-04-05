@@ -11,7 +11,13 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
 	const event = await db.query.event.findFirst({
 		where: eq(schema.event.id, params.id),
 		with: {
-			form: true
+			form: true,
+			organization: {
+				columns: {
+					name: true,
+					logo: true
+				}
+			}
 		}
 	});
 
@@ -30,12 +36,19 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
 		with: {
 			attendances: {
 				where: eq(schema.attendance.eventId, event.id)
+			},
+			organization: {
+				with: {
+					forms: {
+						where: eq(schema.organizationForm.name, 'User Info')
+					}
+				}
 			}
 		}
 	});
 	console.log(member);
 
-	if (!member || !member.additionalInfoId) {
+	if (!member || (member.organization.forms.length > 0 && !member.additionalInfoId)) {
 		redirect(302, `/user/signup/${event?.orgId}?callbackUrl=${url.toString()}`);
 	}
 

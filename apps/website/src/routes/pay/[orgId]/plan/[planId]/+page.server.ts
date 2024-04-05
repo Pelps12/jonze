@@ -40,7 +40,8 @@ export const load: PageServerLoad = async ({ url, locals, params }) => {
 			organization: {
 				columns: {
 					id: true,
-					name: true
+					name: true,
+					logo: true
 				},
 				with: {
 					subaccount: {
@@ -160,6 +161,6 @@ export const load: PageServerLoad = async ({ url, locals, params }) => {
 		clientSecret: session.client_secret,
 		stripeAccount: plan.organization.subaccount.subaccountId,
 		price_data,
-		orgName: plan.organization.name
+		org: plan.organization
 	};
 };

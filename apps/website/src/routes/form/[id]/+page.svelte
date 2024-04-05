@@ -11,7 +11,20 @@
 	export let data;
 </script>
 
-<div class="flex justify-center items-center h-[100vh]">
+<div class="flex flex-col justify-center items-center h-[100vh] gap-3">
+	<div>
+		{#if data.form.organization.logo}
+			<img
+				src={data.form.organization.logo}
+				alt="Organization"
+				width="100"
+				height="100"
+				class="mx-auto"
+			/>
+		{/if}
+
+		<p class="text-center font-bold text-xl">{data.form.organization.name}</p>
+	</div>
 	<form method="post">
 		<Card.Root class="w-[350px] relative">
 			<div
