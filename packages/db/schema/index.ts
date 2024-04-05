@@ -8,7 +8,7 @@ import * as membership from './membership';
 import * as organization from './organization';
 import * as organizationForm from './organizationForm';
 import * as organizationSubaccount from './organizationSubacount';
-
+import * as blog from './blog';
 import * as plan from './plan';
 import * as user from './user';
 
@@ -17,6 +17,7 @@ const schema = {
 	...attendance,
 	...customer,
 	...event,
+	...blog,
 	...formResponse,
 	...member,
 	...membership,
