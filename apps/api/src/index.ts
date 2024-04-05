@@ -70,7 +70,7 @@ app.doc('/doc', (c) => ({
 	},
 	servers: [
 		{
-			url: 'http://localhost:8787'
+			url: 'http://api.jonze.co'
 		}
 	]
 }));
