@@ -10,13 +10,13 @@
 {#if data.content?.code}
 	<div>
 		<div class="text-5xl text-center font-bold">
-			{data.content.data?.fm?.title}
+			{data.content.attributes.title}
 		</div>
 
-		<p>By <span class="font-semibold">{data.content.data?.fm?.author}</span></p>
+		<p>By <span class="font-semibold">{data.content.attributes.author}</span></p>
 
 		<p>
-			{new Date(data.content.data?.fm?.date).toLocaleDateString('en-US', {
+			{new Date(data.content.attributes.date).toLocaleDateString('en-US', {
 				year: 'numeric',
 				month: 'long',
 				day: 'numeric'
