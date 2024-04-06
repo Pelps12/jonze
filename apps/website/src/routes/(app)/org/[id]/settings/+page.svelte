@@ -51,11 +51,52 @@
 	export let form;
 
 	console.log(form?.members);
+
+	let imageUrl: string | undefined = undefined;
+
+	// Function to handle the file selection and update the image preview
+	function handleFileChange(event: any) {
+		const file = event.target.files[0];
+		if (file) {
+			const fileSize = file.size / (1024 * 1024);
+			if (fileSize > 5) {
+				toast.error('File Size must be less than 5MB');
+			}
+			imageUrl = URL.createObjectURL(file);
+		}
+	}
 </script>
 
 <div class="flex justify-start items-center mb-6">
 	<h2 class="text-xl font-semibold">Settings</h2>
 </div>
+
+<form class="p-6" method="post" action="?/updateLogo" enctype="multipart/form-data">
+	<Card.Root class="sm:max-w-[425px]">
+		<Card.Header>
+			<Card.Title>Your Org Logo</Card.Title>
+			<Card.Description>A little bit of branding</Card.Description>
+		</Card.Header>
+		<Card.Content>
+			<div class="grid w-full max-w-sm items-center gap-1.5">
+				{#if data.logo || imageUrl}
+					<img
+						src={imageUrl ?? data.logo}
+						alt="Organization"
+						width="100"
+						height="100"
+						class="mx-auto"
+					/>
+				{/if}
+				<Input name="logo" id="logo" type="file" on:change={handleFileChange} />
+			</div>
+		</Card.Content>
+		<Card.Footer>
+			<Button type="submit">Update</Button>
+		</Card.Footer>
+	</Card.Root>
+</form>
+
 <div class="p-6 grid grid-cols-1 lg:grid-cols-2 items-start gap-4">
 	<Dialog.Root>
 		<Card.Root>

@@ -111,14 +111,11 @@
 
 <div class="m-3">
 	<div>
-		<img
-			src="https://utd-asu.com/images/pic_4.png"
-			alt="Organization"
-			width="100"
-			height="100"
-			class="mx-auto"
-		/>
-		<p class="text-center font-bold text-xl">{data.orgName}</p>
+		{#if data.org.logo}
+			<img src={data.org.logo} alt="Organization" width="100" height="100" class="mx-auto" />
+		{/if}
+
+		<p class="text-center font-bold text-xl">{data.org.name}</p>
 	</div>
 
 	<form

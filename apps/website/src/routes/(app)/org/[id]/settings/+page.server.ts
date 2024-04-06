@@ -5,7 +5,7 @@ import schema from '@repo/db/schema';
 import { error, redirect } from '@sveltejs/kit';
 import { and, eq, or, like } from '@repo/db';
 import type { PageServerLoad, Actions } from './$types';
-import { PUBLIC_APIKEY_PREFIX } from '$env/static/public';
+import { PUBLIC_APIKEY_PREFIX, PUBLIC_UPLODCARE_SECRET_KEY } from '$env/static/public';
 import posthog, { dummyClient } from '$lib/server/posthog';
 import workos from '$lib/server/workos';
 
@@ -46,7 +46,7 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
 	}
 	const keys = organization.members.flatMap((member) => member.keys);
 	console.log(keys.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()));
-	return { keys, members: organization.members };
+	return { keys, members: organization.members, logo: organization.logo };
 };
 
 export const actions: Actions = {
@@ -114,6 +114,43 @@ export const actions: Actions = {
 				role: 'ADMIN'
 			})
 			.where(eq(schema.member.id, memId));
+	},
+
+	updateLogo: async ({ request, params }) => {
+		const formData = await request.formData();
+
+		const file = formData.get('logo');
+		if (file && typeof file !== 'string') {
+			const uploadFormData = new FormData();
+			uploadFormData.append('UPLOADCARE_PUB_KEY', PUBLIC_UPLODCARE_SECRET_KEY);
+			uploadFormData.append('UPLOADCARE_STORE', 'auto');
+			uploadFormData.append(file.name, file);
+			uploadFormData.append('metadata[orgId]', params.id);
+			uploadFormData.append('metadata[type]', 'logo');
+
+			const uploadResponse = await fetch('https://upload.uploadcare.com/base/', {
+				body: uploadFormData,
+				method: 'POST'
+			});
+
+			if (uploadResponse) {
+				const uploadResult = await uploadResponse.json();
+
+				const cdnUrl = `https://ucarecdn.com/${uploadResult[file.name]}/`;
+
+				console.log(cdnUrl);
+
+				await db
+					.update(schema.organization)
+					.set({
+						logo: cdnUrl
+					})
+					.where(eq(schema.organization.id, params.id));
+			}
+		} else {
+			console.log(file, 'IFLRNOFIERNOFERON');
+			error(400, 'Come on');
+		}
 	},
 
 	searchMember: async ({ params, locals, url, request }) => {

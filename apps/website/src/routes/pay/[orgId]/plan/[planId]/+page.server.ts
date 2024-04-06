@@ -27,11 +27,21 @@ export const load: PageServerLoad = async ({ url, locals, params }) => {
 		columns: {
 			id: true,
 			additionalInfoId: true
+		},
+		with: {
+			organization: {
+				columns: {},
+				with: {
+					forms: {
+						where: eq(schema.organizationForm.name, 'User Info')
+					}
+				}
+			}
 		}
 	});
 	console.log(member);
 
-	if (!member || !member.additionalInfoId) {
+	if (!member || (member.organization.forms.length > 0 && !member.additionalInfoId)) {
 		redirect(302, `/user/signup/${params.orgId}?callbackUrl=${url.toString()}`);
 	}
 	const plan = await db.query.plan.findFirst({
@@ -40,7 +50,8 @@ export const load: PageServerLoad = async ({ url, locals, params }) => {
 			organization: {
 				columns: {
 					id: true,
-					name: true
+					name: true,
+					logo: true
 				},
 				with: {
 					subaccount: {
@@ -160,6 +171,6 @@ export const load: PageServerLoad = async ({ url, locals, params }) => {
 		clientSecret: session.client_secret,
 		stripeAccount: plan.organization.subaccount.subaccountId,
 		price_data,
-		orgName: plan.organization.name
+		org: plan.organization
 	};
 };

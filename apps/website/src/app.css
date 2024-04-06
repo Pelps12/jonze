@@ -76,7 +76,85 @@ html {
 	* {
 		@apply border-border;
 	}
+
 	body {
 		@apply bg-background text-foreground;
 	}
+	.blog h1 {
+		@apply text-4xl font-bold mt-8 mb-4; /* Larger and bolder titles */
+	}
+
+	.blog h2 {
+		@apply text-3xl font-semibold mt-6 mb-3; /* Subtitles with a bit less emphasis */
+	}
+
+	.blog h3 {
+		@apply text-2xl font-medium mt-5 mb-2; /* Section titles */
+	}
+
+	.blog p {
+		@apply text-base leading-relaxed my-4; /* Paragraphs with relaxed line height for readability */
+	}
+
+	.blog a {
+		@apply text-primary underline; /* Links with a hover effect */
+	}
+
+	.blog blockquote {
+		@apply pl-4 border-l-4 border-gray-300 italic my-4; /* Stylish blockquotes */
+	}
+
+	.blog ul {
+		@apply list-disc list-inside my-4; /* Unordered lists */
+	}
+
+	.blog ol {
+		@apply list-decimal list-inside my-4; /* Ordered lists */
+	}
+
+	.blog img {
+		@apply my-4 mx-auto; /* Centered images with margin */
+		max-width: 100%;
+		height: auto;
+	}
+
+	.blog hr {
+		@apply border-t my-8; /* Horizontal rules for section breaks */
+	}
+
+	.blog .code-snippet {
+		@apply bg-gray-100 text-sm p-4 rounded; /* Code snippets styling */
+	}
+
+	.blog .highlight {
+		@apply bg-yellow-100; /* Highlighted text */
+	}
+
+	/* Responsive typography for smaller devices */
+	@media (max-width: 640px) {
+		.blog h1 {
+			@apply text-3xl;
+		}
+
+		.blog h2 {
+			@apply text-2xl;
+		}
+
+		.blog h3 {
+			@apply text-xl;
+		}
+	}
+}
+
+@layer blog {
+}
+
+.revert-tailwind {
+	all: initial;
+	font-family: 'Onest', 'system-ui';
+}
+
+.revert-tailwind > * {
+	all: revert;
+	font-family: 'Onest', 'system-ui';
 }

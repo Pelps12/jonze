@@ -78,6 +78,20 @@
       "when": 1712087243980,
       "tag": "0011_little_anthem",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1712300598130,
+      "tag": "0012_wealthy_young_avengers",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "5",
+      "when": 1712357858064,
+      "tag": "0013_far_supreme_intelligence",
+      "breakpoints": true
     }
   ]
 }

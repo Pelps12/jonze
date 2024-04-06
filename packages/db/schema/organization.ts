@@ -10,6 +10,7 @@ import { organizationSubaccount } from './organizationSubacount';
 export const organization = pgTable('Organization', {
 	id: varchar('id', { length: 128 }).primaryKey(),
 	name: varchar('name', { length: 191 }).notNull(),
+	logo: varchar('logo', { length: 191 }),
 	createdAt: timestamp('createdAt', { mode: 'date', precision: 6, withTimezone: true })
 		.defaultNow()
 		.notNull(),

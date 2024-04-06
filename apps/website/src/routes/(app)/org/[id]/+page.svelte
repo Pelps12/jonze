@@ -174,6 +174,7 @@
 				<Card.Content class="grid gap-4 h-auto">
 					<Bar
 						data={chartData}
+						on:click={(e) => console.log(e)}
 						options={{
 							maintainAspectRatio: false,
 							aspectRatio: 1,
