@@ -28,35 +28,32 @@
 <ModeWatcher />
 <Toaster />
 
-<svelte:head>
-	<title>Jonze</title>
-	<MetaTags
-		title="Jonze"
-		description="Member management for campus orgs."
-		openGraph={{
-			url: PUBLIC_URL,
-			title: 'Jonze',
-			description: 'Member management for campus orgs.',
-			images: [
-				{
-					url: 'https://ucarecdn.com/b49dfb27-3d2b-4b3f-a556-e0022c76d2fb/',
-					width: 1000,
-					height: 525,
-					alt: 'Jonze Alt'
-				}
-			],
-			siteName: 'Jonze'
-		}}
-		twitter={{
-			handle: '@Pelps12',
-			site: '@Pelps12',
-			cardType: 'summary_large_image',
-			title: 'Jonze',
-			description: 'Member management for campus orgs.',
-			image: 'https://ucarecdn.com/b49dfb27-3d2b-4b3f-a556-e0022c76d2fb/',
-			imageAlt: 'Twitter image alt'
-		}}
-	/>
-</svelte:head>
+<MetaTags
+	title="Jonze"
+	description="Member management for campus orgs."
+	openGraph={{
+		url: PUBLIC_URL,
+		title: 'Jonze',
+		description: 'Member management for campus orgs.',
+		images: [
+			{
+				url: 'https://ucarecdn.com/b49dfb27-3d2b-4b3f-a556-e0022c76d2fb/',
+				width: 1000,
+				height: 525,
+				alt: 'Jonze Alt'
+			}
+		],
+		siteName: 'Jonze'
+	}}
+	twitter={{
+		handle: '@Pelps12',
+		site: '@Pelps12',
+		cardType: 'summary_large_image',
+		title: 'Jonze',
+		description: 'Member management for campus orgs.',
+		image: 'https://ucarecdn.com/b49dfb27-3d2b-4b3f-a556-e0022c76d2fb/',
+		imageAlt: 'Twitter image alt'
+	}}
+/>
 
 <slot />
