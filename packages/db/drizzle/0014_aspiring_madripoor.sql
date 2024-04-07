@@ -1,0 +1,1 @@
+ALTER TABLE "Customer" ADD COLUMN "memberId" varchar(126);

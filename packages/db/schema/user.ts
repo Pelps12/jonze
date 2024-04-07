@@ -27,6 +27,5 @@ export const user = pgTable(
 );
 
 export const userRelations = relations(user, ({ one, many }) => ({
-	customer: one(customer, { fields: [user.id], references: [customer.userId] }),
 	members: many(member)
 }));

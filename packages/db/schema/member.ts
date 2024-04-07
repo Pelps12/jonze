@@ -6,6 +6,7 @@ import { formResponse } from './formResponse';
 import { attendance } from './attendance';
 import { apiKey } from './apikey';
 import { membership } from './membership';
+import { customer } from './customer';
 
 export const roleEnum = pgEnum('role', ['OWNER', 'ADMIN', 'MEMBER']);
 
@@ -25,6 +26,7 @@ export const member = pgTable('Member', {
 
 export const memberRelations = relations(member, ({ one, many }) => ({
 	user: one(user, { fields: [member.userId], references: [user.id] }),
+	customer: one(customer, { fields: [member.id], references: [customer.memId] }),
 	organization: one(organization, { fields: [member.orgId], references: [organization.id] }),
 	additionalInfo: one(formResponse, {
 		fields: [member.additionalInfoId],

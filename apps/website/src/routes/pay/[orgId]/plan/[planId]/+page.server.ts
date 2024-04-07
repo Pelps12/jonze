@@ -88,9 +88,13 @@ export const load: PageServerLoad = async ({ url, locals, params }) => {
 					: locals.user.email;
 
 	const dbCustomer = await db.query.customer.findFirst({
-		where: eq(schema.customer.userId, locals.user.id),
+		where: and(eq(schema.customer.userId, locals.user.id), eq(schema.customer.orgId, plan.orgId)),
 		with: {
-			user: true
+			member: {
+				with: {
+					user: true
+				}
+			}
 		}
 	});
 
@@ -110,9 +114,10 @@ export const load: PageServerLoad = async ({ url, locals, params }) => {
 		stripeCustomerId = stripeCustomer.id;
 
 		await db.insert(schema.customer).values({
-			userId: locals.user.id,
+			memId: member.id,
 			stripeId: stripeCustomerId,
-			orgId: plan.organization.id
+			orgId: plan.organization.id,
+			userId: locals.user.id
 		});
 	}
 
@@ -139,7 +144,7 @@ export const load: PageServerLoad = async ({ url, locals, params }) => {
 			mode: 'payment',
 			ui_mode: 'custom' as any,
 			// The URL of your payment completion page
-			return_url: 'https://utd-asu.com',
+			return_url: callbackUrl ?? PUBLIC_URL,
 			metadata: {
 				planId: plan.id,
 				memId: member.id

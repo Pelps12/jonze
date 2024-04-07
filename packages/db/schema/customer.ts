@@ -6,8 +6,9 @@ import { organization } from './organization';
 import { organizationSubaccount } from './organizationSubacount';
 
 export const customer = pgTable('Customer', {
-	userId: varchar('userId', { length: 128 }).primaryKey(),
+	userId: varchar('userId', { length: 128 }),
 	stripeId: varchar('stripeId', { length: 128 }).notNull(),
+	memId: varchar('memId', { length: 126 }).primaryKey(),
 	orgId: varchar('orgId', { length: 128 }),
 	createdAt: timestamp('createdAt', { mode: 'date', precision: 6, withTimezone: true })
 		.defaultNow()
@@ -18,7 +19,7 @@ export const customer = pgTable('Customer', {
 });
 
 export const customerRelations = relations(customer, ({ one }) => ({
-	user: one(user, { fields: [customer.userId], references: [user.id] }),
+	member: one(member, { fields: [customer.memId], references: [member.id] }),
 	orgSubaccount: one(organizationSubaccount, {
 		fields: [customer.orgId],
 		references: [organizationSubaccount.orgId]
