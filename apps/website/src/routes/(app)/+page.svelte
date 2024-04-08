@@ -1,9 +1,19 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { page } from '$app/stores';
 	import { PUBLIC_URL } from '$env/static/public';
 	import { Button } from '$lib/components/ui/button';
 	import { mode } from 'mode-watcher';
+	import { onMount } from 'svelte';
 	import { MetaTags } from 'svelte-meta-tags';
+	import { toast } from 'svelte-sonner';
+
+	const payment_success = $page.url.searchParams.has('payment_success');
+	onMount(() => {
+		if (payment_success) {
+			toast.success('Payment Successful');
+		}
+	});
 </script>
 
 <!-- Hero -->

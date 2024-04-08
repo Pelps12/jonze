@@ -15,7 +15,7 @@
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
 	import { page } from '$app/stores';
 	import { formatName } from '$lib/utils.js';
-	import { PUBLIC_STRIPE_KEY } from '$env/static/public';
+	import { PUBLIC_STRIPE_KEY, PUBLIC_URL } from '$env/static/public';
 
 	let loading = true;
 	let stripe: Stripe | null;
@@ -88,7 +88,7 @@
 		console.log(stripe, checkout);
 		if (stripe && checkout) {
 			const { error, session } = await checkout.confirm({
-				return_url: 'https://utd-asu.com'
+				return_url: PUBLIC_URL
 			});
 			// This point will only be reached if there is an immediate error when
 			// confirming the payment. Otherwise, your customer will be redirected to
@@ -96,7 +96,7 @@
 			// be redirected to an intermediate site first to authorize the payment, then
 			// redirected to the `return_url`.
 			if (!error) {
-				window.location.href = 'https://utd-asu.com';
+				window.location.href = `${PUBLIC_URL}?payment_success=true`;
 			} else {
 				if (error.type === 'card_error' || error.type === 'validation_error') {
 					toast.error(error.message ?? 'Unknown Error');
