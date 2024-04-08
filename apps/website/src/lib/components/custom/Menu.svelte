@@ -11,6 +11,7 @@
 	import { mediaQuery } from 'svelte-legos';
 	import type { Organization, User } from '@workos-inc/node';
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	let open = false;
 	const isDesktop = mediaQuery('(min-width: 768px)');
 
@@ -29,7 +30,11 @@
 	const handleLogout = () => {
 		fetch('/api/auth/logout', {
 			method: 'POST'
-		});
+		}).then(() =>
+			goto('/', {
+				invalidateAll: true
+			})
+		);
 	};
 
 	const username = (user?.firstName ?? 'No') + ' ' + (user?.lastName ?? 'Name');

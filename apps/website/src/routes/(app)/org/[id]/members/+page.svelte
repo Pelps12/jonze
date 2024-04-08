@@ -6,11 +6,14 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Alert from '$lib/components/ui/alert';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { Copy, QrCode } from 'lucide-svelte';
+	import { Copy, PlusCircle, QrCode } from 'lucide-svelte';
 	import { PUBLIC_URL } from '$env/static/public';
 	import { toast } from 'svelte-sonner';
 	import { browser } from '$app/environment';
 	import QRCode from 'qrcode';
+	import { Input } from '$lib/components/ui/input';
+	import { writable } from 'svelte/store';
+	import { goto, invalidate } from '$app/navigation';
 
 	export let data;
 
@@ -37,12 +40,34 @@
 			URL.revokeObjectURL(href);
 		}
 	};
+
+	let emailFilter = writable($page.url.searchParams.get('email'));
+
+	emailFilter.subscribe((email) => console.log(email));
+
+	const handleFilterSubmit = async () => {
+		if ($emailFilter) {
+			const url = new URL($page.url);
+			url.searchParams.set('email', $emailFilter);
+			window.location.href = url.toString();
+
+			//$page.url.searchParams.set('email', $emailFilter);
+		} else {
+			const url = new URL($page.url);
+			url.searchParams.delete('email');
+			window.location.href = url.toString();
+		}
+	};
+
+	let showStatusBar = true;
+	let showActivityBar = false;
+	let showPanel = false;
 </script>
 
 <div class="flex justify-end">
 	<DropdownMenu.Root>
 		<DropdownMenu.Trigger asChild let:builder>
-			<Button variant="outline" builders={[builder]}>Signup Form</Button>
+			<Button variant="outline" class="border-dotted" builders={[builder]}>Signup Form</Button>
 		</DropdownMenu.Trigger>
 		<DropdownMenu.Content>
 			<DropdownMenu.Item
@@ -64,6 +89,12 @@
 		</DropdownMenu.Content>
 	</DropdownMenu.Root>
 </div>
+
+<form class="my-3 flex gap-2 flex-start">
+	<Input bind:value={$emailFilter} placeholder="Filter by Email" class="max-w-md" />
+
+	<Button on:click={() => handleFilterSubmit()}>Apply</Button>
+</form>
 <div class=" mx-auto py-10">
 	<DataTable members={data.members} organizationForm={data.organizationForm} />
 </div>
