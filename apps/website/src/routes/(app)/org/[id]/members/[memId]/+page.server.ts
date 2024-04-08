@@ -64,7 +64,8 @@ export const load: PageServerLoad = async ({ params }) => {
 		form: await superValidate(
 			member.memberships[0]
 				? {
-						planId: member.memberships[0].planId
+						planId: member.memberships[0].planId,
+						provider: member.memberships[0].provider
 					}
 				: {},
 			zod(membershipCreationSchema)

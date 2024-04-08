@@ -14,6 +14,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	const plans = await db.query.plan.findMany({
 		where: eq(schema.plan.orgId, params.id)
 	});
+	console.log(plans);
 	const transformedPlans = plans.map((plan) => ({
 		...plan,
 		interval: { years: plan.interval?.years }

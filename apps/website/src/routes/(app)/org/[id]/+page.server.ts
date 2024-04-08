@@ -86,8 +86,8 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 	const arr = Array.from([1, 2, 2, 2, 2, 2, 2, 3, 3, 4, 4, 4]);
 
 	const chartData = {
-		labels: arr.map((event) => '').reverse(),
-		data: arr.map((event) => Math.ceil(Math.random() * 100 + 1)).reverse()
+		labels: organization.events.map((event) => event.name).reverse(),
+		data: organization.events.map((event) => event.attendances.length).reverse()
 	};
 
 	return { organization, layout, chartData, clientSecret };

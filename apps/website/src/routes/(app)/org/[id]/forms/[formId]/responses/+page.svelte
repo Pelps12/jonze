@@ -13,7 +13,7 @@
 	const columns = table.createColumns([
 		table.column({
 			accessor: (item) => item.member.user,
-			header: 'Event Name',
+			header: 'User',
 			cell: ({ value, row }) => {
 				if (row.isData()) {
 					return createRender(Link, {
