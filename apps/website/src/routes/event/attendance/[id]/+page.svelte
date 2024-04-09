@@ -8,6 +8,7 @@
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import { PUBLIC_URL } from '$env/static/public';
 	export let data;
 	let filled = data.formFilled;
 
@@ -16,8 +17,9 @@
 	onMount(() => {
 		setTimeout(() => {
 			const callbackUrl = $page.url.searchParams.get('callbackUrl');
+			const returnURL = new URL(callbackUrl ?? PUBLIC_URL);
 			if (invalid && callbackUrl) {
-				window.location.href = callbackUrl;
+				window.location.href = returnURL.toString();
 			}
 		}, 7000);
 	});
