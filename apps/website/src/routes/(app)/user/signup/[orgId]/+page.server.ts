@@ -48,7 +48,10 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 			}
 		});
 		const signupForm = member?.organization.forms[0];
-		if (signupForm && member.additionalInfo) {
+		if (
+			(signupForm && member.additionalInfoId) ||
+			(member && member.organization.forms.length == 0)
+		) {
 			redirect(302, callbackUrl ?? `/org/${orgId}`);
 		}
 	}
