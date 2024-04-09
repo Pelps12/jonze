@@ -62,16 +62,15 @@
 
 		<div class="w-full flex items-center justify-end ms-auto sm:gap-x-3 sm:order-3">
 			<div class="flex flex-row items-center justify-end gap-2">
-				<Button variant="ghost" href="/pricing" class="text-zinc-800 dark:text-zinc-100 gap-2">
+				<Button variant="ghost" href="/pricing" class="text-zinc-800 dark:text-zinc-100 p-2">
 					Pricing
 				</Button>
 				<Button
 					variant="ghost"
 					href="https://docs.jonze.co"
-					class="text-zinc-800 dark:text-zinc-100 gap-2"
+					class="text-zinc-800 dark:text-zinc-100 p-2"
 				>
 					Docs
-					<Badge>New</Badge>
 				</Button>
 
 				<DropdownMenu.Root closeOnItemClick={false}>
