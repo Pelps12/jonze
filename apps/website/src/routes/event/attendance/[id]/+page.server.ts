@@ -6,6 +6,7 @@ import { error, redirect, type Actions, fail } from '@sveltejs/kit';
 import { objectsHaveSameKeys } from '$lib/server/helpers';
 import { newId } from '@repo/db/utils/createId';
 import posthog, { dummyClient } from '$lib/server/posthog';
+import { PUBLIC_URL } from '$env/static/public';
 
 export const load: PageServerLoad = async ({ locals, params, url }) => {
 	const event = await db.query.event.findFirst({
@@ -58,6 +59,8 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
 export const actions: Actions = {
 	default: async ({ request, locals, params, url, getClientAddress, platform }) => {
 		const callbackUrl = url.searchParams.get('callbackUrl');
+
+		const returnUrl = new URL(callbackUrl ?? PUBLIC_URL);
 
 		if (!params.id) error(400, 'Event ID Required');
 		const event = await db.query.event.findFirst({
@@ -158,6 +161,7 @@ export const actions: Actions = {
 		});
 
 		platform?.context.waitUntil(dummyClient.flushAsync());
-		redirect(302, callbackUrl ?? '/');
+		returnUrl.searchParams.set('attendance_success', 'true');
+		redirect(302, returnUrl);
 	}
 };
