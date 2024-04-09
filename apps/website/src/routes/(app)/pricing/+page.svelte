@@ -8,9 +8,11 @@
 		class="p-4 sm:px-10 flex flex-col justify-center items-center text-base h-100vh mx-auto"
 		id="pricing"
 	>
-		<h3 class="text-5xl font-semibold text-center flex gap-2 justify-center mb-10">
-			Offerings for <span class="text-primary">orgs</span> of all sizes
-		</h3>
+		<div class="max-w-3xl text-center mx-auto z-20 relative p-2">
+			<h1 class="block font-bold text-4xl md:text-5xl lg:text-6xl">
+				Offerings for <span class="text-primary">orgs</span> of all sizes
+			</h1>
+		</div>
 		<div
 			class="isolate mx-auto grid max-w-md grid-cols-1 gap-8 lg:mx-0 lg:max-w-none lg:grid-cols-2"
 		>
