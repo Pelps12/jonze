@@ -4,7 +4,7 @@
 	import { PUBLIC_URL } from '$env/static/public';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
-	import { ChevronRight } from 'lucide-svelte';
+	import { ChevronDownIcon, ChevronRight } from 'lucide-svelte';
 	import { mode } from 'mode-watcher';
 	import { onMount } from 'svelte';
 	import { MetaTags } from 'svelte-meta-tags';
@@ -72,6 +72,9 @@
 		<!-- Buttons -->
 		<div class="mt-8 gap-3 flex justify-center z-20 relative">
 			<Button href="/org/create" class="gap-2">Get Started <ChevronRight class="h-4 w-4" /></Button>
+			<Button href="#attendance" variant="outline" class="gap-2"
+				>Learn More <ChevronDownIcon class="h-4 w-4" /></Button
+			>
 		</div>
 		<!-- End Buttons -->
 	</div>
