@@ -148,6 +148,7 @@
 					</DropdownMenu.Root>
 				{:else}
 					<Button variant="secondary" class="gap-2" href="/api/auth">Log In</Button>
+					<Button class="gap-2" href="/api/auth">Sign Up</Button>
 				{/if}
 			</div>
 		</div>
