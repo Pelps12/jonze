@@ -9,9 +9,7 @@
 	export let id: number;
 	export let data: CustomTextAreaField;
 	$: temporaryEdit = structuredClone(data);
-	const handleChange = (value: Partial<CustomTextAreaField>) => {
-		temporaryEdit = { ...temporaryEdit, ...value };
-	};
+
 	onMount(() => {
 		console.log(temporaryEdit, id);
 	});
@@ -19,6 +17,10 @@
 	const handleSave = () => {
 		console.log('HIGH');
 		edit(id, temporaryEdit);
+	};
+	const handleChange = (value: Partial<CustomTextAreaField>) => {
+		temporaryEdit = { ...temporaryEdit, ...value };
+		handleSave();
 	};
 
 	const handleDelete = () => {
