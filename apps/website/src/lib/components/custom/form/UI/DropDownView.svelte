@@ -9,13 +9,15 @@
 	import type { CustomDropDownField } from '$lib/types/forms';
 	export let data: CustomDropDownField;
 	export let id: number;
-	$: temporaryEdit = data;
-	const handleChange = (value: Partial<CustomDropDownField>) => {
-		temporaryEdit = { ...temporaryEdit, ...value };
-	};
+	$: temporaryEdit = structuredClone(data);
 
 	const handleSave = () => {
 		edit(id, temporaryEdit);
+	};
+
+	const handleChange = (value: Partial<CustomDropDownField>) => {
+		temporaryEdit = { ...temporaryEdit, ...value };
+		handleSave();
 	};
 
 	const handleDelete = () => {
