@@ -9,7 +9,7 @@
 	import type { CustomDropDownField } from '$lib/types/forms';
 	export let data: CustomDropDownField;
 	export let id: number;
-	$: temporaryEdit = structuredClone(data);
+	$: temporaryEdit = data;
 	const handleChange = (value: Partial<CustomDropDownField>) => {
 		temporaryEdit = { ...temporaryEdit, ...value };
 	};
@@ -29,6 +29,7 @@
 				options: temporaryEdit.options.filter((_, index) => id !== index)
 			}
 		};
+		handleSave();
 	};
 
 	const handleChangeOption = (
@@ -43,6 +44,7 @@
 				)
 			}
 		};
+		handleSave();
 	};
 	const handleAddMore = () => {
 		const numOptions = temporaryEdit.options.length;
@@ -57,6 +59,7 @@
 				]
 			}
 		};
+		handleSave();
 	};
 </script>
 
