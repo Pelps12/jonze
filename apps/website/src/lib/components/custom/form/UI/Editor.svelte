@@ -122,7 +122,7 @@
 						<span>TextArea Field</span>
 					</Button>
 
-					<Button variant="secondary" on:click={() => addHelper('radio')}>
+					<Button variant="secondary" on:click={() => addHelper('radio')} disabled>
 						<PlusCircle class="h-4 w-4 mr-2" />
 						<span>Options Field</span>
 					</Button>
