@@ -1,10 +1,21 @@
 import db from '$lib/server/db';
 import schema from '@repo/db/schema';
-import { ZodCustomForm } from '$lib/types/forms';
+import { ZodCustomForm, type CustomForm } from '$lib/types/forms';
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import posthog, { dummyClient } from '$lib/server/posthog';
+
+const duplicateKey = (array: CustomForm) => {
+	const seenIds = new Set();
+	for (const item of array) {
+		if (seenIds.has(item.label)) {
+			return item.label; // Duplicate found
+		}
+		seenIds.add(item.label);
+	}
+	return undefined;
+};
 
 export const POST: RequestHandler = async ({ request, locals, getClientAddress, platform }) => {
 	const result = await z
@@ -18,6 +29,12 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress, 
 		error(400, 'Poorly formatted input');
 	}
 	const { data } = result;
+	const duplicate = duplicateKey(data.form);
+
+	if (duplicate) {
+		error(400, `Duplicate Label (${duplicate})`);
+	}
+
 	const orgForm = await db.insert(schema.organizationForm).values({
 		orgId: data.organizationId,
 		form: data.form,
