@@ -46,8 +46,8 @@ class Authentication {
 		this.token = token;
 	}
 
-	appPortalAccess(appId: string, addtional: {}): Promise<Response> {
-		return fetch(`https://api.svix.com/api/v1/auth/app-portal-access/${appId}/`, {
+	async appPortalAccess(appId: string, addtional: {}): Promise<any> {
+		const response = await fetch(`https://api.svix.com/api/v1/auth/app-portal-access/${appId}/`, {
 			headers: {
 				Accept: 'application/json',
 				'Content-Type': 'application/json',
@@ -56,6 +56,8 @@ class Authentication {
 			body: JSON.stringify(addtional),
 			method: 'POST'
 		});
+
+		return response.json();
 	}
 }
 
