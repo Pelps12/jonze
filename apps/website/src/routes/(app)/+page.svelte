@@ -52,9 +52,7 @@
 		<!-- Title -->
 		<div class="mt-5 max-w-3xl text-center mx-auto z-20 relative">
 			<h1 class="block font-bold text-4xl md:text-5xl lg:text-6xl">
-				<span class="bg-clip-text text-primary drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,1)]"
-					>Streamlining</span
-				>
+				<span class="bg-clip-text text-primary">Streamlining</span>
 				organization management
 			</h1>
 		</div>

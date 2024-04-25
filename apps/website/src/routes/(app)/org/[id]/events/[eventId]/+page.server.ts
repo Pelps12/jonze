@@ -28,7 +28,8 @@ export const load: PageServerLoad = async ({ params }) => {
 						}
 					},
 					response: true
-				}
+				},
+				orderBy: (atnd, { desc }) => [desc(atnd.createdAt)]
 			},
 			form: true
 		}

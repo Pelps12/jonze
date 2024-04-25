@@ -6,6 +6,7 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import { newId } from '@repo/db/utils/createId';
 import { objectsHaveSameKeys } from '$lib/server/helpers';
 import { dummyClient } from '$lib/server/posthog';
+import svix from '$lib/server/svix';
 
 export const load: PageServerLoad = async ({ parent, url, locals, params }) => {
 	const form = await db.query.organizationForm.findFirst({
@@ -56,46 +57,45 @@ export const actions: Actions = {
 			console.log(pair[0] + ', ' + pair[1]);
 		}
 
-		let responseId = null;
+		let responseId = newId('response');
 
-		if (form) {
-			responseId = newId('response');
+		const userResponseArray = Array.from(formData.entries()).filter(
+			(val) => typeof val[1] === 'string'
+		) as [string, string][];
 
-			const userResponseArray = Array.from(formData.entries()).filter(
-				(val) => typeof val[1] === 'string'
-			) as [string, string][];
+		type response = {
+			additionalFields: Record<string, string>;
+		};
 
-			type response = {
-				additionalFields: Record<string, string>;
-			};
+		console.log(userResponseArray);
 
-			console.log(userResponseArray);
-
-			const userResponse = userResponseArray.reduce<response>(
-				(acc, [key, value]) => {
-					if (key !== 'firstName' && key !== 'lastName') {
-						acc['additionalFields'][key] = value;
-					}
-					return acc;
-				},
-				{
-					additionalFields: {}
+		const userResponse = userResponseArray.reduce<response>(
+			(acc, [key, value]) => {
+				if (key !== 'firstName' && key !== 'lastName') {
+					acc['additionalFields'][key] = value;
 				}
-			);
-			console.log(userResponse);
-
-			if (
-				!objectsHaveSameKeys(
-					userResponse.additionalFields,
-					form.form.reduce((o, key) => ({ ...o, [key.label]: 'OOP' }), {})
-				)
-			) {
-				return fail(400);
+				return acc;
+			},
+			{
+				additionalFields: {}
 			}
+		);
+		console.log(userResponse);
 
-			console.log(userResponse.additionalFields);
+		if (
+			!objectsHaveSameKeys(
+				userResponse.additionalFields,
+				form.form.reduce((o, key) => ({ ...o, [key.label]: 'OOP' }), {})
+			)
+		) {
+			return fail(400);
+		}
 
-			await db.insert(schema.formResponse).values({
+		console.log(userResponse.additionalFields);
+
+		const [formResponse] = await db
+			.insert(schema.formResponse)
+			.values({
 				id: responseId,
 				response: Object.keys(userResponse.additionalFields).map((key) => ({
 					label: key,
@@ -103,8 +103,8 @@ export const actions: Actions = {
 				})) as any,
 				formId: form.id,
 				memId: member.id
-			});
-		}
+			})
+			.returning();
 
 		dummyClient.capture({
 			distinctId: locals.user.id,
@@ -116,7 +116,20 @@ export const actions: Actions = {
 			}
 		});
 
-		platform?.context.waitUntil(dummyClient.flushAsync());
+		platform?.context.waitUntil(
+			Promise.all([
+				dummyClient.flushAsync(),
+				svix.message.create(params.id, {
+					eventType: 'form.filled',
+					payload: {
+						type: 'form.filled',
+						data: {
+							...formResponse
+						}
+					}
+				})
+			])
+		);
 		redirect(302, callbackUrl ?? '/');
 	}
 };

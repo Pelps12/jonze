@@ -56,7 +56,10 @@
 
 <Card.Root class="max-w-md">
 	<Card.Header>
-		<Card.Title>Member</Card.Title>
+		<Card.Title
+			>{data.member.role.charAt(0).toUpperCase() +
+				data.member.role.slice(1).toLowerCase()}</Card.Title
+		>
 	</Card.Header>
 	<Card.Content class="grid gap-6 ">
 		<div class="flex items-center justify-between space-x-4 relative">

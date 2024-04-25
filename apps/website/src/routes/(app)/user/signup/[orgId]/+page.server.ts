@@ -8,6 +8,7 @@ import { newId } from '@repo/db/utils/createId';
 import { objectsHaveSameKeys } from '$lib/server/helpers';
 import type { PageServerLoad } from './$types';
 import posthog, { dummyClient } from '$lib/server/posthog';
+import svix from '$lib/server/svix';
 
 export const load: PageServerLoad = async ({ params, locals, url }) => {
 	const orgId = params.orgId;
@@ -169,7 +170,7 @@ export const actions: Actions = {
 		});
 
 		//Add user to our database
-		const result = await db
+		const [result] = await db
 			.insert(schema.member)
 			.values({
 				id: om.id,
@@ -178,7 +179,7 @@ export const actions: Actions = {
 				role: 'MEMBER',
 				additionalInfoId: responseId
 			})
-			.returning({ insertedId: schema.member.id })
+			.returning()
 			.onConflictDoUpdate({
 				target: schema.member.id,
 				set: {
@@ -188,11 +189,10 @@ export const actions: Actions = {
 					updatedAt: new Date()
 				}
 			});
-		const { insertedId } = result[0];
 		if (defaultPlan) {
 			await db.insert(schema.membership).values({
 				planId: defaultPlan.id,
-				memId: insertedId
+				memId: result.id
 			});
 		}
 
@@ -207,7 +207,20 @@ export const actions: Actions = {
 			}
 		});
 
-		platform?.context.waitUntil(dummyClient.flushAsync());
+		platform?.context.waitUntil(
+			Promise.all([
+				dummyClient.flushAsync(),
+				svix.message.create(orgId, {
+					eventType: 'member.added',
+					payload: {
+						type: 'member.added',
+						data: {
+							...result
+						}
+					}
+				})
+			])
+		);
 
 		redirect(302, callbackUrl ?? '/');
 	}

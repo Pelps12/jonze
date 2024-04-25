@@ -14,6 +14,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { writable } from 'svelte/store';
 	import { goto, invalidate } from '$app/navigation';
+	import { organizationForm } from '@repo/db/schema/organizationForm';
 
 	export let data;
 
@@ -64,6 +65,18 @@
 	let showPanel = false;
 </script>
 
+{#if !data.organizationForm}
+	<Alert.Root class="mb-2">
+		<Alert.Title>Quick Tip!</Alert.Title>
+		<Alert.Description
+			>You can add <a
+				class="underline pointer-events-auto"
+				href={`/org/${$page.params.id}/forms/create?form_name=User Info`}>custom user info</a
+			> if your org requires additional fields from members on sign up</Alert.Description
+		>
+	</Alert.Root>
+{/if}
+
 <div class="flex justify-end">
 	<DropdownMenu.Root>
 		<DropdownMenu.Trigger asChild let:builder>
@@ -92,7 +105,22 @@
 
 <form class="my-3 flex gap-2 flex-start">
 	<Input bind:value={$emailFilter} placeholder="Filter by Email" class="max-w-md" />
-
+	<DropdownMenu.Root>
+		<DropdownMenu.Trigger asChild let:builder>
+			<Button variant="outline" builders={[builder]}><PlusCircle class="h-4 w-4 mr-2" />Plan</Button
+			>
+		</DropdownMenu.Trigger>
+		<DropdownMenu.Content class="w-56">
+			<DropdownMenu.Label>Membership Plan</DropdownMenu.Label>
+			<DropdownMenu.Separator />
+			<DropdownMenu.CheckboxItem bind:checked={showStatusBar}
+				>Default Plan</DropdownMenu.CheckboxItem
+			>
+			<DropdownMenu.CheckboxItem bind:checked={showActivityBar}>
+				Paid Plan
+			</DropdownMenu.CheckboxItem>
+		</DropdownMenu.Content>
+	</DropdownMenu.Root>
 	<Button on:click={() => handleFilterSubmit()}>Apply</Button>
 </form>
 <div class=" mx-auto py-10">
