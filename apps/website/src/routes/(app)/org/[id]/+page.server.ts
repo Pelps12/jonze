@@ -66,6 +66,8 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 		error(404, 'Organization not Found');
 	}
 
+	console.log(organization.members);
+
 	let clientSecret: string | undefined = undefined;
 	if (organization.subaccount) {
 		const accountSession = await stripe.accountSessions.create({

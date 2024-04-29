@@ -66,7 +66,7 @@ export const actions: Actions = {
 
 		const newUser = {
 			...locals.user,
-			orgs: [...locals.user.orgs, { id: organization.id, name: organization.name }]
+			orgs: [...locals.user.orgs, { id: organization.id, name: organization.name, memberId: om.id }]
 		};
 		const token = await signJWT(newUser);
 

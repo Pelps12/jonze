@@ -13,6 +13,7 @@
 	import Link from './link.svelte';
 	import MembershipForm from './MembershipForm.svelte';
 	import { page } from '$app/stores';
+	import { formatName } from '$lib/utils';
 
 	export let data: PageData;
 
@@ -70,8 +71,7 @@
 				</Avatar.Root>
 				<div>
 					<p class="text-sm font-medium leading-none">
-						{data.member.user.firstName}
-						{data.member.user.lastName}
+						{formatName(data.member.user.firstName, data.member.user.lastName)}
 					</p>
 					<p class="text-sm text-muted-foreground">{data.member.user.email}</p>
 				</div>

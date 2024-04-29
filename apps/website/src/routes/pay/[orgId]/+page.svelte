@@ -4,10 +4,14 @@
 	import * as Card from '$lib/components/ui/card';
 </script>
 
-<div class="text-7xl max-w-3xl mx-auto">
-	<h1 class="text-center text-lg font-bold">
-		{data.org.name}
-	</h1>
+<div class="text-7xl max-w-3xl mx-auto p-8">
+	<div>
+		{#if data.org.logo}
+			<img src={data.org.logo} alt="Organization" width="100" height="100" class="mx-auto" />
+		{/if}
+
+		<p class="text-center font-bold text-xl">{data.org.name}</p>
+	</div>
 
 	{#each data.org.plans as plan}
 		<a

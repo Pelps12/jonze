@@ -19,10 +19,16 @@ export const GET: RequestHandler = async ({ request, cookies, platform, getClien
 			userId: user.id
 		});
 		const orgs = await Promise.all(
-			organizationMemberships.data.map(async (membership) => {
-				const org = await workos.organizations.getOrganization(membership.organizationId);
-				return org;
-			})
+			organizationMemberships.data
+				.filter((om) => om.role.slug !== 'member')
+				.map(async (membership) => {
+					const org = await workos.organizations.getOrganization(membership.organizationId);
+					return {
+						id: org.id,
+						name: org.name,
+						memberId: membership.id
+					};
+				})
 		);
 		console.log(user);
 		const token = await signJWT({ ...user, orgs: orgs });

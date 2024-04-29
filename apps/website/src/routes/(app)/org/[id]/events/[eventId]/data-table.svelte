@@ -4,6 +4,7 @@
 	import { readable } from 'svelte/store';
 	import * as Table from '$lib/components/ui/table';
 	import type { Attendance, FormResponse, Member, OrgForm, User } from '@repo/db/types';
+	import { formatName } from '$lib/utils';
 	export let attendants: (Attendance & {
 		member: Member & {
 			user: Omit<User, 'createdAt' | 'updatedAt' | 'id'>;
@@ -22,12 +23,8 @@
 	const table = createTable(readable(attendants));
 	const columns = table.createColumns([
 		table.column({
-			accessor: (item) => item.member.user.firstName ?? '',
-			header: 'First Name'
-		}),
-		table.column({
-			accessor: (item) => item.member.user.lastName ?? '',
-			header: 'Last Name'
+			accessor: (item) => formatName(item.member.user.firstName, item.member.user.lastName),
+			header: 'Name'
 		}),
 		table.column({
 			accessor: (item) => item.member.user.email,

@@ -18,6 +18,7 @@
 	import InviteBox from './InviteBox.svelte';
 	import { Switch } from '$lib/components/ui/switch';
 	import * as Tooltip from '$lib/components/ui/tooltip';
+	import { formatName } from '$lib/utils';
 
 	page.subscribe((info) => console.log(info.form));
 	let open = true;
@@ -143,8 +144,7 @@
 								</Avatar.Root>
 								<div>
 									<p class="text-sm font-medium leading-none">
-										{member.user.firstName}
-										{member.user.lastName}
+										{formatName(member.user.firstName, member.user.lastName)}
 									</p>
 									<p class="text-sm text-muted-foreground">{member.user.email}</p>
 								</div>
