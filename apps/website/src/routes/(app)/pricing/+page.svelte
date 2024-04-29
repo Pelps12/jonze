@@ -9,13 +9,11 @@
 		id="pricing"
 	>
 		<div class="max-w-3xl text-center mx-auto z-20 relative p-2">
-			<h1 class="block font-bold text-4xl md:text-5xl lg:text-6xl">
+			<h1 class="block font-bold text-4xl md:text-5xl lg:text-6xl text-balance">
 				Offerings for <span class="text-primary">orgs</span> of all sizes
 			</h1>
 		</div>
-		<div
-			class="isolate mx-auto grid max-w-md grid-cols-1 gap-8 lg:mx-0 lg:max-w-none lg:grid-cols-2"
-		>
+		<div class="isolate mx-auto grid max-w-md grid-cols-1 gap-8 lg:mx-0 lg:max-w-none">
 			<div class="ring-1 ring-gray-200 rounded-3xl p-8 xl:p-10">
 				<div class="flex items-center justify-between gap-x-4">
 					<h3 id="tier-standard" class="text-outline text-2xl font-semibold leading-8">Standard</h3>
@@ -31,8 +29,25 @@
 					class="w-full shadow-sm  mt-6 block rounded-md py-2 px-3 text-center text-base font-medium leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
 					>Get Started</Button
 				>
-				<ul role="list" class="mt-8 space-y-3 text-sm leading-6 text-neutral xl:mt-10">
+				<ul role="list" class="mt-8 space-y-3 text-sm leading-6 text-neutral xl:mt-10 min-w-64">
 					<li class="flex gap-x-3 text-base">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke-width="1.5"
+							stroke="currentColor"
+							aria-hidden="true"
+							class="h-6 w-5 flex-none text-outline"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+							></path>
+						</svg>Still in Beta
+					</li>
+					<!-- 					<li class="flex gap-x-3 text-base">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							fill="none"
@@ -82,10 +97,10 @@
 								d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
 							></path>
 						</svg>7%+ 80¢ per membership
-					</li>
+					</li> -->
 				</ul>
 			</div>
-			<div class="animate-pulse ring-2 ring-primary rounded-3xl p-8 xl:p-10">
+			<div class="animate-pulse ring-2 ring-primary rounded-3xl p-8 xl:p-10 hidden">
 				<div class="flex items-center justify-between gap-x-4">
 					<h3 id="tier-extended" class="text-primary text-2xl font-semibold leading-8">
 						Jonze Plus
@@ -137,23 +152,7 @@
 							></path>
 						</svg>Unlimited Integrations
 					</li>
-					<li class="flex gap-x-3 text-base">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke-width="1.5"
-							stroke="currentColor"
-							aria-hidden="true"
-							class="h-6 w-5 flex-none text-primary"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-							></path>
-						</svg>Newsletters
-					</li>
+
 					<li class="flex gap-x-3 text-base">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"

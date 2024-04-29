@@ -88,7 +88,7 @@ export const load: PageServerLoad = async ({ url, locals, params }) => {
 					: locals.user.email;
 
 	const dbCustomer = await db.query.customer.findFirst({
-		where: and(eq(schema.customer.userId, locals.user.id), eq(schema.customer.orgId, plan.orgId)),
+		where: eq(schema.customer.memId, member.id),
 		with: {
 			member: {
 				with: {
@@ -97,6 +97,7 @@ export const load: PageServerLoad = async ({ url, locals, params }) => {
 			}
 		}
 	});
+	console.log(dbCustomer, locals.user.id);
 
 	if (dbCustomer) {
 		stripeCustomerId = dbCustomer.stripeId;
