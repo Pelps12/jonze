@@ -22,6 +22,9 @@
 				if (browser) {
 					window.history.back();
 				}
+			} else {
+				const { message } = await response.json();
+				toast.error(message);
 			}
 		} else {
 			toast.error('No elements present', {

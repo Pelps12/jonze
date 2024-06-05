@@ -13,6 +13,7 @@
 	import Link from './link.svelte';
 	import MembershipForm from './MembershipForm.svelte';
 	import { page } from '$app/stores';
+	import { formatName } from '$lib/utils';
 
 	export let data: PageData;
 
@@ -56,7 +57,10 @@
 
 <Card.Root class="max-w-md">
 	<Card.Header>
-		<Card.Title>Member</Card.Title>
+		<Card.Title
+			>{data.member.role.charAt(0).toUpperCase() +
+				data.member.role.slice(1).toLowerCase()}</Card.Title
+		>
 	</Card.Header>
 	<Card.Content class="grid gap-6 ">
 		<div class="flex items-center justify-between space-x-4 relative">
@@ -67,8 +71,7 @@
 				</Avatar.Root>
 				<div>
 					<p class="text-sm font-medium leading-none">
-						{data.member.user.firstName}
-						{data.member.user.lastName}
+						{formatName(data.member.user.firstName, data.member.user.lastName)}
 					</p>
 					<p class="text-sm text-muted-foreground">{data.member.user.email}</p>
 				</div>

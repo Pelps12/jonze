@@ -18,7 +18,7 @@
 				if (row.isData()) {
 					return createRender(Link, {
 						value: formatName(value.firstName, value.lastName),
-						id: row.original.id ?? ''
+						id: row.original.memId ?? ''
 					});
 				}
 				return '';
@@ -27,7 +27,7 @@
 		...(data.form?.form ?? [])?.map((formField) =>
 			table.column({
 				accessor: (item) =>
-					item.response.find((element) => element.label === formField.label)?.response,
+					item.response.find((element) => element.label === formField.label)?.response ?? '',
 				header: formField.label
 			})
 		)

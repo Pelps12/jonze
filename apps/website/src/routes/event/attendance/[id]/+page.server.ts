@@ -7,6 +7,7 @@ import { objectsHaveSameKeys } from '$lib/server/helpers';
 import { newId } from '@repo/db/utils/createId';
 import posthog, { dummyClient } from '$lib/server/posthog';
 import { PUBLIC_URL } from '$env/static/public';
+import svix from '$lib/server/svix';
 
 export const load: PageServerLoad = async ({ locals, params, url }) => {
 	const event = await db.query.event.findFirst({
@@ -144,11 +145,14 @@ export const actions: Actions = {
 			});
 		}
 
-		await db.insert(schema.attendance).values({
-			responseId: responseId,
-			memId: member.id,
-			eventId: event.id
-		});
+		const [attendance] = await db
+			.insert(schema.attendance)
+			.values({
+				responseId: responseId,
+				memId: member.id,
+				eventId: event.id
+			})
+			.returning();
 
 		dummyClient.capture({
 			distinctId: locals.user.id,
@@ -160,7 +164,20 @@ export const actions: Actions = {
 			}
 		});
 
-		platform?.context.waitUntil(dummyClient.flushAsync());
+		platform?.context.waitUntil(
+			Promise.all([
+				dummyClient.flushAsync(),
+				svix.message.create(params.id, {
+					eventType: 'attendance.marked',
+					payload: {
+						type: 'attendance.marked',
+						data: {
+							...attendance
+						}
+					}
+				})
+			])
+		);
 		returnUrl.searchParams.set('attendance_success', 'true');
 		redirect(302, returnUrl);
 	}

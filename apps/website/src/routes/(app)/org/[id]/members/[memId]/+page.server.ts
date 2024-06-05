@@ -7,6 +7,7 @@ import { membershipCreationSchema } from './schema';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { dummyClient } from '$lib/server/posthog';
+import svix from '$lib/server/svix';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const member = await db.query.member.findFirst({
@@ -83,7 +84,18 @@ export const actions: Actions = {
 			});
 		}
 		console.log(form.data, 'Update Data');
-		const newEvent = await db
+
+		const member = await db.query.member.findFirst({
+			where: eq(schema.member.id, event.params.memId),
+			with: {
+				additionalInfo: true
+			}
+		});
+
+		if (!member) {
+			error(404, 'Member not found');
+		}
+		const [newMembership] = await db
 			.insert(schema.membership)
 			.values({
 				planId: form.data.planId,
@@ -91,8 +103,8 @@ export const actions: Actions = {
 				provider: form.data.provider,
 				...(form.data.createdAt ? { createdAt: form.data.createdAt } : {})
 			})
-			.returning({ insertedId: schema.membership.id });
-
+			.returning();
+		console.log(newMembership, 'MEMBERSHIP');
 		//Capture event updated
 
 		const useragent = event.request.headers.get('user-agent');
@@ -105,12 +117,25 @@ export const actions: Actions = {
 					planId: form.data.planId,
 					orgId: event.params.id,
 					memId: event.params.memId,
-					id: newEvent[0].insertedId,
+					id: newMembership.id,
 					...(useragent && { $useragent: useragent })
 				}
 			});
-		if (newEvent) {
-			event.platform?.context.waitUntil(dummyClient.flushAsync());
+		if (newMembership) {
+			event.platform?.context.waitUntil(
+				Promise.all([
+					dummyClient.flushAsync(),
+					svix.message.create(event.params.id, {
+						eventType: 'membership.updated',
+						payload: {
+							type: 'membership.updated',
+							data: {
+								...{ ...newMembership, member }
+							}
+						}
+					})
+				])
+			);
 			redirect(302, event.url);
 		}
 

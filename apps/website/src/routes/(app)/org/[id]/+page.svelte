@@ -8,7 +8,7 @@
 	import { onMount } from 'svelte';
 	import { loadConnectAndInitialize } from '@stripe/connect-js';
 	import { mode } from 'mode-watcher';
-	import { CheckCircle2Icon, Circle } from 'lucide-svelte';
+	import { CheckCircle2Icon, Circle, CircleIcon } from 'lucide-svelte';
 
 	export let data: PageData;
 
@@ -26,6 +26,7 @@
 	import { formatName } from '$lib/utils';
 	import { page } from '$app/stores';
 	import { Button } from '$lib/components/ui/button';
+	import { twJoin } from 'tailwind-merge';
 
 	Chart.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
@@ -87,75 +88,46 @@
 	});
 </script>
 
-{#if data.organization.events.length == 0 && data.organization.members.length == 1}
-	<div class="mb-6">
-		<h2 class="text-xl font-semibold">Welcome to Jonze</h2>
-		<p class="text-sm">Here are a few things you might want to get things going</p>
-	</div>
+<div class="relative">
+	{#if data.organization.events.length == 0 && data.organization.members.length == 1}
+		<div
+			class="mb-6 text-center h-[90vh] flex flex-col justify-center absolute top-0 left-0 right-0 z-10"
+		>
+			<div class="my-auto">
+				<h2 class="text-5xl font-semibold my-2">
+					Welcome to <span class="text-primary">Jonze</span>
+				</h2>
+				<p class="text-lg text-balance my-2">Get started by making your First Event.</p>
+				<Button size="lg" class="text-xl" href={`/org/${$page.params.id}/events?newevent=true`}
+					>CREATE</Button
+				>
+			</div>
+		</div>
 
-	<div class="grid grid-cols-2 gap-5 max-w-2xl mx-auto">
+		<!-- <div class="grid gap-5 max-w-xl mx-auto">
 		<Card.Root class="relative">
-			<CheckCircle2Icon class="h-5 w-5 absolute top-0 right-0 m-3" />
+			<CircleIcon class="h-5 w-5 absolute top-0 right-0 m-3" />
 			<Card.Header>
-				<Card.Title>"User Info" Form (Optional)</Card.Title>
-				<Card.Description>The additional fields your org requests from members</Card.Description>
-			</Card.Header>
-			<Card.Content><p class="text-sm">NOTE: Be sure to call it "User Info"</p></Card.Content>
-			<Card.Footer>
-				<Button href={`/org/${$page.params.id}/forms/create?form_name=User Info`}>Build</Button>
-			</Card.Footer>
-		</Card.Root>
-
-		<Card.Root class="relative">
-			<CheckCircle2Icon class="h-5 w-5 absolute top-0 right-0 m-3" />
-			<Card.Header>
-				<Card.Title>Attendance Form</Card.Title>
-				<Card.Description>A form that can be attached to created events</Card.Description>
-			</Card.Header>
-			<Card.Content>
-				<p class="text-sm">This can be named anything</p>
-			</Card.Content>
-			<Card.Footer>
-				<Button href={`/org/${$page.params.id}/forms/create`}>Form</Button>
-			</Card.Footer>
-		</Card.Root>
-
-		<Card.Root class="relative">
-			<CheckCircle2Icon class="h-5 w-5 absolute top-0 right-0 m-3" />
-			<Card.Header>
-				<Card.Title>First Event</Card.Title>
-				<Card.Description
-					>Members can start marking attendace when you create an event.
-				</Card.Description>
+				<Card.Title></Card.Title>
+				<Card.Description></Card.Description>
 			</Card.Header>
 
 			<Card.Content>
 				<p class="text-sm">Copy the link or QR Code and that's it</p>
 			</Card.Content>
-			<Card.Footer>
-				<Button href={`/org/${$page.params.id}/events?newevent=true`}>Create</Button>
-			</Card.Footer>
+			<Card.Footer></Card.Footer>
 		</Card.Root>
+	</div> -->
+	{/if}
 
-		<Card.Root>
-			<Card.Header>
-				<Card.Title>You're Done</Card.Title>
-				<Card.Description>Or are you? 🤔</Card.Description>
-			</Card.Header>
-			<Card.Content>
-				<p class="text-sm">
-					There's more. Like a lot more. We've got APIs, membership plans and more
-				</p>
-			</Card.Content>
-			<Card.Footer>
-				<Button disabled variant="ghost">Explore</Button>
-			</Card.Footer>
-		</Card.Root>
-	</div>
-{:else}
 	<Resizable.PaneGroup
 		direction="horizontal"
-		class=" rounded-lg border max-h-[30rem]"
+		class={twJoin(
+			[' rounded-lg border max-h-[30rem]'],
+			data.organization.events.length == 0 &&
+				data.organization.members.length == 1 &&
+				'opacity-25 grayscale-[40%]'
+		)}
 		{onLayoutChange}
 	>
 		<Resizable.Pane
@@ -232,6 +204,6 @@
 			</Card.Root>
 		</Resizable.Pane>
 	</Resizable.PaneGroup>
-{/if}
+</div>
 
 <div id="connectElement" class="my-5" />

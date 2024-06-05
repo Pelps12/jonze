@@ -9,6 +9,7 @@ import { parseZonedDateTime } from '@internationalized/date';
 import posthog, { dummyClient } from '$lib/server/posthog';
 import { newId } from '@repo/db/utils/createId';
 import { zod } from 'sveltekit-superforms/adapters';
+import svix from '$lib/server/svix';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const events = await db.query.event.findMany({
@@ -68,16 +69,19 @@ export const actions: Actions = {
 		console.log(form.data);
 
 		const eventId = newId('event');
-		const newEvent = await db.insert(schema.event).values({
-			id: eventId,
-			start: form.data.start,
-			end: form.data.end,
-			image: form.data.image,
-			description: form.data.description,
-			orgId: event.params.id,
-			name: form.data.name,
-			formId: form.data.formId
-		});
+		const [newEvent] = await db
+			.insert(schema.event)
+			.values({
+				id: eventId,
+				start: form.data.start,
+				end: form.data.end,
+				image: form.data.image,
+				description: form.data.description,
+				orgId: event.params.id,
+				name: form.data.name,
+				formId: form.data.formId
+			})
+			.returning();
 		const useragent = event.request.headers.get('user-agent');
 		event.locals.user &&
 			dummyClient.capture({
@@ -92,7 +96,20 @@ export const actions: Actions = {
 				}
 			});
 		if (newEvent) {
-			event.platform?.context.waitUntil(dummyClient.flushAsync());
+			event.platform?.context.waitUntil(
+				Promise.all([
+					dummyClient.flushAsync(),
+					svix.message.create(event.params.id, {
+						eventType: 'event.created',
+						payload: {
+							type: 'event.created',
+							data: {
+								...newEvent
+							}
+						}
+					})
+				])
+			);
 			redirect(302, event.url);
 		}
 
@@ -108,7 +125,7 @@ export const actions: Actions = {
 			});
 		}
 		console.log(form.data, 'Update Data');
-		const newEvent = await db
+		const [newEvent] = await db
 			.update(schema.event)
 			.set({
 				start: form.data.start,
@@ -120,7 +137,8 @@ export const actions: Actions = {
 				name: form.data.name,
 				updatedAt: new Date()
 			})
-			.where(eq(schema.event.id, form.data.id));
+			.where(eq(schema.event.id, form.data.id))
+			.returning();
 
 		//Capture event updated
 
@@ -138,7 +156,20 @@ export const actions: Actions = {
 				}
 			});
 		if (newEvent) {
-			event.platform?.context.waitUntil(dummyClient.flushAsync());
+			event.platform?.context.waitUntil(
+				Promise.all([
+					dummyClient.flushAsync(),
+					svix.message.create(event.params.id, {
+						eventType: 'event.updated',
+						payload: {
+							type: 'event.updated',
+							data: {
+								...newEvent
+							}
+						}
+					})
+				])
+			);
 			redirect(302, event.url);
 		}
 

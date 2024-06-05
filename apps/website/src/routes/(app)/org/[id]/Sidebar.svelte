@@ -53,7 +53,7 @@
 			>
 				<TrendingUp class={twJoin('h-4 w-4 ')} />
 				<span class="hidden lg:block">Plans</span>
-				<Badge class="hidden lg:block" variant="outline">Beta</Badge>
+				<Badge class="hidden lg:block" variant="outline">Alpha</Badge>
 			</Button>
 			<Button
 				class="w-full justify-center lg:justify-start gap-2"

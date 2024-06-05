@@ -112,25 +112,38 @@
 					<Sheet.Description>Add field to form for user response</Sheet.Description>
 				</Sheet.Header>
 				<div class="flex flex-col gap-2">
-					<Button variant="secondary" on:click={() => addHelper('text')}>
-						<PlusCircle class="h-4 w-4 mr-2" />
-						<span>Text Field</span>
-					</Button>
+					<Sheet.Close asChild let:builder>
+						<Button builders={[builder]} variant="secondary" on:click={() => addHelper('text')}>
+							<PlusCircle class="h-4 w-4 mr-2" />
+							<span>Text Field</span>
+						</Button>
+					</Sheet.Close>
 
-					<Button variant="secondary" on:click={() => addHelper('textarea')}>
-						<PlusCircle class="h-4 w-4 mr-2" />
-						<span>TextArea Field</span>
-					</Button>
+					<Sheet.Close asChild let:builder>
+						<Button builders={[builder]} variant="secondary" on:click={() => addHelper('textarea')}>
+							<PlusCircle class="h-4 w-4 mr-2" />
+							<span>TextArea Field</span>
+						</Button>
+					</Sheet.Close>
 
-					<Button variant="secondary" on:click={() => addHelper('radio')} disabled>
-						<PlusCircle class="h-4 w-4 mr-2" />
-						<span>Options Field</span>
-					</Button>
+					<Sheet.Close asChild let:builder>
+						<Button
+							builders={[builder]}
+							variant="secondary"
+							on:click={() => addHelper('radio')}
+							disabled
+						>
+							<PlusCircle class="h-4 w-4 mr-2" />
+							<span>Options Field</span>
+						</Button>
+					</Sheet.Close>
 
-					<Button variant="secondary" on:click={() => addHelper('dropdown')}>
-						<PlusCircle class="h-4 w-4 mr-2" />
-						<span>Dropdown Field</span>
-					</Button>
+					<Sheet.Close asChild let:builder>
+						<Button builders={[builder]} variant="secondary" on:click={() => addHelper('dropdown')}>
+							<PlusCircle class="h-4 w-4 mr-2" />
+							<span>Dropdown Field</span>
+						</Button>
+					</Sheet.Close>
 				</div>
 			</Sheet.Content>
 		</Sheet.Root>

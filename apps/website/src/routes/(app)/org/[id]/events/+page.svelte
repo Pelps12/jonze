@@ -18,6 +18,7 @@
 	import UpdateEventForm from './UpdateEventForm.svelte';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
+	import * as Alert from '$lib/components/ui/alert';
 	let newFormOpen = $page.url.searchParams.has('newevent');
 
 	const isDesktop = mediaQuery('(min-width: 768px)');
@@ -54,6 +55,18 @@
 		{}
 	);
 </script>
+
+{#if !data.events.find((event) => !!event.form)}
+	<Alert.Root class="mb-2">
+		<Alert.Title>Quick Tip!</Alert.Title>
+		<Alert.Description
+			>You can add <a
+				class="underline pointer-events-auto"
+				href={`/org/${$page.params.id}/forms/create`}>a feedback form</a
+			> and attach it on event creation 😉</Alert.Description
+		>
+	</Alert.Root>
+{/if}
 
 <div class="flex justify-between items-center mb-6">
 	<h2 class="text-xl font-semibold">Events</h2>

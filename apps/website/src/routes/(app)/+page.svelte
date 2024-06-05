@@ -38,7 +38,7 @@
 >
 	<div class="max-w-[100rem] mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-10">
 		<!-- Announcement Banner -->
-		<div class="flex justify-center">
+		<!-- 		<div class="flex justify-center">
 			<Button
 				variant="outline"
 				disabled
@@ -46,15 +46,13 @@
 			>
 				Memberships in beta. More metrics on the way
 			</Button>
-		</div>
+		</div> -->
 		<!-- End Announcement Banner -->
 
 		<!-- Title -->
 		<div class="mt-5 max-w-3xl text-center mx-auto z-20 relative">
 			<h1 class="block font-bold text-4xl md:text-5xl lg:text-6xl">
-				<span class="bg-clip-text text-primary drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,1)]"
-					>Streamlining</span
-				>
+				<span class="bg-clip-text text-primary">Streamlining</span>
 				organization management
 			</h1>
 		</div>
@@ -94,7 +92,9 @@
 		</svg>
 	</div>
 </div>
-<div class="max-w-5xl left-0 right-0 w-full mx-auto -translate-y-[20%] z-30 mt-10 -mb-20">
+<div
+	class="max-w-5xl left-0 right-0 w-full mx-auto -translate-y-[20%] lg:-translate-y-[40%] z-30 mt-10 -mb-20"
+>
 	<div
 		class="w-full h-11 bg-background rounded-t-lg border-2 border-black dark:border-white flex justify-start items-center space-x-1.5 px-3"
 	>
@@ -233,6 +233,20 @@
 		</div>
 	</div>
 </div>
+
+<section class="w-full py-12 md:py-16 lg:py-20">
+	<div class="container mx-auto px-4 md:px-6">
+		<div class="mx-auto max-w-3xl text-center">
+			<h2 class="text-2xl font-bold tracking-tight md:text-3xl lg:text-4xl">
+				Get started with Jonze
+			</h2>
+
+			<div class="mt-6">
+				<Button size="lg" href="/api/auth">Get Started</Button>
+			</div>
+		</div>
+	</div>
+</section>
 
 <style>
 	.custom-shape-divider-bottom-1707505390 {

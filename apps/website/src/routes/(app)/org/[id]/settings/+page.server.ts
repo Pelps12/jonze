@@ -8,6 +8,7 @@ import type { PageServerLoad, Actions } from './$types';
 import { PUBLIC_APIKEY_PREFIX, PUBLIC_UPLODCARE_SECRET_KEY } from '$env/static/public';
 import posthog, { dummyClient } from '$lib/server/posthog';
 import workos from '$lib/server/workos';
+import svix from '$lib/server/svix';
 
 export const load: PageServerLoad = async ({ locals, params, url }) => {
 	if (!locals.user) {
@@ -44,9 +45,18 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
 	if (!organization) {
 		error(404, 'Org Not Found');
 	}
+
+	let webhookUrl = undefined;
+	try {
+		const dashboard = await svix.authentication.appPortalAccess(organization.id, {});
+		webhookUrl = dashboard.url;
+	} catch (err) {
+		console.log(err);
+	}
+
 	const keys = organization.members.flatMap((member) => member.keys);
 	console.log(keys.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()));
-	return { keys, members: organization.members, logo: organization.logo };
+	return { keys, members: organization.members, logo: organization.logo, webhookUrl };
 };
 
 export const actions: Actions = {
@@ -91,6 +101,24 @@ export const actions: Actions = {
 		platform?.context.waitUntil(dummyClient.flushAsync());
 
 		return { key: createdKey.result.key };
+	},
+	enable_webhooks: async ({ request, locals, params }) => {
+		if (!params.id) error(400, 'Organization ID Required');
+
+		if (!locals.member) {
+			error(401, 'You are not an admin');
+		}
+
+		const org = await db.query.organization.findFirst({
+			where: eq(schema.organization.id, params.id)
+		});
+
+		if (!org) error(404, 'Org not Found');
+
+		await svix.application.create({ name: org.name, uid: org.id });
+		const { url } = await svix.authentication.appPortalAccess(org.id, {});
+
+		return { webhookUrl: url };
 	},
 
 	createAdmin: async ({ request, locals, params }) => {

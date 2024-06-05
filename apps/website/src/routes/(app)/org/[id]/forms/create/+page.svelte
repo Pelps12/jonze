@@ -27,11 +27,18 @@
 				if (browser) {
 					window.history.back();
 				}
+			} else {
+				const { message } = await response.json();
+				toast.error(message);
 			}
 		} else {
-			toast.error('No elements present', {
-				description: 'You need more than one element to upload'
-			});
+			if (!$form_name) {
+				toast.error('Please add a form name');
+			} else {
+				toast.error('No elements present', {
+					description: 'You need more than one element to upload'
+				});
+			}
 		}
 	};
 </script>

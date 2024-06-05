@@ -12,6 +12,7 @@
 	import type { Organization, User } from '@workos-inc/node';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { formatName } from '$lib/utils';
 	let open = false;
 	const isDesktop = mediaQuery('(min-width: 768px)');
 
@@ -37,7 +38,7 @@
 		);
 	};
 
-	const username = (user?.firstName ?? 'No') + ' ' + (user?.lastName ?? 'Name');
+	const username = formatName(user?.firstName ?? null, user?.lastName ?? null);
 </script>
 
 <ModeWatcher />

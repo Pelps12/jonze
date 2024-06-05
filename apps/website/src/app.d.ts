@@ -8,7 +8,7 @@ declare global {
 	namespace App {
 		// interface Error {}
 		interface Locals {
-			user?: User & { orgs: Pick<Organization, 'id' | 'name'>[] }; // Your type here
+			user?: User & { orgs: { memberId: string; id: string; name: string }[] }; // Your type here
 			member?: Member;
 		}
 		// interface PageData {}
@@ -19,8 +19,6 @@ declare global {
 			};
 		}
 	}
-
-
 }
 
 export {};
