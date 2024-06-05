@@ -91,8 +91,13 @@
 			</Card.Header>
 
 			<Card.Footer class="flex justify-between">
-				<Button variant="outline" href={`/org/${$page.params.id}/forms/${form.id}`}>Edit</Button>
-				<Button href={`/org/${$page.params.id}/forms/${form.id}/responses`}>Responses</Button>
+				{#if form.responses.length == 0}
+					<Button variant="outline" href={`/org/${$page.params.id}/forms/${form.id}`}>Edit</Button>
+				{:else}
+					<Button variant="outline" href={`/org/${$page.params.id}/forms/${form.id}/responses`}
+						>Responses</Button
+					>
+				{/if}
 			</Card.Footer>
 		</Card.Root>
 	{/each}

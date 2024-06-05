@@ -73,6 +73,14 @@ export const PUT: RequestHandler = async ({ request, locals, getClientAddress, p
 		error(400, 'Poorly formatted input');
 	}
 	const { data } = result;
+
+	const response = await db.query.formResponse.findFirst({
+		where: eq(schema.formResponse.formId, data.formId)
+	});
+
+	if (response) {
+		error(403, 'Form already has responses');
+	}
 	const orgForm = await db
 		.update(schema.organizationForm)
 		.set({

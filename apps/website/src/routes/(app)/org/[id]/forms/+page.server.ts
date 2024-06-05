@@ -12,6 +12,11 @@ export const load: PageServerLoad = async ({ params }) => {
 			updatedAt: true,
 			createdAt: true
 		},
+		with: {
+			responses: {
+				limit: 1
+			}
+		},
 		orderBy: (form, { desc }) => [desc(form.updatedAt)]
 	});
 
