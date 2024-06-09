@@ -270,7 +270,10 @@
 							{/if}
 						{/await}
 
-						<Button variant="destructive">Delete</Button>
+						<Button
+							variant="destructive"
+							on:click={() => toast('Delete functionality in development')}>Delete</Button
+						>
 					</Card.Footer>
 				</Card.Root>
 			{/each}
