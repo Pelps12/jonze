@@ -18,8 +18,6 @@
 
 	export let data;
 
-	console.log(data);
-
 	const handleCopyLink = (link: string) => {
 		if (browser) {
 			navigator.clipboard.writeText(link).then(() => {
@@ -124,5 +122,5 @@
 	<Button on:click={() => handleFilterSubmit()}>Apply</Button>
 </form>
 <div class=" mx-auto py-10">
-	<DataTable members={data.members} organizationForm={data.organizationForm} />
+	<DataTable {data} />
 </div>

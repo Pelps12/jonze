@@ -5,17 +5,25 @@
 	import * as Table from '$lib/components/ui/table';
 	import type { FormResponse, Member, OrgForm, User } from '@repo/db/types';
 	import { formatName } from '$lib/utils';
-	export let members: (Member & {
-		user: Omit<User, 'createdAt' | 'updatedAt' | 'id'>;
-		additionalInfo: FormResponse | null;
-	})[];
-	export let organizationForm: OrgForm | undefined;
-	type Payment = {
-		id: string;
-		amount: number;
-		status: 'pending' | 'processing' | 'success' | 'failed' | 'refunded';
-		email: string;
-	};
+
+	import ChevronLeft from 'lucide-svelte/icons/chevron-left';
+	import ChevronRight from 'lucide-svelte/icons/chevron-right';
+	import { mediaQuery } from 'svelte-legos';
+	import * as Pagination from '$lib/components/ui/pagination/index.js';
+	import { Button } from '$lib/components/ui/button';
+	import { page } from '$app/stores';
+	import { goto, invalidate, invalidateAll } from '$app/navigation';
+	import type { PageData } from './$types';
+
+	const isDesktop = mediaQuery('(min-width: 768px)');
+
+	let count = 20;
+	$: perPage = $isDesktop ? 3 : 8;
+	$: siblingCount = $isDesktop ? 1 : 0;
+
+	export let data: PageData;
+
+	const { members, organizationForm, pagination } = data;
 
 	const table = createTable(readable(members));
 	const columns = table.createColumns([
@@ -50,7 +58,6 @@
 						},
 						cell: ({ row }) => {
 							if (row.isData() && row.original && row.original.additionalInfo) {
-								console.log(row.original.additionalInfo.response);
 								const val = row.original.additionalInfo.response?.find(
 									(element) => element.label === field.label
 								)?.response;
@@ -87,9 +94,42 @@
 		})
 	]);
 	const { headerRows, pageRows, tableAttrs, tableBodyAttrs } = table.createViewModel(columns);
+
+	const handlePagination = async (direction: 'prev' | 'next') => {
+		const newUrl = new URL($page.url);
+		if (direction == 'prev' && pagination.prevCursor) {
+			newUrl.searchParams.set('before', pagination.prevCursor);
+			newUrl.searchParams.delete('after');
+		} else if (direction == 'next' && pagination.nextCursor) {
+			newUrl.searchParams.set('after', pagination.nextCursor);
+			newUrl.searchParams.delete('before');
+		}
+
+		window.location.href = newUrl.toString();
+	};
 </script>
 
-<div class="rounded-md border">
+<div class="flex justify-end gap-2">
+	<Button
+		disabled={!data.pagination.prevCursor}
+		variant="outline"
+		on:click={() => handlePagination('prev')}
+	>
+		<ChevronLeft class="h-4 w-4" />
+		<span class="hidden sm:block">Previous</span>
+	</Button>
+
+	<Button
+		disabled={!data.pagination.nextCursor}
+		variant="outline"
+		on:click={() => handlePagination('next')}
+	>
+		<span class="hidden sm:block">Next</span>
+		<ChevronRight class="h-4 w-4" />
+	</Button>
+</div>
+
+<div class="rounded-md border my-4">
 	<Table.Root {...$tableAttrs}>
 		<Table.Header>
 			{#each $headerRows as headerRow}
@@ -122,4 +162,24 @@
 			{/each}
 		</Table.Body>
 	</Table.Root>
+</div>
+
+<div class="flex justify-end gap-2">
+	<Button
+		disabled={!data.pagination.prevCursor}
+		variant="outline"
+		on:click={() => handlePagination('prev')}
+	>
+		<ChevronLeft class="h-4 w-4" />
+		<span class="hidden sm:block">Previous</span>
+	</Button>
+
+	<Button
+		disabled={!data.pagination.nextCursor}
+		variant="outline"
+		on:click={() => handlePagination('next')}
+	>
+		<span class="hidden sm:block">Next</span>
+		<ChevronRight class="h-4 w-4" />
+	</Button>
 </div>
