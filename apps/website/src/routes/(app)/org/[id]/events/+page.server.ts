@@ -4,7 +4,7 @@ import { eventCreationSchema, eventUpdationSchema } from './schema';
 import { error, fail, redirect } from '@sveltejs/kit';
 import db from '$lib/server/db';
 import schema from '@repo/db/schema';
-import { eq, and, not } from 'drizzle-orm';
+import { eq, and, not, inArray, isNotNull } from '@repo/db';
 import { parseZonedDateTime } from '@internationalized/date';
 import posthog, { dummyClient } from '$lib/server/posthog';
 import { newId } from '@repo/db/utils/createId';
@@ -176,5 +176,36 @@ export const actions: Actions = {
 		return {
 			form
 		};
+	},
+	delete: async (event) => {
+		const formData = await event.request.formData();
+		const id = formData.get('id');
+		if (typeof id !== 'string') {
+			error(400, 'Some Bad Input');
+		}
+
+		const dbEvent = await db.query.event.findFirst({
+			where: eq(schema.event.id, id),
+			with: {
+				attendances: {
+					where: isNotNull(schema.attendance.responseId)
+				}
+			}
+		});
+
+		if (!dbEvent) {
+			error(404, 'Event not found');
+		}
+
+		const deletedResponse = await db.delete(schema.formResponse).where(
+			inArray(
+				schema.formResponse.id,
+				dbEvent.attendances.map((attendance) => attendance.responseId as string)
+			)
+		);
+
+		await db.delete(schema.event).where(eq(schema.event.id, id));
+
+		redirect(302, event.url);
 	}
 };
