@@ -6,7 +6,9 @@ export const apiKey = pgTable(
 	'APIKey',
 	{
 		keyId: varchar('keyId', { length: 128 }).notNull(),
-		memId: varchar('memId', { length: 128 }).notNull(),
+		memId: varchar('memId', { length: 128 })
+			.notNull()
+			.references(() => member.id),
 		hint: varchar('hint', { length: 20 }).notNull(),
 		createdAt: timestamp('createdAt', { mode: 'date', precision: 6, withTimezone: true })
 			.defaultNow()

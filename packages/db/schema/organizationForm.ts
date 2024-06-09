@@ -11,7 +11,11 @@ export const organizationForm = pgTable('OrganizationForm', {
 	id: varchar('id', { length: 128 })
 		.$defaultFn(() => newId('form'))
 		.primaryKey(),
-	orgId: varchar('orgId', { length: 191 }).notNull(),
+	orgId: varchar('orgId', { length: 191 })
+		.notNull()
+		.references(() => organization.id, {
+			onDelete: 'cascade'
+		}),
 	name: varchar('name', { length: 191 }).notNull(),
 	form: json('form').$type<CustomForm>().notNull(),
 	createdAt: timestamp('createdAt', { mode: 'date', precision: 6, withTimezone: true })
@@ -27,9 +31,6 @@ export const formRelations = relations(organizationForm, ({ one, many }) => ({
 		fields: [organizationForm.orgId],
 		references: [organization.id]
 	}),
-	events: one(event, {
-		fields: [organizationForm.id],
-		references: [event.formId]
-	}), //May change
+	events: many(event), //May change
 	responses: many(formResponse)
 }));

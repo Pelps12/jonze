@@ -144,6 +144,9 @@ importers:
       jose:
         specifier: ^5.2.1
         version: 5.2.1
+      json-2-csv:
+        specifier: ^5.5.1
+        version: 5.5.1
       lucide-svelte:
         specifier: ^0.390.0
         version: 0.390.0(svelte@4.2.10)
@@ -3704,6 +3707,11 @@ packages:
       mimic-response: 3.1.0
     dev: false
 
+  /deeks@3.1.0:
+    resolution: {integrity: sha512-e7oWH1LzIdv/prMQ7pmlDlaVoL64glqzvNgkgQNgyec9ORPHrT2jaOqMtRyqJuwWjtfb6v+2rk9pmaHj+F137A==}
+    engines: {node: '>= 16'}
+    dev: false
+
   /deep-is@0.1.4:
     resolution: {integrity: sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==}
 
@@ -3842,6 +3850,11 @@ packages:
     engines: {node: '>=6'}
     dependencies:
       dns-packet: 5.6.1
+    dev: false
+
+  /doc-path@4.1.1:
+    resolution: {integrity: sha512-h1ErTglQAVv2gCnOpD3sFS6uolDbOKHDU1BZq+Kl3npPqroU3dYL42lUgMfd5UimlwtRgp7C9dLGwqQ5D2HYgQ==}
+    engines: {node: '>=16'}
     dev: false
 
   /doctrine@3.0.0:
@@ -5546,6 +5559,14 @@ packages:
     hasBin: true
     dependencies:
       argparse: 2.0.1
+
+  /json-2-csv@5.5.1:
+    resolution: {integrity: sha512-KgAtAXTQopRwe90gh8SgjRSxgt9bUWbGAPMo9W0TZLA8SqiQH7khtagFfeEUjG3NBPwJu/+9uX5pMvunKaPvrQ==}
+    engines: {node: '>= 16'}
+    dependencies:
+      deeks: 3.1.0
+      doc-path: 4.1.1
+    dev: false
 
   /json-buffer@3.0.1:
     resolution: {integrity: sha512-4bV5BfR2mqfQTJm+V5tPPdf+ZpuhiIvTuAB5g8kcrXOZpTT/QwwVRWBywX1ozr6lEuPdbHxwaJlm9G6mI2sfSQ==}

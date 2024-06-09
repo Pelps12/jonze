@@ -14,8 +14,14 @@ export const event = pgTable('Event', {
 	end: timestamp('end', { mode: 'date', precision: 6, withTimezone: true }).notNull(),
 	description: text('description'),
 	image: varchar('image', { length: 191 }),
-	orgId: varchar('orgId', { length: 128 }).notNull(),
-	formId: varchar('formId', { length: 128 }),
+	orgId: varchar('orgId', { length: 128 })
+		.notNull()
+		.references(() => organization.id, {
+			onDelete: 'cascade'
+		}),
+	formId: varchar('formId', { length: 128 }).references(() => organizationForm.id, {
+		onDelete: 'set null'
+	}),
 	createdAt: timestamp('createdAt', { mode: 'date', precision: 6, withTimezone: true })
 		.defaultNow()
 		.notNull(),

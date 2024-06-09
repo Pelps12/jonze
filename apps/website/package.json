@@ -67,6 +67,7 @@
 		"install": "^0.13.0",
 		"iron-session": "^8.0.1",
 		"jose": "^5.2.1",
+		"json-2-csv": "^5.5.1",
 		"lucide-svelte": "^0.390.0",
 		"marked": "^12.0.1",
 		"mode-watcher": "^0.2.0",

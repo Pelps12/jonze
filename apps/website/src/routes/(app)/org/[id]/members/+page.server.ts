@@ -8,7 +8,10 @@ import { error, type Actions } from '@sveltejs/kit';
 export const load: PageServerLoad = async ({ params, url }) => {
 	const emailFilter = url.searchParams.get('email');
 
-	const limit = parseInt(url.searchParams.get('limit') ?? '10');
+	const limit =
+		url.searchParams.get('limit') === 'all'
+			? Number.MAX_SAFE_INTEGER
+			: parseInt(url.searchParams.get('limit') ?? '10');
 	const prevCursor = url.searchParams.get('before');
 	const nextCursor = url.searchParams.get('after');
 	if (prevCursor && nextCursor) {

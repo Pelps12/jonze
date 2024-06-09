@@ -10,9 +10,19 @@ export const attendance = pgTable('Attendance', {
 	id: varchar('id', { length: 128 })
 		.$defaultFn(() => newId('attendance'))
 		.primaryKey(),
-	memId: varchar('memId', { length: 128 }).notNull(),
-	eventId: varchar('eventId', { length: 128 }).notNull(),
-	responseId: varchar('responseId', { length: 128 }),
+	memId: varchar('memId', { length: 128 })
+		.notNull()
+		.references(() => member.id, {
+			onDelete: 'cascade'
+		}),
+	eventId: varchar('eventId', { length: 128 })
+		.notNull()
+		.references(() => event.id, {
+			onDelete: 'cascade'
+		}),
+	responseId: varchar('responseId', { length: 128 }).references(() => formResponse.id, {
+		onDelete: 'set null'
+	}),
 	createdAt: timestamp('createdAt', { mode: 'date', precision: 6, withTimezone: true })
 		.defaultNow()
 		.notNull(),

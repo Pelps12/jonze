@@ -9,6 +9,7 @@ export const providerEnum = pgEnum('provider', [
 	'Cashapp',
 	'Zelle',
 	'Venmo',
+	'Cash',
 	'Other',
 	'None'
 ]);
@@ -17,8 +18,16 @@ export const membership = pgTable('Membership', {
 	id: varchar('id', { length: 128 })
 		.$defaultFn(() => newId('membership'))
 		.primaryKey(),
-	memId: varchar('memId', { length: 191 }).notNull(),
-	planId: varchar('planId', { length: 191 }).notNull(),
+	memId: varchar('memId', { length: 191 })
+		.notNull()
+		.references(() => member.id, {
+			onDelete: 'cascade'
+		}),
+	planId: varchar('planId', { length: 191 })
+		.notNull()
+		.references(() => plan.id, {
+			onDelete: 'cascade'
+		}),
 	provider: providerEnum('provider').notNull().default('None'),
 	createdAt: timestamp('createdAt', { mode: 'date', precision: 6, withTimezone: true })
 		.defaultNow()

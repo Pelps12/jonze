@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createRender, createTable, Render, Subscribe } from 'svelte-headless-table';
 	import Actions from './data-table-actions.svelte';
-	import { readable } from 'svelte/store';
+	import { readable, writable } from 'svelte/store';
 	import * as Table from '$lib/components/ui/table';
 	import type { FormResponse, Member, OrgForm, User } from '@repo/db/types';
 	import { formatName } from '$lib/utils';
@@ -14,6 +14,9 @@
 	import { page } from '$app/stores';
 	import { goto, invalidate, invalidateAll } from '$app/navigation';
 	import type { PageData } from './$types';
+	import { FileDown } from 'lucide-svelte';
+	import { json2csv } from 'json-2-csv';
+	import * as Select from '$lib/components/ui/select';
 
 	const isDesktop = mediaQuery('(min-width: 768px)');
 
@@ -107,9 +110,69 @@
 
 		window.location.href = newUrl.toString();
 	};
+
+	const handleLimitChange = (newLimit: any) => {
+		const newUrl = new URL($page.url);
+		const currentLimit = newUrl.searchParams.get('limit') ?? '10';
+		if (currentLimit !== newLimit) {
+			newUrl.searchParams.set('limit', newLimit);
+			window.location.href = newUrl.toString();
+		}
+	};
+
+	const handleExport = async (members: PageData['members']) => {
+		const csv = json2csv(
+			members.map((member) => {
+				const additionalInfo = member.additionalInfo?.response?.reduce<any>(
+					(accumulator, current) => {
+						accumulator[current.label] =
+							typeof current.response === 'string' ? current.response : current.response[0];
+						return accumulator;
+					},
+					{}
+				);
+				const newMember = { ...member, additionalInfo };
+				return newMember;
+			}),
+			{
+				expandNestedObjects: true,
+				expandArrayObjects: true
+			}
+		);
+
+		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+
+		// Create a link element for the download
+		const link = document.createElement('a');
+		const url = URL.createObjectURL(blob);
+		link.setAttribute('href', url);
+		link.setAttribute('download', 'members.csv');
+		link.style.visibility = 'hidden';
+
+		// Append to the document and trigger the download
+		document.body.appendChild(link);
+		link.click();
+
+		// Clean up
+		document.body.removeChild(link);
+		window.URL.revokeObjectURL(url);
+	};
+
+	const selected = {
+		value: $page.url.searchParams.get('limit') ?? '10',
+		label:
+			$page.url.searchParams.get('limit') === 'all'
+				? 'All'
+				: $page.url.searchParams.get('limit') ?? '10'
+	};
+	$: console.log(selected);
 </script>
 
+<!-- Options -->
 <div class="flex justify-end gap-2">
+	<Button variant="outline" on:click={() => handleExport(members)}
+		><FileDown class="h-4 w-4 mr-2" /><span class="hidden sm:block">Export</span></Button
+	>
 	<Button
 		disabled={!data.pagination.prevCursor}
 		variant="outline"
@@ -118,6 +181,18 @@
 		<ChevronLeft class="h-4 w-4" />
 		<span class="hidden sm:block">Previous</span>
 	</Button>
+
+	<Select.Root {selected} onSelectedChange={(e) => handleLimitChange(e?.value)}>
+		<Select.Trigger class="w-[80px]">
+			<Select.Value placeholder="10" />
+		</Select.Trigger>
+		<Select.Content>
+			<Select.Item value="10">10</Select.Item>
+			<Select.Item value="20">20</Select.Item>
+			<Select.Item value="50">50</Select.Item>
+			<Select.Item value="all">All</Select.Item>
+		</Select.Content>
+	</Select.Root>
 
 	<Button
 		disabled={!data.pagination.nextCursor}
@@ -130,7 +205,7 @@
 </div>
 
 <div class="rounded-md border my-4">
-	<Table.Root {...$tableAttrs}>
+	<Table.Root {...$tableAttrs} class="rounded-md">
 		<Table.Header>
 			{#each $headerRows as headerRow}
 				<Subscribe rowAttrs={headerRow.attrs()}>
