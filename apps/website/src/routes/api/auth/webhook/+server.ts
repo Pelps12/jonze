@@ -91,7 +91,8 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 				.onConflictDoUpdate({
 					target: schema.member.id,
 					set: {
-						role: newMember.role.slug.toUpperCase() as 'OWNER' | 'ADMIN' | 'MEMBER'
+						role: newMember.role.slug.toUpperCase() as 'OWNER' | 'ADMIN' | 'MEMBER',
+						updatedAt: new Date()
 					}
 				});
 		}

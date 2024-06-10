@@ -139,7 +139,8 @@ export const actions: Actions = {
 		await db
 			.update(schema.member)
 			.set({
-				role: 'ADMIN'
+				role: 'ADMIN',
+				updatedAt: new Date()
 			})
 			.where(eq(schema.member.id, memId));
 	},
