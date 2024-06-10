@@ -9,10 +9,11 @@ export const GET: RequestHandler = async ({ request, cookies, platform, getClien
 	const callbackUrl = url.searchParams.get('state');
 	console.log(callbackUrl);
 	if (code) {
-		const { user } = await workos.userManagement.authenticateWithCode({
+		const { user, accessToken, refreshToken } = await workos.userManagement.authenticateWithCode({
 			code,
 			clientId
 		});
+		console.log(accessToken);
 
 		//Find Better Way
 		const organizationMemberships = await workos.userManagement.listOrganizationMemberships({

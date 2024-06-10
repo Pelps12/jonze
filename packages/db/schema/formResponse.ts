@@ -10,7 +10,11 @@ export const formResponse = pgTable('FormResponse', {
 	id: varchar('id', { length: 128 })
 		.$defaultFn(() => newId('response'))
 		.primaryKey(),
-	formId: varchar('formId', { length: 128 }).notNull(),
+	formId: varchar('formId', { length: 128 })
+		.notNull()
+		.references(() => organizationForm.id, {
+			onDelete: 'cascade'
+		}),
 	response: json('response')
 		.$type<
 			{
@@ -19,7 +23,9 @@ export const formResponse = pgTable('FormResponse', {
 			}[]
 		>()
 		.notNull(),
-	memId: varchar('memId', { length: 128 }),
+	memId: varchar('memId', { length: 128 }).references(() => member.id, {
+		onDelete: 'cascade'
+	}),
 	createdAt: timestamp('createdAt', { mode: 'date', precision: 6, withTimezone: true })
 		.defaultNow()
 		.notNull(),

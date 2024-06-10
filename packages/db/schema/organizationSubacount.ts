@@ -7,7 +7,7 @@ import { formResponse } from './formResponse';
 import { event } from './event';
 
 export const organizationSubaccount = pgTable('OrganizationSubaccount', {
-	orgId: varchar('orgId', { length: 191 }).primaryKey(),
+	orgId: varchar('orgId', { length: 191 }).primaryKey(), //Handle manually. Requires Stripe deletion
 	subaccountId: varchar('subAccountId', { length: 191 }).notNull(),
 	createdAt: timestamp('createdAt', { mode: 'date', precision: 6, withTimezone: true })
 		.defaultNow()

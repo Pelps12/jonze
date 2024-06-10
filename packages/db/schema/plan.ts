@@ -8,7 +8,11 @@ export const plan = pgTable('plan', {
 	id: varchar('id', { length: 128 })
 		.$defaultFn(() => newId('plan'))
 		.primaryKey(),
-	orgId: varchar('orgId', { length: 191 }).notNull(),
+	orgId: varchar('orgId', { length: 191 })
+		.notNull()
+		.references(() => organization.id, {
+			onDelete: 'cascade'
+		}),
 	name: varchar('name', { length: 191 }).notNull(),
 	start: timestamp('start', { mode: 'date', withTimezone: true }),
 	interval: interval('interval', { fields: 'year to month' }),

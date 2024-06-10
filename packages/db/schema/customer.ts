@@ -8,7 +8,11 @@ import { organizationSubaccount } from './organizationSubacount';
 export const customer = pgTable('Customer', {
 	userId: varchar('userId', { length: 128 }),
 	stripeId: varchar('stripeId', { length: 128 }).notNull(),
-	memId: varchar('memId', { length: 126 }).primaryKey(),
+	memId: varchar('memId', { length: 126 })
+		.primaryKey()
+		.references(() => member.id, {
+			onDelete: 'cascade'
+		}),
 	orgId: varchar('orgId', { length: 128 }),
 	createdAt: timestamp('createdAt', { mode: 'date', precision: 6, withTimezone: true })
 		.defaultNow()

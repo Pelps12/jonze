@@ -12,7 +12,11 @@ export const roleEnum = pgEnum('role', ['OWNER', 'ADMIN', 'MEMBER']);
 
 export const member = pgTable('Member', {
 	id: varchar('id', { length: 128 }).primaryKey(),
-	orgId: varchar('orgId', { length: 128 }).notNull(),
+	orgId: varchar('orgId', { length: 128 })
+		.notNull()
+		.references(() => organization.id, {
+			onDelete: 'cascade'
+		}),
 	userId: varchar('userId', { length: 128 }).notNull(),
 	role: roleEnum('role').notNull().default('MEMBER'),
 	additionalInfoId: varchar('additionalInfoId', { length: 128 }),

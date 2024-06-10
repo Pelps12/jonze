@@ -19,6 +19,8 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import * as Alert from '$lib/components/ui/alert';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog';
+	import { enhance } from '$app/forms';
 	let newFormOpen = $page.url.searchParams.has('newevent');
 
 	const isDesktop = mediaQuery('(min-width: 768px)');
@@ -270,7 +272,43 @@
 							{/if}
 						{/await}
 
-						<Button variant="destructive">Delete</Button>
+						<AlertDialog.Root>
+							<AlertDialog.Trigger asChild let:builder>
+								<Button variant="destructive" builders={[builder]}>Delete</Button>
+							</AlertDialog.Trigger>
+							<AlertDialog.Content>
+								<AlertDialog.Header>
+									<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
+									<AlertDialog.Description>
+										This action cannot be undone. This will permanently delete the event, associated
+										attendances and responses.
+									</AlertDialog.Description>
+								</AlertDialog.Header>
+								<AlertDialog.Footer>
+									<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+									<form
+										action="?/delete"
+										method="post"
+										use:enhance={({ formElement, formData, action, cancel, submitter }) => {
+											// `formElement` is this `<form>` element
+											// `formData` is its `FormData` object that's about to be submitted
+											// `action` is the URL to which the form is posted
+											// calling `cancel()` will prevent the submission
+											// `submitter` is the `HTMLElement` that caused the form to be submitted
+
+											return async ({ result, update }) => {
+												// `result` is an `ActionResult` object
+												// `update` is a function which triggers the default logic that would be triggered if this callback wasn't set
+												toast.success('Event successfully deleted');
+											};
+										}}
+									>
+										<input type="text" name="id" id="" class="hidden" value={event.id} />
+										<AlertDialog.Action type="submit">Continue</AlertDialog.Action>
+									</form>
+								</AlertDialog.Footer>
+							</AlertDialog.Content>
+						</AlertDialog.Root>
 					</Card.Footer>
 				</Card.Root>
 			{/each}

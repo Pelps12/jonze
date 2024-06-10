@@ -1,5 +1,5 @@
 import db from '$lib/server/db';
-import { and, eq, desc, like } from '@repo/db';
+import { and, eq, desc, like, gt, asc, lt, gte, lte } from '@repo/db';
 import type { PageServerLoad } from './$types';
 import schema from '@repo/db/schema';
 import type { FormResponse, Member, User } from '@repo/db/types';
@@ -8,6 +8,19 @@ import { error, type Actions } from '@sveltejs/kit';
 export const load: PageServerLoad = async ({ params, url }) => {
 	const emailFilter = url.searchParams.get('email');
 
+	const limit =
+		url.searchParams.get('limit') === 'all'
+			? Number.MAX_SAFE_INTEGER
+			: parseInt(url.searchParams.get('limit') ?? '10');
+	const prevCursor = url.searchParams.get('before');
+	const nextCursor = url.searchParams.get('after');
+	if (prevCursor && nextCursor) {
+		error(400, 'Cannot have both cursors');
+	}
+	const cursor = prevCursor ?? nextCursor;
+	const direction = prevCursor ? 'prev' : 'next';
+	const order: any = 'desc';
+
 	const rows = await db
 		.select()
 		.from(schema.member)
@@ -15,11 +28,18 @@ export const load: PageServerLoad = async ({ params, url }) => {
 		.leftJoin(schema.formResponse, eq(schema.formResponse.id, schema.member.additionalInfoId))
 		.where(
 			and(
+				cursor
+					? direction === 'prev' //XOR comparison
+						? gte(schema.member.id, cursor)
+						: lte(schema.member.id, cursor)
+					: undefined,
 				eq(schema.member.orgId, params.id),
 				emailFilter ? like(schema.user.email, `%${emailFilter}%`) : undefined
 			)
 		)
-		.orderBy(desc(schema.member.createdAt));
+		.orderBy(direction === 'prev' ? asc(schema.member.createdAt) : desc(schema.member.createdAt))
+		.limit(limit + 1)
+		.offset(0);
 
 	const result = rows.reduce<(Member & { user: User; additionalInfo: FormResponse | null })[]>(
 		(acc, row) => {
@@ -30,8 +50,9 @@ export const load: PageServerLoad = async ({ params, url }) => {
 		},
 		[]
 	);
+	console.log(result.map((item) => item.user.firstName));
 
-	console.log(result);
+	const nextItem = direction == 'prev' ? result.shift() : result.pop();
 
 	const organizationForm = await db.query.organizationForm.findFirst({
 		where: and(
@@ -40,5 +61,14 @@ export const load: PageServerLoad = async ({ params, url }) => {
 		)
 	});
 
-	return { members: result, organizationForm };
+	return {
+		members: direction === 'prev' ? result.reverse() : result,
+		organizationForm,
+		pagination: {
+			prevCursor:
+				direction === 'prev' ? (result.length >= limit && result[0] ? result[0].id : null) : cursor,
+			nextCursor:
+				direction === 'prev' ? cursor : result.length >= limit && nextItem ? nextItem.id : null
+		}
+	};
 };
