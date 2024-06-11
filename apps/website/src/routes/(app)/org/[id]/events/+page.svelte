@@ -21,6 +21,7 @@
 	import * as Alert from '$lib/components/ui/alert';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { enhance } from '$app/forms';
+	import { Image } from '@unpic/svelte';
 	let newFormOpen = $page.url.searchParams.has('newevent');
 
 	const isDesktop = mediaQuery('(min-width: 768px)');
@@ -199,12 +200,14 @@
 						>
 					</Card.Header>
 					<div class="flex justify-center rounded-lg m-3">
-						<img
-							alt={event.name}
-							class=" aspect-square object-cover m-5 w-auto rounded-lg"
+						<Image
+							src={event.image ?? '/placholder.svg'}
+							layout="fullWidth"
 							height={350}
-							src={event.image ?? '/placeholder.svg'}
-							width={350}
+							priority={false}
+							alt="A lovely bath"
+							cdn="uploadcare"
+							class="aspect-square object-cover m-5 w-auto rounded-lg"
 						/>
 					</div>
 					<Card.Content>
