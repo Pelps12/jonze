@@ -6,7 +6,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Alert from '$lib/components/ui/alert';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { Copy, PlusCircle, QrCode } from 'lucide-svelte';
+	import { Copy, PlusCircle, QrCode, XIcon } from 'lucide-svelte';
 	import { PUBLIC_URL } from '$env/static/public';
 	import { toast } from 'svelte-sonner';
 	import { browser } from '$app/environment';
@@ -15,8 +15,45 @@
 	import { writable } from 'svelte/store';
 	import { goto, invalidate } from '$app/navigation';
 	import { organizationForm } from '@repo/db/schema/organizationForm';
+	import * as Select from '$lib/components/ui/select';
 
 	export let data;
+
+	let selected: any = undefined;
+	const defaultFilters = ['name', 'email', 'plan'];
+	const nameFilter = $page.url.searchParams.get('name');
+	const emailFilter = $page.url.searchParams.get('email');
+	const planFilter = $page.url.searchParams.get('plan');
+	const customFilter = $page.url.searchParams.get('custom_value');
+	const customFilterType = $page.url.searchParams.get('custom_type');
+	const filterValue = writable<string>();
+	if (nameFilter) {
+		selected = {
+			value: 'name',
+			label: 'Name'
+		};
+		filterValue.set(nameFilter);
+	} else if (emailFilter) {
+		selected = {
+			value: 'email',
+			label: 'Email'
+		};
+
+		filterValue.set(emailFilter);
+	} else if (planFilter) {
+		selected = {
+			value: 'plan',
+			label: 'Plan'
+		};
+
+		filterValue.set(planFilter);
+	} else if (customFilter && customFilterType) {
+		selected = {
+			value: customFilterType,
+			label: customFilterType
+		};
+		filterValue.set(customFilter);
+	}
 
 	const handleCopyLink = (link: string) => {
 		if (browser) {
@@ -40,27 +77,40 @@
 		}
 	};
 
-	let emailFilter = writable($page.url.searchParams.get('email'));
+	const removeAllFilters = (url: URL) => {
+		url.searchParams.delete('email');
+		url.searchParams.delete('name');
+		url.searchParams.delete('plan');
+		url.searchParams.delete('custom_type');
+		url.searchParams.delete('custom_value');
 
-	emailFilter.subscribe((email) => console.log(email));
+		return url;
+	};
 
 	const handleFilterSubmit = async () => {
-		if ($emailFilter) {
-			const url = new URL($page.url);
-			url.searchParams.set('email', $emailFilter);
+		if (selected && selected.value) {
+			const url = removeAllFilters(new URL($page.url));
+			if (defaultFilters.includes(selected.value)) {
+				url.searchParams.set(selected.value, $filterValue);
+			} else {
+				url.searchParams.set('custom_type', selected.value);
+				url.searchParams.set('custom_value', $filterValue);
+			}
+
 			window.location.href = url.toString();
 
 			//$page.url.searchParams.set('email', $emailFilter);
 		} else {
-			const url = new URL($page.url);
-			url.searchParams.delete('email');
-			window.location.href = url.toString();
+			toast.warning('Pick a filter');
 		}
 	};
 
-	let showStatusBar = true;
-	let showActivityBar = false;
-	let showPanel = false;
+	const handleReset = () => {
+		const url = removeAllFilters(new URL($page.url));
+		window.location.href = url.toString();
+	};
+
+	$: console.log(selected);
 </script>
 
 {#if !data.organizationForm}
@@ -102,24 +152,35 @@
 </div>
 
 <form class="my-3 flex gap-2 flex-start">
-	<Input bind:value={$emailFilter} placeholder="Filter by Email" class="max-w-md" />
-	<DropdownMenu.Root>
-		<DropdownMenu.Trigger asChild let:builder>
-			<Button variant="outline" builders={[builder]}><PlusCircle class="h-4 w-4 mr-2" />Plan</Button
-			>
-		</DropdownMenu.Trigger>
-		<DropdownMenu.Content class="w-56">
-			<DropdownMenu.Label>Membership Plan</DropdownMenu.Label>
-			<DropdownMenu.Separator />
-			<DropdownMenu.CheckboxItem bind:checked={showStatusBar}
-				>Default Plan</DropdownMenu.CheckboxItem
-			>
-			<DropdownMenu.CheckboxItem bind:checked={showActivityBar}>
-				Paid Plan
-			</DropdownMenu.CheckboxItem>
-		</DropdownMenu.Content>
-	</DropdownMenu.Root>
+	<Select.Root
+		{selected}
+		onSelectedChange={(e) => {
+			selected = e;
+		}}
+	>
+		<Select.Trigger class="w-[100px]">
+			<Select.Value placeholder="Filter by" />
+		</Select.Trigger>
+		<Select.Content>
+			<Select.Item value="email">Email</Select.Item>
+			<Select.Item value="name">Name</Select.Item>
+			<Select.Item value="plan">Plan</Select.Item>
+			{#each data.organizationForm?.form ?? [] as formValue}
+				<Select.Item value={formValue.label}>{formValue.label}</Select.Item>
+			{/each}
+		</Select.Content>
+	</Select.Root>
+	<Input
+		bind:value={$filterValue}
+		on:keydown={(e) => e.key === 'Enter' && handleFilterSubmit()}
+		placeholder={`Filter ${!!selected?.label ? `by ${selected?.label}` : ''}`}
+		class="max-w-md"
+	/>
 	<Button on:click={() => handleFilterSubmit()}>Apply</Button>
+	<Button on:click={() => handleReset()} variant="outline">
+		<XIcon class="w-4 h-4" />
+		Reset
+	</Button>
 </form>
 <div class=" mx-auto py-10">
 	<DataTable {data} />

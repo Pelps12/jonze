@@ -49,6 +49,7 @@
 		"@t3-oss/env-core": "^0.9.2",
 		"@types/d3": "^7.4.3",
 		"@unkey/api": "^0.17.0",
+		"@unpic/svelte": "^0.0.53",
 		"@uploadcare/blocks": "0.32.1",
 		"@uploadcare/upload-client": "^6.13.0",
 		"@workos-inc/node": "^6.7.0",

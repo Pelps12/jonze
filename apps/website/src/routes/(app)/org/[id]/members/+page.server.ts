@@ -1,12 +1,21 @@
 import db from '$lib/server/db';
-import { and, eq, desc, like, gt, asc, lt, gte, lte } from '@repo/db';
+import { and, eq, desc, like, gt, asc, lt, gte, lte, sql, ilike } from '@repo/db';
 import type { PageServerLoad } from './$types';
 import schema from '@repo/db/schema';
 import type { FormResponse, Member, User } from '@repo/db/types';
 import { error, type Actions } from '@sveltejs/kit';
+import { alias } from 'drizzle-orm/pg-core';
 
 export const load: PageServerLoad = async ({ params, url }) => {
 	const emailFilter = url.searchParams.get('email');
+	const name = url.searchParams.get('name');
+	const formattedName = name ? `%${name}%` : null;
+
+	const plan = url.searchParams.get('plan');
+	const formattedPlan = plan ? `%${plan}%` : null;
+
+	const customValue = url.searchParams.get('custom_value');
+	const customType = url.searchParams.get('custom_type');
 
 	const limit =
 		url.searchParams.get('limit') === 'all'
@@ -21,7 +30,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
 	const direction = prevCursor ? 'prev' : 'next';
 	const order: any = 'desc';
 
-	const rows = await db
+	let query = db
 		.select()
 		.from(schema.member)
 		.innerJoin(schema.user, eq(schema.user.id, schema.member.userId))
@@ -34,13 +43,46 @@ export const load: PageServerLoad = async ({ params, url }) => {
 						: lte(schema.member.id, cursor)
 					: undefined,
 				eq(schema.member.orgId, params.id),
-				emailFilter ? like(schema.user.email, `%${emailFilter}%`) : undefined
+				emailFilter ? like(schema.user.email, `%${emailFilter}%`) : undefined,
+				formattedName
+					? sql`CONCAT(${schema.user.firstName}, ' ', ${schema.user.lastName}) ILIKE ${formattedName}`
+					: undefined
 			)
 		)
 		.orderBy(direction === 'prev' ? asc(schema.member.createdAt) : desc(schema.member.createdAt))
 		.limit(limit + 1)
-		.offset(0);
+		.offset(0)
+		.$dynamic();
 
+	if (formattedPlan) {
+		const latestMembershipSQ = db
+			.select({
+				memId: schema.membership.memId,
+				latest: sql<string>`MAX(${schema.membership.createdAt})`.as('latest')
+			})
+			.from(schema.membership)
+			.groupBy(schema.membership.memId)
+			.as('LatestMembership');
+
+		query = query
+			.innerJoin(schema.membership, eq(schema.membership.memId, schema.member.id))
+			.innerJoin(schema.plan, eq(schema.plan.id, schema.membership.planId))
+			.innerJoin(
+				latestMembershipSQ,
+				and(
+					eq(latestMembershipSQ.memId, schema.member.id),
+					eq(latestMembershipSQ.latest, schema.membership.createdAt)
+				)
+			)
+			.where(ilike(schema.plan.name, `%${formattedPlan}%`));
+	}
+
+	if (customValue && customType) {
+		const id = JSON.stringify([{ label: customType, response: customValue }]);
+		query = query.where(sql`${schema.formResponse.response} @> ${id}`);
+	}
+
+	const rows = await query;
 	const result = rows.reduce<(Member & { user: User; additionalInfo: FormResponse | null })[]>(
 		(acc, row) => {
 			const user = row.User;
@@ -52,7 +94,8 @@ export const load: PageServerLoad = async ({ params, url }) => {
 	);
 	console.log(result.map((item) => item.user.firstName));
 
-	const nextItem = direction == 'prev' ? result.shift() : result.pop();
+	const nextItem =
+		result.length > limit ? (direction == 'prev' ? result.shift() : result.pop()) : undefined;
 
 	const organizationForm = await db.query.organizationForm.findFirst({
 		where: and(

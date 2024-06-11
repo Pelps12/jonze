@@ -1,5 +1,4 @@
-import { timestamp, json, pgTable, varchar } from 'drizzle-orm/pg-core';
-import { sql } from 'drizzle-orm/sql';
+import { timestamp, pgTable, varchar, jsonb } from 'drizzle-orm/pg-core';
 import { newId } from '../utils/createId';
 import { relations } from 'drizzle-orm';
 import { member } from './member';
@@ -15,7 +14,7 @@ export const formResponse = pgTable('FormResponse', {
 		.references(() => organizationForm.id, {
 			onDelete: 'cascade'
 		}),
-	response: json('response')
+	response: jsonb('response')
 		.$type<
 			{
 				label: string;

@@ -1,0 +1,1 @@
+ALTER TABLE "FormResponse" ALTER COLUMN "response" SET DATA TYPE jsonb;

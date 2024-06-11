@@ -10,5 +10,5 @@ import schema from '@repo/db/schema';
 
 const connection = neon(DATABASE_URL);
 
-const db = drizzle(connection, { schema });
+const db = drizzle(connection, { schema, logger: true });
 export default db;

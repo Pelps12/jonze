@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import * as Drawer from '$lib/components/ui/drawer';
@@ -21,6 +21,7 @@
 	import * as Alert from '$lib/components/ui/alert';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { enhance } from '$app/forms';
+	import { Image } from '@unpic/svelte';
 	let newFormOpen = $page.url.searchParams.has('newevent');
 
 	const isDesktop = mediaQuery('(min-width: 768px)');
@@ -199,13 +200,14 @@
 						>
 					</Card.Header>
 					<div class="flex justify-center rounded-lg m-3">
-						<img
-							alt="Spring Festival"
-							class=" aspect-square object-cover m-5 w-auto rounded-lg"
+						<Image
+							src={event.image ?? '/placholder.svg'}
+							layout="fullWidth"
 							height={350}
-							src={event.image}
-							placeholder={'/placeholder.svg'}
-							width={350}
+							priority={false}
+							alt="A lovely bath"
+							cdn="uploadcare"
+							class="aspect-square object-cover m-5 w-auto rounded-lg"
 						/>
 					</div>
 					<Card.Content>
@@ -304,7 +306,11 @@
 										}}
 									>
 										<input type="text" name="id" id="" class="hidden" value={event.id} />
-										<AlertDialog.Action type="submit">Continue</AlertDialog.Action>
+										<AlertDialog.Action
+											type="submit"
+											class={buttonVariants({ variant: 'destructive' })}
+											>Continue</AlertDialog.Action
+										>
 									</form>
 								</AlertDialog.Footer>
 							</AlertDialog.Content>
