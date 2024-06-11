@@ -200,11 +200,10 @@
 					</Card.Header>
 					<div class="flex justify-center rounded-lg m-3">
 						<img
-							alt="Spring Festival"
+							alt={event.name}
 							class=" aspect-square object-cover m-5 w-auto rounded-lg"
 							height={350}
-							src={event.image}
-							placeholder={'/placeholder.svg'}
+							src={event.image ?? '/placeholder.svg'}
 							width={350}
 						/>
 					</div>
