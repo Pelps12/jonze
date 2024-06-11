@@ -2,7 +2,10 @@
 	import { goto, preloadData, pushState } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { Badge } from '$lib/components/ui/badge';
-	import { Button, type ButtonEvents } from '$lib/components/ui/button';
+	import { Button, buttonVariants, type ButtonEvents } from '$lib/components/ui/button';
+	import * as Card from '$lib/components/ui/card';
+	import * as Dialog from '$lib/components/ui/dialog';
+	import Subscription from '$lib/components/custom/Subscription.svelte';
 	import { cn } from '$lib/utils';
 	import {
 		CalendarIcon,
@@ -19,7 +22,7 @@
 	export { className as class };
 </script>
 
-<div class={cn('lg:h-[100vh]', className)}>
+<div class={cn('lg:h-[80vh] flex flex-col justify-between', className)}>
 	<div class=" lg:py-4">
 		<div class=" px-3 lg:py-2 flex lg:block">
 			<Button
@@ -73,4 +76,23 @@
 			</Button>
 		</div>
 	</div>
+
+	<Card.Root class="m-2 hidden lg:block">
+		<Card.Header class="p-2 pt-0 md:p-4">
+			<Card.Title>Upgrade to Pro</Card.Title>
+			<Card.Description>
+				Unlock all features and get unlimited access to our support team.
+			</Card.Description>
+		</Card.Header>
+		<Card.Content class="p-2 pt-0 md:p-4 md:pt-0">
+			<Dialog.Root>
+				<Dialog.Trigger class={cn(buttonVariants({ size: 'sm' }), 'w-full')}
+					>Subscribe</Dialog.Trigger
+				>
+				<Dialog.Content class="w-full">
+					<Subscription />
+				</Dialog.Content>
+			</Dialog.Root>
+		</Card.Content>
+	</Card.Root>
 </div>

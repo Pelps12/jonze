@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import * as Drawer from '$lib/components/ui/drawer';
@@ -304,7 +304,11 @@
 										}}
 									>
 										<input type="text" name="id" id="" class="hidden" value={event.id} />
-										<AlertDialog.Action type="submit">Continue</AlertDialog.Action>
+										<AlertDialog.Action
+											type="submit"
+											class={buttonVariants({ variant: 'destructive' })}
+											>Continue</AlertDialog.Action
+										>
 									</form>
 								</AlertDialog.Footer>
 							</AlertDialog.Content>

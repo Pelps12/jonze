@@ -14,6 +14,9 @@ export const load: PageServerLoad = async ({ params, url }) => {
 	const plan = url.searchParams.get('plan');
 	const formattedPlan = plan ? `%${plan}%` : null;
 
+	const customValue = url.searchParams.get('custom_value');
+	const customType = url.searchParams.get('custom_type');
+
 	const limit =
 		url.searchParams.get('limit') === 'all'
 			? Number.MAX_SAFE_INTEGER
@@ -34,6 +37,11 @@ export const load: PageServerLoad = async ({ params, url }) => {
 		.leftJoin(schema.formResponse, eq(schema.formResponse.id, schema.member.additionalInfoId))
 		.where(
 			and(
+				cursor
+					? direction === 'prev' //XOR comparison
+						? gte(schema.member.id, cursor)
+						: lte(schema.member.id, cursor)
+					: undefined,
 				eq(schema.member.orgId, params.id),
 				emailFilter ? like(schema.user.email, `%${emailFilter}%`) : undefined,
 				formattedName
@@ -67,6 +75,11 @@ export const load: PageServerLoad = async ({ params, url }) => {
 				)
 			)
 			.where(ilike(schema.plan.name, `%${formattedPlan}%`));
+	}
+
+	if (customValue && customType) {
+		const id = JSON.stringify([{ label: customType, response: customValue }]);
+		query = query.where(sql`${schema.formResponse.response} @> ${id}`);
 	}
 
 	const rows = await query;

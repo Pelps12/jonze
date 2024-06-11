@@ -20,9 +20,12 @@
 	export let data;
 
 	let selected: any = undefined;
+	const defaultFilters = ['name', 'email', 'plan'];
 	const nameFilter = $page.url.searchParams.get('name');
 	const emailFilter = $page.url.searchParams.get('email');
 	const planFilter = $page.url.searchParams.get('plan');
+	const customFilter = $page.url.searchParams.get('custom_value');
+	const customFilterType = $page.url.searchParams.get('custom_type');
 	const filterValue = writable<string>();
 	if (nameFilter) {
 		selected = {
@@ -44,6 +47,12 @@
 		};
 
 		filterValue.set(planFilter);
+	} else if (customFilter && customFilterType) {
+		selected = {
+			value: customFilterType,
+			label: customFilterType
+		};
+		filterValue.set(customFilter);
 	}
 
 	const handleCopyLink = (link: string) => {
@@ -72,13 +81,22 @@
 		url.searchParams.delete('email');
 		url.searchParams.delete('name');
 		url.searchParams.delete('plan');
+		url.searchParams.delete('custom_type');
+		url.searchParams.delete('custom_value');
+
 		return url;
 	};
 
 	const handleFilterSubmit = async () => {
 		if (selected && selected.value) {
 			const url = removeAllFilters(new URL($page.url));
-			url.searchParams.set(selected.value, $filterValue);
+			if (defaultFilters.includes(selected.value)) {
+				url.searchParams.set(selected.value, $filterValue);
+			} else {
+				url.searchParams.set('custom_type', selected.value);
+				url.searchParams.set('custom_value', $filterValue);
+			}
+
 			window.location.href = url.toString();
 
 			//$page.url.searchParams.set('email', $emailFilter);
@@ -88,10 +106,7 @@
 	};
 
 	const handleReset = () => {
-		const url = new URL($page.url);
-		url.searchParams.delete('email');
-		url.searchParams.delete('name');
-		url.searchParams.delete('plan');
+		const url = removeAllFilters(new URL($page.url));
 		window.location.href = url.toString();
 	};
 
@@ -150,10 +165,14 @@
 			<Select.Item value="email">Email</Select.Item>
 			<Select.Item value="name">Name</Select.Item>
 			<Select.Item value="plan">Plan</Select.Item>
+			{#each data.organizationForm?.form ?? [] as formValue}
+				<Select.Item value={formValue.label}>{formValue.label}</Select.Item>
+			{/each}
 		</Select.Content>
 	</Select.Root>
 	<Input
 		bind:value={$filterValue}
+		on:keydown={(e) => e.key === 'Enter' && handleFilterSubmit()}
 		placeholder={`Filter ${!!selected?.label ? `by ${selected?.label}` : ''}`}
 		class="max-w-md"
 	/>

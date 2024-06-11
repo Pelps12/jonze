@@ -1,6 +1,6 @@
 import db from '$lib/server/db';
 import { and, eq, or } from 'drizzle-orm';
-import type { PageServerLoad } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 import schema from '@repo/db/schema';
 import { error, redirect } from '@sveltejs/kit';
 import { attendance } from '@repo/db/schema/attendance';
@@ -93,4 +93,48 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 	};
 
 	return { organization, layout, chartData, clientSecret };
+};
+
+export const actions: Actions = {
+	upgrade: async (event) => {
+		if (!event.locals.user) error(401);
+		const member = await db.query.member.findFirst({
+			where: and(
+				eq(schema.member.orgId, event.params.id),
+				eq(schema.member.role, 'OWNER'),
+				eq(schema.member.userId, event.locals.user.id)
+			)
+		});
+		if (!member)
+			error(401, 'Only the owner of this org has such privileges. \nSpeak with them about it');
+		const formdata = await event.request.formData();
+
+		const period = formdata.get('period');
+
+		if (!period || (period !== 'yearly' && period !== 'monthly')) {
+			error(400, 'Period missing');
+		}
+
+		const prices = await stripe.prices.list({
+			lookup_keys: [`plus_${period}`],
+			expand: ['data.product']
+		});
+		const session = await stripe.checkout.sessions.create({
+			billing_address_collection: 'auto',
+			line_items: [
+				{
+					price: prices.data[0].id,
+					// For metered billing, do not pass quantity
+					quantity: 1
+				}
+			],
+			mode: 'subscription',
+			success_url: event.url.toString(),
+			cancel_url: event.url.toString()
+		});
+
+		if (!session.url) error(500);
+
+		return redirect(302, session.url);
+	}
 };

@@ -181,7 +181,7 @@
 	{/each}
 </Card.Root>
 
-<div class="rounded-md border">
+<div class="rounded-md border my-4">
 	<Table.Root {...$tableAttrs}>
 		<Table.Header>
 			{#each $headerRows as headerRow}
