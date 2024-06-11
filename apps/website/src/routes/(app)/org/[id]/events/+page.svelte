@@ -200,15 +200,23 @@
 						>
 					</Card.Header>
 					<div class="flex justify-center rounded-lg m-3">
-						<Image
-							src={event.image ?? '/placholder.svg'}
-							layout="fullWidth"
-							height={350}
-							priority={false}
-							alt="A lovely bath"
-							cdn="uploadcare"
-							class="aspect-square object-cover m-5 w-auto rounded-lg"
-						/>
+						{#if event.image}
+							<Image
+								src={event.image}
+								layout="fullWidth"
+								height={350}
+								priority={false}
+								alt={event.name}
+								class="aspect-square object-cover m-5 w-auto rounded-lg"
+							/>
+						{:else}
+							<img
+								src={'/placeholder.svg'}
+								height={350}
+								alt={event.name}
+								class="aspect-square object-cover m-5 w-auto rounded-lg"
+							/>
+						{/if}
 					</div>
 					<Card.Content>
 						<p class="text-sm text-gray-600">
