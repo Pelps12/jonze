@@ -23,7 +23,7 @@
 	import { Bar } from 'svelte-chartjs';
 	import { derived } from 'svelte/store';
 
-	import { formatName } from '$lib/utils';
+	import { formatName, getInitials } from '$lib/utils';
 	import { page } from '$app/stores';
 	import { Button } from '$lib/components/ui/button';
 	import { twJoin } from 'tailwind-merge';
@@ -179,8 +179,9 @@
 							<Avatar.Root class="w-10 h-10 border">
 								<Avatar.Image src={member.user.profilePictureUrl} />
 								<Avatar.Fallback
-									>{(member.user.firstName?.charAt(0) ?? 'U') +
-										(member.user.lastName?.charAt(0) ?? '')}</Avatar.Fallback
+									>{getInitials(
+										formatName(member.user.firstName, member.user.lastName)
+									)}</Avatar.Fallback
 								>
 							</Avatar.Root>
 							<div class="text-sm grid gap-1">

@@ -12,7 +12,7 @@
 	import type { Organization, User } from '@workos-inc/node';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { formatName } from '$lib/utils';
+	import { formatName, getInitials } from '$lib/utils';
 	let open = false;
 	const isDesktop = mediaQuery('(min-width: 768px)');
 
@@ -99,10 +99,7 @@
 							<Button variant="ghost" builders={[builder]} class="relative h-8 w-8 rounded-full">
 								<Avatar.Root>
 									<Avatar.Image src={user?.profilePictureUrl} alt="@shadcn" />
-									<Avatar.Fallback
-										>{(user.firstName?.charAt(0) ?? 'U') +
-											(user.lastName?.charAt(0) ?? '')}</Avatar.Fallback
-									>
+									<Avatar.Fallback>{getInitials(username)}</Avatar.Fallback>
 								</Avatar.Root>
 							</Button>
 						</DropdownMenu.Trigger>

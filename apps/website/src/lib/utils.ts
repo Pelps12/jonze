@@ -64,3 +64,21 @@ export function formatName(firstName: string | null, lastName: string | null): s
 		return `${firstName ?? ''} ${lastName ?? ''}`.trim();
 	}
 }
+
+export function getInitials(fullName: string): string {
+	// Trim the fullName to remove any extra spaces before and after the name
+	fullName = fullName.trim();
+
+	// Check if the fullName is "No Name" or empty
+	if (fullName === '' || fullName.toLowerCase() === 'no name') {
+		return ''; // Return an empty string or adjust as needed
+	}
+
+	// Split the name by spaces
+	const names = fullName.split(/\s+/);
+
+	// Get the first letter of each part of the name
+	const initials = names.map((name) => name[0].toUpperCase()).join('');
+
+	return initials;
+}
