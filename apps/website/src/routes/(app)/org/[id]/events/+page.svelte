@@ -8,7 +8,7 @@
 	import { mediaQuery } from 'svelte-legos';
 	import EventForm from './EventForm.svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { Copy, MoreHorizontal, QrCode } from 'lucide-svelte';
+	import { Copy, FileDown, MoreHorizontal, QrCode } from 'lucide-svelte';
 	import { browser } from '$app/environment';
 	import { PUBLIC_URL } from '$env/static/public';
 	import { toast } from 'svelte-sonner';
@@ -22,6 +22,8 @@
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { enhance } from '$app/forms';
 	import { Image } from '@unpic/svelte';
+	import { json2csv } from 'json-2-csv';
+	import type { PageData } from './$types';
 	let newFormOpen = $page.url.searchParams.has('newevent');
 
 	const isDesktop = mediaQuery('(min-width: 768px)');
@@ -45,6 +47,30 @@
 			aElement.click();
 			URL.revokeObjectURL(href);
 		}
+	};
+
+	const handleExport = async (events: PageData['events'], filename: string) => {
+		const csv = json2csv(events, {
+			expandNestedObjects: true,
+			expandArrayObjects: true
+		});
+
+		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+
+		// Create a link element for the download
+		const link = document.createElement('a');
+		const url = URL.createObjectURL(blob);
+		link.setAttribute('href', url);
+		link.setAttribute('download', filename);
+		link.style.visibility = 'hidden';
+
+		// Append to the document and trigger the download
+		document.body.appendChild(link);
+		link.click();
+
+		// Clean up
+		document.body.removeChild(link);
+		window.URL.revokeObjectURL(url);
 	};
 
 	export let data;
@@ -77,6 +103,9 @@
 		{#await data.forms}
 			<Button disabled>Add Event</Button>
 		{:then forms}
+			<Button variant="outline" on:click={() => handleExport(data.events, 'events.csv')}
+				><FileDown class="h-4 w-4 mr-2" /><span class="hidden sm:block">Export</span></Button
+			>
 			{#if $isDesktop}
 				<Dialog.Root bind:open={newFormOpen}>
 					<Dialog.Trigger asChild let:builder>

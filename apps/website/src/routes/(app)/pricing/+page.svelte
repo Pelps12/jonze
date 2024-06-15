@@ -6,6 +6,8 @@
 	import { writable, type Writable } from 'svelte/store';
 
 	let isYearly = false;
+	import * as Tooltip from '$lib/components/ui/tooltip';
+	import { Info } from 'lucide-svelte';
 </script>
 
 <section class="flex items-center justify-center mt-10 pb-10">
@@ -92,8 +94,22 @@
 								stroke-linejoin="round"
 								d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
 							></path>
-						</svg>3 integrations
+						</svg>
+						<div class="flex items-center gap-2">
+							<span>3 Integrations</span>
+							<Tooltip.Root>
+								<Tooltip.Trigger class="underline"><Info class="h-4 w-4" /></Tooltip.Trigger>
+								<Tooltip.Content class="max-w-xs text-center text-balance">
+									<p>
+										A feature that allows syncing info in Jonze with email clients (SendGrid,
+										MailChimp, Resend), social media services (LinkedIn, Instagram, Discord) and
+										more.
+									</p>
+								</Tooltip.Content>
+							</Tooltip.Root>
+						</div>
 					</li>
+
 					<li class="flex gap-x-3 text-base">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -111,9 +127,27 @@
 							></path>
 						</svg>7%+ 80¢ per membership
 					</li>
+
+					<li class="flex gap-x-3 text-base">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke-width="1.5"
+							stroke="currentColor"
+							aria-hidden="true"
+							class="h-6 w-5 flex-none text-outline"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+							></path>
+						</svg>Discord server support
+					</li>
 				</ul>
 			</div>
-			<div class="animate-pulse ring-2 ring-primary rounded-3xl p-8 xl:p-10">
+			<div class="ring-2 ring-primary rounded-3xl p-8 xl:p-10">
 				<div class="flex items-center justify-between gap-x-4">
 					<h3 id="tier-extended" class="text-primary text-2xl font-semibold leading-8">
 						Jonze Plus
@@ -172,7 +206,20 @@
 								stroke-linejoin="round"
 								d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
 							></path>
-						</svg>Unlimited Integrations
+						</svg>
+						<div class="flex items-center gap-2">
+							<span>Unlimited Integrations</span>
+							<Tooltip.Root>
+								<Tooltip.Trigger class="underline"><Info class="h-4 w-4" /></Tooltip.Trigger>
+								<Tooltip.Content class="max-w-xs text-center text-balance">
+									<p>
+										A feature that allows syncing info in Jonze with email clients (SendGrid,
+										MailChimp, Resend), social media services (LinkedIn, Instagram, Discord) and
+										more.
+									</p>
+								</Tooltip.Content>
+							</Tooltip.Root>
+						</div>
 					</li>
 
 					<li class="flex gap-x-3 text-base">
@@ -191,6 +238,71 @@
 								d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
 							></path>
 						</svg>5% + 50¢ per membership
+					</li>
+
+					<li class="flex gap-x-3 text-base">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke-width="1.5"
+							stroke="currentColor"
+							aria-hidden="true"
+							class="h-6 w-5 flex-none text-primary"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+							></path>
+						</svg>Remove Jonze branding
+					</li>
+
+					<li class="flex gap-x-3 text-base">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke-width="1.5"
+							stroke="currentColor"
+							aria-hidden="true"
+							class="h-6 w-5 flex-none text-primary"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+							></path>
+						</svg>
+						<div class="flex items-center gap-2">
+							BYO Domain
+							<Tooltip.Root>
+								<Tooltip.Trigger class="underline"><Info class="h-4 w-4" /></Tooltip.Trigger>
+								<Tooltip.Content class="max-w-xs text-center text-balance">
+									<p>
+										You can have attendance, forms and registration directly on your own subdomain
+										e.g. members.example.com
+									</p>
+								</Tooltip.Content>
+							</Tooltip.Root>
+						</div>
+					</li>
+					<li class="flex gap-x-3 text-base">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke-width="1.5"
+							stroke="currentColor"
+							aria-hidden="true"
+							class="h-6 w-5 flex-none text-primary"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+							></path>
+						</svg>Direct customer support
 					</li>
 				</ul>
 			</div>

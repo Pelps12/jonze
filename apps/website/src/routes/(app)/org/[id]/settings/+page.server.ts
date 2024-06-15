@@ -121,13 +121,13 @@ export const actions: Actions = {
 		return { webhookUrl: url };
 	},
 
-	createAdmin: async ({ request, locals, params }) => {
-		if (!params.id) error(400, 'Organization ID Required');
+	createAdmin: async (event) => {
+		if (!event.params.id) error(400, 'Organization ID Required');
 
-		if (!locals.member) {
+		if (!event.locals.member) {
 			error(401, 'You are not an admin');
 		}
-		const formData = await request.formData();
+		const formData = await event.request.formData();
 		const memId = formData.get('memId');
 
 		if (typeof memId !== 'string') error(400, 'Invalid form');

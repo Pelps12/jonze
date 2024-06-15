@@ -71,7 +71,7 @@ export function getInitials(fullName: string): string {
 
 	// Check if the fullName is "No Name" or empty
 	if (fullName === '' || fullName.toLowerCase() === 'no name') {
-		return ''; // Return an empty string or adjust as needed
+		return '?'; // Return an empty string or adjust as needed
 	}
 
 	// Split the name by spaces

@@ -23,58 +23,56 @@
 </script>
 
 <div class={cn('lg:h-[80vh] flex flex-col justify-between', className)}>
-	<div class=" lg:py-4">
-		<div class=" px-3 lg:py-2 flex lg:block">
-			<Button
-				class="w-full justify-center lg:justify-start gap-2"
-				variant="ghost"
-				href="/org/{$page.params.id}"
-			>
-				<HomeIcon class="h-4 w-4" />
-				<span class="hidden lg:block">Home</span>
-			</Button>
-			<Button
-				class="w-full justify-center lg:justify-start gap-2"
-				href="/org/{$page.params.id}/events"
-				variant="ghost"
-			>
-				<CalendarIcon class="h-4 w-4" />
-				<span class="hidden lg:block">Events</span>
-			</Button>
-			<Button
-				class="w-full justify-center lg:justify-start gap-2"
-				href="/org/{$page.params.id}/members"
-				variant="ghost"
-			>
-				<UsersIcon class="h-4 w-4" />
-				<span class="hidden lg:block">Members</span>
-			</Button>
-			<Button
-				class="w-full justify-center lg:justify-start gap-2"
-				href="/org/{$page.params.id}/plans"
-				variant="ghost"
-			>
-				<TrendingUp class={twJoin('h-4 w-4 ')} />
-				<span class="hidden lg:block">Plans</span>
-				<Badge class="hidden lg:block" variant="outline">Alpha</Badge>
-			</Button>
-			<Button
-				class="w-full justify-center lg:justify-start gap-2"
-				href="/org/{$page.params.id}/forms"
-				variant="ghost"
-			>
-				<FileText class="h-4 w-4" />
-				<span class="hidden lg:block">Forms</span>
-			</Button>
-			<Button
-				class="w-full justify-center lg:justify-start gap-2"
-				href="/org/{$page.params.id}/settings"
-				variant="ghost"
-			>
-				<SettingsIcon class="h-4 w-4" />
-				<span class="hidden lg:block">Settings</span>
-			</Button>
-		</div>
+	<div class=" px-3 lg:py-2 flex lg:block">
+		<Button
+			class="w-full justify-center lg:justify-start gap-2"
+			variant="ghost"
+			href="/org/{$page.params.id}"
+		>
+			<HomeIcon class="h-4 w-4" />
+			<span class="hidden lg:block">Home</span>
+		</Button>
+		<Button
+			class="w-full justify-center lg:justify-start gap-2"
+			href="/org/{$page.params.id}/events"
+			variant="ghost"
+		>
+			<CalendarIcon class="h-4 w-4" />
+			<span class="hidden lg:block">Events</span>
+		</Button>
+		<Button
+			class="w-full justify-center lg:justify-start gap-2"
+			href="/org/{$page.params.id}/members"
+			variant="ghost"
+		>
+			<UsersIcon class="h-4 w-4" />
+			<span class="hidden lg:block">Members</span>
+		</Button>
+		<Button
+			class="w-full justify-center lg:justify-start gap-2"
+			href="/org/{$page.params.id}/plans"
+			variant="ghost"
+		>
+			<TrendingUp class={twJoin('h-4 w-4 ')} />
+			<span class="hidden lg:block">Plans</span>
+			<Badge class="hidden lg:block" variant="outline">Alpha</Badge>
+		</Button>
+		<Button
+			class="w-full justify-center lg:justify-start gap-2"
+			href="/org/{$page.params.id}/forms"
+			variant="ghost"
+		>
+			<FileText class="h-4 w-4" />
+			<span class="hidden lg:block">Forms</span>
+		</Button>
+		<Button
+			class="w-full justify-center lg:justify-start gap-2"
+			href="/org/{$page.params.id}/settings"
+			variant="ghost"
+		>
+			<SettingsIcon class="h-4 w-4" />
+			<span class="hidden lg:block">Settings</span>
+		</Button>
 	</div>
 
 	<Card.Root class="m-2 hidden lg:block">

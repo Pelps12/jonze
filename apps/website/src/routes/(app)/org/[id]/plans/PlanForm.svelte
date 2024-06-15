@@ -22,8 +22,21 @@
 
 	import { getAttrs } from 'bits-ui';
 	import { cn } from '$lib/utils';
-	import { Check, ChevronsUpDown } from 'lucide-svelte';
+	import { CalendarIcon, Check, ChevronsUpDown } from 'lucide-svelte';
 	import type { Writable } from 'svelte/store';
+	import {
+		CalendarDate,
+		DateFormatter,
+		getLocalTimeZone,
+		parseDate,
+		toCalendarDate,
+		today,
+		type DateValue
+	} from '@internationalized/date';
+	import * as Popover from '$lib/components/ui/popover';
+	import { buttonVariants } from '$lib/components/ui/button';
+	import { Calendar } from '$lib/components/ui/calendar';
+	import Error from '../+error.svelte';
 
 	export let data: SuperValidated<Infer<PlanCreationSchema>>;
 	export let actionType: 'create' | 'update' = 'create';
@@ -62,6 +75,21 @@
 	};
 
 	form.errors.subscribe((err) => console.log(err));
+	const df = new DateFormatter('en-US', {
+		dateStyle: 'long'
+	});
+
+	let value: DateValue | undefined;
+
+	$: value = $formData.start
+		? new CalendarDate(
+				$formData.start.getFullYear(),
+				$formData.start.getMonth() + 1,
+				$formData.start.getDate()
+			)
+		: undefined;
+
+	let placeholder: DateValue = today(getLocalTimeZone());
 </script>
 
 <form
@@ -78,7 +106,7 @@
 		</Form.Control>
 	</Form.Field>
 
-	<Form.Field {form} name="amount">
+	<Form.Field {form} name="amount" class="mb-2">
 		<Form.Control let:attrs>
 			<Form.Label>Amount</Form.Label>
 			<Input
@@ -90,7 +118,7 @@
 		</Form.Control>
 	</Form.Field>
 
-	<Form.Field {form} name="start">
+	<!-- 	<Form.Field {form} name="start">
 		<Form.Control let:attrs>
 			<Form.Label>Expiry Date (ignore the year it will auto reset)</Form.Label>
 			<Input
@@ -99,6 +127,44 @@
 				bind:value={$startProxy}
 				min={$constraints.start?.min?.toString().slice(0, 16)}
 			/>
+		</Form.Control>
+	</Form.Field> -->
+
+	<Form.Field {form} name="start" class="flex flex-col">
+		<Form.Control let:attrs>
+			<Form.Label>Expiry Date</Form.Label>
+			<Popover.Root>
+				<Popover.Trigger
+					{...attrs}
+					class={cn(
+						buttonVariants({ variant: 'outline' }),
+						'w-[280px] justify-start pl-4 text-left font-normal',
+						!value && 'text-muted-foreground'
+					)}
+				>
+					{value ? df.format(value.toDate(getLocalTimeZone())) : 'Pick a date'}
+					<CalendarIcon class="ml-auto h-4 w-4 opacity-50" />
+				</Popover.Trigger>
+				<Popover.Content class="w-auto p-0" side="top">
+					<Calendar
+						{value}
+						bind:placeholder
+						minValue={new CalendarDate(1900, 1, 1)}
+						calendarLabel="Date of birth"
+						initialFocus
+						onValueChange={(v) => {
+							if (v) {
+								$formData.start = v.toDate(getLocalTimeZone());
+							} else {
+								console.log('HWHHEEH');
+							}
+						}}
+					/>
+				</Popover.Content>
+			</Popover.Root>
+
+			<Form.FieldErrors />
+			<input hidden value={$formData.start} name={attrs.name} />
 		</Form.Control>
 	</Form.Field>
 
