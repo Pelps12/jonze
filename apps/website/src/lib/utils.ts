@@ -82,3 +82,10 @@ export function getInitials(fullName: string): string {
 
 	return initials;
 }
+
+export const getApplicationFee = (
+	amount: number,
+	transaction_type: 'standard' | 'plus' = 'standard'
+): number => {
+	return Math.ceil(0.07 * amount + 80) - Math.ceil(0.029 * amount + 30);
+};

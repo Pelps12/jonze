@@ -7,6 +7,7 @@ import type { PageServerLoad } from './$types';
 import db from '$lib/server/db';
 import { eq, and, not } from '@repo/db';
 import schema from '@repo/db/schema';
+import { getApplicationFee } from '$lib/utils';
 
 export const load: PageServerLoad = async ({ url, locals, params }) => {
 	const callbackUrl = url.searchParams.get('callbackUrl');
@@ -139,8 +140,7 @@ export const load: PageServerLoad = async ({ url, locals, params }) => {
 			],
 			payment_intent_data: {
 				description: `Payment for ${plan.name} by ${name}`,
-				application_fee_amount:
-					Math.ceil(0.07 * price_data.amount + 80) - Math.ceil(0.029 * price_data.amount + 30)
+				application_fee_amount: getApplicationFee(price_data.amount)
 			},
 			mode: 'payment',
 			ui_mode: 'custom' as any,
