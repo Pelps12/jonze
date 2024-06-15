@@ -13,7 +13,7 @@
 	import Link from './link.svelte';
 	import MembershipForm from './MembershipForm.svelte';
 	import { page } from '$app/stores';
-	import { formatName } from '$lib/utils';
+	import { formatName, getInitials } from '$lib/utils';
 
 	export let data: PageData;
 
@@ -67,7 +67,11 @@
 			<div class="flex items-center space-x-4">
 				<Avatar.Root>
 					<Avatar.Image src={data.member.user.profilePictureUrl} alt={data.member.user.firstName} />
-					<Avatar.Fallback>U</Avatar.Fallback>
+					<Avatar.Fallback
+						>{getInitials(
+							formatName(data.member.user.firstName, data.member.user.lastName)
+						)}</Avatar.Fallback
+					>
 				</Avatar.Root>
 				<div>
 					<p class="text-sm font-medium leading-none">

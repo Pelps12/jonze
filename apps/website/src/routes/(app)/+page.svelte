@@ -235,15 +235,28 @@
 </div>
 
 <section class="w-full py-12 md:py-16 lg:py-20">
-	<div class="container mx-auto px-4 md:px-6">
-		<div class="mx-auto max-w-3xl text-center">
-			<h2 class="text-2xl font-bold tracking-tight md:text-3xl lg:text-4xl">
-				Get started with Jonze
+	<div class="container grid items-center justify-center gap-4 px-4 text-center md:px-6">
+		<div class="space-y-3">
+			<h2 class="text-3xl font-bold tracking-tighter md:text-4xl/tight">
+				Take Your Member Data Management to the Next Level
 			</h2>
-
-			<div class="mt-6">
-				<Button size="lg" href="/api/auth">Get Started</Button>
-			</div>
+			<p
+				class="mx-auto max-w-[600px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400"
+			>
+				Sign up for our Jonze platform and streamline your organization's member data management
+				today.
+			</p>
+		</div>
+		<div class="mx-auto w-full max-w-sm space-y-2">
+			<form class="">
+				<Button type="submit">Sign Up</Button>
+			</form>
+			<p class="text-xs text-gray-500 dark:text-gray-400">
+				By signing up, you agree to our{' '}
+				<Button variant="link" href="#" class="underline underline-offset-2 px-0">
+					Terms &amp; Conditions
+				</Button>
+			</p>
 		</div>
 	</div>
 </section>

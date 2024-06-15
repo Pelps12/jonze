@@ -26,4 +26,5 @@
 				" We're sorry, but an unexpected error has occurred. Please try refreshing the page."}
 		</p>
 	</div>
+	<Button href="/">GO HOME</Button>
 </div>

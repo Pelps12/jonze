@@ -23,7 +23,7 @@
 	import { Bar } from 'svelte-chartjs';
 	import { derived } from 'svelte/store';
 
-	import { formatName } from '$lib/utils';
+	import { cn, formatName, getInitials } from '$lib/utils';
 	import { page } from '$app/stores';
 	import { Button } from '$lib/components/ui/button';
 	import { twJoin } from 'tailwind-merge';
@@ -51,6 +51,7 @@
 			}
 		]
 	};
+	let transactionHistoryVisible = false;
 
 	onMount(() => {
 		if (data.clientSecret) {
@@ -67,7 +68,7 @@
 				],
 				appearance: {
 					variables: {
-						colorBackground: $mode === 'light' ? '#f3f2f1' : '#161413'
+						colorBackground: $mode === 'light' ? '#f3f2f1' : '#1B1918'
 					}
 				}
 			});
@@ -75,7 +76,7 @@
 				stripeConnectInstance.update({
 					appearance: {
 						variables: {
-							colorBackground: value === 'light' ? '#f3f2f1' : '#161413'
+							colorBackground: value === 'light' ? '#f3f2f1' : '#1B1918'
 						}
 					}
 				})
@@ -84,6 +85,7 @@
 			const paymentComponent = stripeConnectInstance.create('payments');
 			const container = document.getElementById('connectElement');
 			container?.appendChild(paymentComponent);
+			transactionHistoryVisible = true;
 		}
 	});
 </script>
@@ -179,8 +181,9 @@
 							<Avatar.Root class="w-10 h-10 border">
 								<Avatar.Image src={member.user.profilePictureUrl} />
 								<Avatar.Fallback
-									>{(member.user.firstName?.charAt(0) ?? 'U') +
-										(member.user.lastName?.charAt(0) ?? '')}</Avatar.Fallback
+									>{getInitials(
+										formatName(member.user.firstName, member.user.lastName)
+									)}</Avatar.Fallback
 								>
 							</Avatar.Root>
 							<div class="text-sm grid gap-1">
@@ -206,4 +209,15 @@
 	</Resizable.PaneGroup>
 </div>
 
-<div id="connectElement" class="my-5" />
+{#if data.clientSecret}
+	<Card.Root class={cn(' relative my-4')}>
+		<Card.Header class="p-4 absolute z-[20]">
+			<div class="grid gap-4">
+				<Card.Title class="text-lg font-semibold">Transaction History</Card.Title>
+			</div>
+		</Card.Header>
+		<Card.Content class="grid gap-4">
+			<div id="connectElement" class="my-5" />
+		</Card.Content>
+	</Card.Root>
+{/if}

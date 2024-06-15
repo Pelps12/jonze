@@ -178,8 +178,8 @@ importers:
         specifier: ^1.5.3
         version: 1.5.3
       stripe:
-        specifier: ^14.23.0
-        version: 14.23.0
+        specifier: ^15.11.0
+        version: 15.11.0
       svelte-chartjs:
         specifier: ^3.1.5
         version: 3.1.5(chart.js@4.4.1)(svelte@4.2.10)
@@ -7939,8 +7939,8 @@ packages:
     resolution: {integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==}
     engines: {node: '>=8'}
 
-  /stripe@14.23.0:
-    resolution: {integrity: sha512-OPD7LqBmni6uDdqA05GGgMZyyRWxJOehONBNC9tYgY4Uh089EtXd6QLIgRGrqTDlQH3cA2BXo848nxwa/zsQzw==}
+  /stripe@15.11.0:
+    resolution: {integrity: sha512-qmZF0PN1jRVpiQrXL8eTb9Jy/6S+aUlcDquKBFT2h3PkaD7RZ444FIojVXUg67FK2zFIUNXgMv02c7csdL5qHg==}
     engines: {node: '>=12.*'}
     dependencies:
       '@types/node': 18.19.17

@@ -14,7 +14,7 @@
 	import { toast } from 'svelte-sonner';
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
 	import { page } from '$app/stores';
-	import { formatName } from '$lib/utils.js';
+	import { formatName, getInitials } from '$lib/utils.js';
 	import { PUBLIC_STRIPE_KEY, PUBLIC_URL } from '$env/static/public';
 
 	let loading = true;
@@ -134,8 +134,9 @@
 				<Avatar.Root class="w-10 h-10 border">
 					<Avatar.Image src={data.user?.profilePictureUrl} />
 					<Avatar.Fallback
-						>{(data.user?.firstName?.charAt(0) ?? 'U') +
-							(data.user?.lastName?.charAt(0) ?? '')}</Avatar.Fallback
+						>{getInitials(
+							formatName(data.user?.firstName ?? null, data.user?.lastName ?? null)
+						)}</Avatar.Fallback
 					>
 				</Avatar.Root>
 				<div class="text-sm grid gap-1">

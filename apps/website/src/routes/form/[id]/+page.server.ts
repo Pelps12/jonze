@@ -1,7 +1,7 @@
 import db from '$lib/server/db';
 import schema from '@repo/db/schema';
 import type { Actions, PageServerLoad } from './$types';
-import { and, eq } from '@repo/db';
+import { and, eq, not } from '@repo/db';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { newId } from '@repo/db/utils/createId';
 import { objectsHaveSameKeys } from '$lib/server/helpers';
@@ -11,6 +11,7 @@ import svix from '$lib/server/svix';
 export const load: PageServerLoad = async ({ parent, url, locals, params }) => {
 	const form = await db.query.organizationForm.findFirst({
 		where: eq(schema.organizationForm.id, params.id),
+
 		with: {
 			organization: {
 				columns: {
@@ -22,6 +23,8 @@ export const load: PageServerLoad = async ({ parent, url, locals, params }) => {
 	});
 
 	if (!form) error(404, 'Form Not Found');
+
+	if (form.name === 'User Info') error(403, 'This is a restricted form');
 	if (!locals.user) {
 		redirect(302, `/user/signup/${form.orgId}?callbackUrl=${url.toString()}`);
 	}

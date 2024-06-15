@@ -13,6 +13,7 @@
 	import QRCode from 'qrcode';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Copy, MoreHorizontal, QrCode } from 'lucide-svelte';
+	import * as Alert from '$lib/components/ui/alert';
 	let newFormOpen = writable($page.url.searchParams.has('newplan'));
 
 	export let data;
@@ -44,8 +45,16 @@
 	};
 </script>
 
+<Alert.Root class="mb-2">
+	<Alert.Title>Quick One!</Alert.Title>
+	<Alert.Description
+		>Managed memberships are now available. Ask to have them enabled.</Alert.Description
+	>
+</Alert.Root>
+
 <div class="flex justify-between items-center mb-6">
 	<h2 class="text-xl font-semibold">Membership Plans</h2>
+
 	<div class="flex space-x-2">
 		{#if $isDesktop}
 			<Dialog.Root bind:open={$newFormOpen}>

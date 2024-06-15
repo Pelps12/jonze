@@ -2,7 +2,7 @@
 	import { ModeWatcher } from 'mode-watcher';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Button } from '$lib/components/ui/button';
-	import { Sun, Moon, UserPlus, PlusCircle, MessageSquare } from 'lucide-svelte';
+	import { Sun, Moon, UserPlus, PlusCircle, MessageSquare, Menu } from 'lucide-svelte';
 	import { setMode, resetMode } from 'mode-watcher';
 	import { onMount } from 'svelte';
 	import * as Avatar from '$lib/components/ui/avatar';
@@ -12,7 +12,7 @@
 	import type { Organization, User } from '@workos-inc/node';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { formatName } from '$lib/utils';
+	import { formatName, getInitials } from '$lib/utils';
 	let open = false;
 	const isDesktop = mediaQuery('(min-width: 768px)');
 
@@ -61,37 +61,64 @@
 			>
 		</div>
 
-		<div class="w-full flex items-center justify-end ms-auto sm:gap-x-3 sm:order-3">
-			<div class="flex flex-row items-center justify-end gap-2">
-				<Button variant="ghost" href="/pricing" class="text-zinc-800 dark:text-zinc-100 p-2">
-					Pricing
+		<DropdownMenu.Root closeOnItemClick={false}>
+			<DropdownMenu.Trigger asChild let:builder>
+				<Button class="md:hidden" builders={[builder]} variant="outline" size="icon">
+					<Menu class="h-4 w-4" />
 				</Button>
-				<Button
-					variant="ghost"
-					href="https://docs.jonze.co"
-					class="text-zinc-800 dark:text-zinc-100 p-2"
-				>
-					Docs
-				</Button>
-
-				<DropdownMenu.Root closeOnItemClick={false}>
-					<DropdownMenu.Trigger asChild let:builder>
-						<Button builders={[builder]} variant="outline" size="icon">
-							<Sun
-								class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
-							/>
-							<Moon
-								class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
-							/>
-							<span class="sr-only">Toggle theme</span>
-						</Button>
-					</DropdownMenu.Trigger>
-					<DropdownMenu.Content align="end">
+			</DropdownMenu.Trigger>
+			<DropdownMenu.Content align="end">
+				<DropdownMenu.Item href="/pricing">Pricing</DropdownMenu.Item>
+				<DropdownMenu.Item href="https://docs.jonze.co">Docs</DropdownMenu.Item>
+				<DropdownMenu.Item href="/roadmap">Roadmap</DropdownMenu.Item>
+				<DropdownMenu.Sub>
+					<DropdownMenu.SubTrigger>Theme</DropdownMenu.SubTrigger>
+					<DropdownMenu.SubContent align="start" side="left">
 						<DropdownMenu.Item on:click={() => setMode('light')}>Light</DropdownMenu.Item>
 						<DropdownMenu.Item on:click={() => setMode('dark')}>Dark</DropdownMenu.Item>
 						<DropdownMenu.Item on:click={() => resetMode()}>System</DropdownMenu.Item>
-					</DropdownMenu.Content>
-				</DropdownMenu.Root>
+					</DropdownMenu.SubContent>
+				</DropdownMenu.Sub>
+				<DropdownMenu.Item href="/api/auth">Log In / Sign Up</DropdownMenu.Item>
+			</DropdownMenu.Content>
+		</DropdownMenu.Root>
+
+		<div class="w-full items-center justify-end ms-auto sm:gap-x-3 sm:order-3 hidden md:flex">
+			<div class="flex flex-row items-center justify-end gap-2">
+				<div class="flex flex-row items-center justify-end gap-2">
+					<Button variant="ghost" href="/pricing" class="text-zinc-800 dark:text-zinc-100 p-2">
+						Pricing
+					</Button>
+					<Button
+						variant="ghost"
+						href="https://docs.jonze.co"
+						class="text-zinc-800 dark:text-zinc-100 p-2"
+					>
+						Docs
+					</Button>
+					<Button variant="ghost" href="/roadmap" class="text-zinc-800 dark:text-zinc-100 p-2">
+						Roadmap
+					</Button>
+
+					<DropdownMenu.Root closeOnItemClick={false}>
+						<DropdownMenu.Trigger asChild let:builder>
+							<Button builders={[builder]} variant="outline" size="icon">
+								<Sun
+									class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+								/>
+								<Moon
+									class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+								/>
+								<span class="sr-only">Toggle theme</span>
+							</Button>
+						</DropdownMenu.Trigger>
+						<DropdownMenu.Content align="end">
+							<DropdownMenu.Item on:click={() => setMode('light')}>Light</DropdownMenu.Item>
+							<DropdownMenu.Item on:click={() => setMode('dark')}>Dark</DropdownMenu.Item>
+							<DropdownMenu.Item on:click={() => resetMode()}>System</DropdownMenu.Item>
+						</DropdownMenu.Content>
+					</DropdownMenu.Root>
+				</div>
 
 				{#if user}
 					<DropdownMenu.Root>
@@ -99,10 +126,7 @@
 							<Button variant="ghost" builders={[builder]} class="relative h-8 w-8 rounded-full">
 								<Avatar.Root>
 									<Avatar.Image src={user?.profilePictureUrl} alt="@shadcn" />
-									<Avatar.Fallback
-										>{(user.firstName?.charAt(0) ?? 'U') +
-											(user.lastName?.charAt(0) ?? '')}</Avatar.Fallback
-									>
+									<Avatar.Fallback>{getInitials(username)}</Avatar.Fallback>
 								</Avatar.Root>
 							</Button>
 						</DropdownMenu.Trigger>
