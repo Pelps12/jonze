@@ -1,6 +1,7 @@
 import * as apiKey from './apikey';
 import * as attendance from './attendance';
 import * as event from './event';
+import * as eventTag from './eventTag';
 import * as customer from './customer';
 import * as formResponse from './formResponse';
 import * as member from './member';
@@ -17,6 +18,7 @@ const schema = {
 	...attendance,
 	...customer,
 	...event,
+	...eventTag,
 	...blog,
 	...formResponse,
 	...member,

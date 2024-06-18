@@ -14,7 +14,8 @@ export const eventCreationSchema = z.object({
 	image: z.string().nullable(),
 	description: z.string().nullable(),
 	name: z.string(),
-	formId: z.string().nullable()
+	formId: z.string().nullable(),
+	tags: z.array(z.string()).default([])
 });
 
 export const eventUpdationSchema = z.object({
@@ -24,7 +25,8 @@ export const eventUpdationSchema = z.object({
 	image: z.string().nullable(),
 	description: z.string().nullable(),
 	name: z.string(),
-	formId: z.string().nullable()
+	formId: z.string().nullable(),
+	tags: z.array(z.string()).default([])
 });
 
 export type EventCreationSchema = typeof eventCreationSchema;

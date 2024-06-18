@@ -10,13 +10,15 @@ import posthog, { dummyClient } from '$lib/server/posthog';
 import { newId } from '@repo/db/utils/createId';
 import { zod } from 'sveltekit-superforms/adapters';
 import svix from '$lib/server/svix';
+import { z } from 'zod';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const events = await db.query.event.findMany({
 		where: eq(schema.event.orgId, params.id),
 		orderBy: (events, { desc }) => [desc(events.start)],
 		with: {
-			form: true
+			form: true,
+			tags: true
 		}
 	});
 
@@ -30,7 +32,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			name: true
 		}
 	});
-	console.log(events);
+	console.log(events.map((event) => event.tags));
 	return {
 		events,
 		form: await superValidate(zod(eventCreationSchema)),
@@ -44,7 +46,8 @@ export const load: PageServerLoad = async ({ params }) => {
 						start: event.start,
 						end: event.end,
 						image: event.image,
-						formId: event.formId
+						formId: event.formId,
+						tags: event.tags?.names
 					},
 					zod(eventUpdationSchema),
 					{
@@ -124,7 +127,13 @@ export const actions: Actions = {
 				form
 			});
 		}
-		console.log(form.data, 'Update Data');
+
+		const tagParse = await eventUpdationSchema.shape.tags.safeParseAsync(
+			JSON.parse(form.data.tags[0])
+		);
+		if (!tagParse.success) error(400, 'Something with the tags');
+
+		const tags = tagParse.data;
 		const [newEvent] = await db
 			.update(schema.event)
 			.set({
@@ -139,6 +148,16 @@ export const actions: Actions = {
 			})
 			.where(eq(schema.event.id, form.data.id))
 			.returning();
+
+		if (tags.length > 0) {
+			await db
+				.insert(schema.eventTag)
+				.values({ id: newEvent.id, names: tags })
+				.onConflictDoUpdate({
+					target: schema.eventTag.id,
+					set: { names: tags }
+				});
+		}
 
 		//Capture event updated
 
