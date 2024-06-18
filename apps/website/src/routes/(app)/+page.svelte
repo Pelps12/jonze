@@ -249,7 +249,7 @@
 		</div>
 		<div class="mx-auto w-full max-w-sm space-y-2">
 			<form class="">
-				<Button type="submit">Sign Up</Button>
+				<Button href="/api/auth">Sign Up</Button>
 			</form>
 			<p class="text-xs text-gray-500 dark:text-gray-400">
 				By signing up, you agree to our{' '}

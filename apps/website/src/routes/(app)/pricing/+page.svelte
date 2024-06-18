@@ -8,6 +8,8 @@
 	let isYearly = false;
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { Info } from 'lucide-svelte';
+	import { toast } from 'svelte-sonner';
+	import { goto } from '$app/navigation';
 </script>
 
 <section class="flex items-center justify-center mt-10 pb-10">
@@ -169,6 +171,15 @@
 				<Button
 					type="submit"
 					aria-describedby="tier-extended"
+					on:click={() =>
+						toast.info('Go to an exisiting org dashabord or create a new one', {
+							action: {
+								label: 'Create',
+								onClick: (event) => {
+									goto('/org/create');
+								}
+							}
+						})}
 					class="w-full shadow-sm  mt-6 block rounded-md py-2 px-3 text-center text-base font-medium leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
 					>Subscribe</Button
 				>
