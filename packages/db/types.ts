@@ -7,3 +7,4 @@ export type Member = typeof schema.member.$inferSelect;
 export type Organization = typeof schema.organization.$inferSelect;
 export type OrgForm = typeof schema.organizationForm.$inferSelect;
 export type FormResponse = typeof schema.formResponse.$inferSelect;
+export type EventTag = typeof schema.eventTag.$inferSelect;

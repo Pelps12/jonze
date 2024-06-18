@@ -10,14 +10,16 @@
 		type SuperValidated,
 		type Infer,
 		superForm,
-		dateProxy
+		dateProxy,
+		defaults
 	} from 'sveltekit-superforms';
 	import { Input } from '$lib/components/ui/input';
 	import { client } from '$lib/client/uploadcare';
 	import { parseISO, format } from 'date-fns';
 	import enUS from 'date-fns/locale/en-US';
 	import { formatInTimeZone } from 'date-fns-tz';
-	import type { OrgForm, Event as dbEvent } from '@repo/db/types';
+	import { zod } from 'sveltekit-superforms/adapters';
+
 	import { onMount, tick } from 'svelte';
 	import { browser } from '$app/environment';
 	import { zodClient } from 'sveltekit-superforms/adapters';
@@ -49,9 +51,31 @@
 		return formattedDate;
 	}
 
-	const form = superForm(data, {
+	const serverForm = superForm(data, {
 		validators: zodClient(eventCreationSchema)
 	});
+
+	const form = superForm(
+		defaults(
+			event
+				? {
+						...event,
+						tags: event.tags?.names ?? []
+					}
+				: undefined,
+			zod(eventCreationSchema)
+		),
+		{
+			validators: zod(eventCreationSchema),
+			onUpdate({ form }) {
+				if (form.valid) {
+					// TODO: Call an external API with form.data, await the result and update form
+					console.log(form.data);
+				}
+			},
+			dataType: 'json'
+		}
+	);
 	import { badgeVariants } from '$lib/components/ui/badge';
 	import MultiSelect from 'svelte-multiselect';
 

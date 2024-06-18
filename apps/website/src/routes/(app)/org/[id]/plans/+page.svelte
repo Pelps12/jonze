@@ -48,7 +48,10 @@
 <Alert.Root class="mb-2">
 	<Alert.Title>Quick One!</Alert.Title>
 	<Alert.Description
-		>Managed memberships are now available. Ask to have them enabled.</Alert.Description
+		>Managed membership plans are now available. Go <a
+			class="underline pointer-events-auto"
+			href={`./plans/onboarding`}>here</a
+		> to enable them for your org</Alert.Description
 	>
 </Alert.Root>
 

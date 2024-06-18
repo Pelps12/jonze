@@ -8,7 +8,7 @@
 	import { mediaQuery } from 'svelte-legos';
 	import EventForm from './EventForm.svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { Copy, FileDown, MoreHorizontal, PlusIcon, QrCode } from 'lucide-svelte';
+	import { Copy, CopyPlus, FileDown, MoreHorizontal, PlusIcon, QrCode, XIcon } from 'lucide-svelte';
 	import { browser } from '$app/environment';
 	import { PUBLIC_URL } from '$env/static/public';
 	import { toast } from 'svelte-sonner';
@@ -32,6 +32,7 @@
 	import listPlugin from '@fullcalendar/list';
 	import { cn } from '$lib/utils';
 	import { Badge } from '$lib/components/ui/badge';
+	import type { ArrayElement } from '$lib/types/misc';
 	let newFormOpen = $page.url.searchParams.has('newevent');
 
 	const calendarEvents = [
@@ -59,6 +60,18 @@
 		{ title: 'Tech Meetup', start: '2024-07-30T18:00:00', end: '2024-07-30T20:00:00' },
 		{ title: 'Summer Concert', start: '2024-07-31T20:00:00', end: '2024-07-31T23:00:00' }
 	];
+
+	let selectedEvent: ArrayElement<PageData['events']> | undefined = undefined;
+
+	const handleOpenDuplicate = (eventId: string) => {
+		const duplicatedEvent = data.events.find((event) => event.id === eventId);
+		if (!duplicatedEvent) {
+			toast.error('Event not found');
+		} else {
+			selectedEvent = duplicatedEvent;
+			newFormOpen = true;
+		}
+	};
 
 	const isDesktop = mediaQuery('(min-width: 768px)');
 	const handleCopyAttendance = (eventId: string) => {
@@ -120,22 +133,83 @@
 
 	let selectedView = writable({ label: 'List View', value: 'list' });
 
-	onMount(() => {
-		var calendarEl = document.getElementById('calendar');
-		console.log(calendarEl);
-		if (calendarEl) {
-			const calendar = new Calendar(calendarEl, {
-				initialView: 'dayGridMonth',
-				plugins: [dayGridPlugin, timeGridPlugin, listPlugin],
-				events: data.events.map((event) => ({ title: event.name, ...event })),
-				headerToolbar: {
-					left: 'prev,next today',
-					center: 'title',
+	onMount(() => {});
 
-					right: 'dayGridMonth,timeGridWeek,listWeek'
+	let selected: any = undefined;
+	const defaultFilters = ['name', 'tag'];
+	const nameFilter = $page.url.searchParams.get('name');
+	const tagFilter = $page.url.searchParams.get('tag');
+	const filterValue = writable<string>();
+	if (nameFilter) {
+		selected = {
+			value: 'name',
+			label: 'Name'
+		};
+		filterValue.set(nameFilter);
+	} else if (tagFilter) {
+		selected = {
+			value: 'tag',
+			label: 'Tag'
+		};
+
+		filterValue.set(tagFilter);
+	}
+
+	const removeAllFilters = (url: URL) => {
+		url.searchParams.delete('tag');
+		url.searchParams.delete('name');
+
+		return url;
+	};
+
+	const handleFilterSubmit = async () => {
+		if (selected && selected.value) {
+			const url = removeAllFilters(new URL($page.url));
+			if (defaultFilters.includes(selected.value)) {
+				url.searchParams.set(selected.value, $filterValue);
+			} else {
+				url.searchParams.set('custom_type', selected.value);
+				url.searchParams.set('custom_value', $filterValue);
+			}
+
+			window.location.href = url.toString();
+
+			//$page.url.searchParams.set('email', $emailFilter);
+		} else {
+			toast.warning('Pick a filter');
+		}
+	};
+
+	const handleReset = () => {
+		const url = removeAllFilters(new URL($page.url));
+		window.location.href = url.toString();
+	};
+
+	selectedView.subscribe((view) => {
+		if (view.value === 'calendar') {
+			setTimeout(() => {
+				var calendarEl = document.getElementById('calendar');
+				console.log(calendarEl);
+				if (calendarEl) {
+					const calendar = new Calendar(calendarEl, {
+						initialView: 'dayGridMonth',
+						plugins: [dayGridPlugin, timeGridPlugin, listPlugin],
+						events: data.events.map((event) => ({
+							title: event.name,
+							...event,
+							url: `${PUBLIC_URL}/org/${$page.params.id}/events/${event.id}`
+						})),
+						headerToolbar: {
+							left: 'prev,next today',
+							center: 'title',
+
+							right: 'dayGridMonth,timeGridWeek,listWeek'
+						},
+						eventInteractive: true
+					});
+					calendar.render();
 				}
-			});
-			calendar.render();
+			}, 100);
 		}
 	});
 </script>
@@ -176,7 +250,11 @@
 			{#if $isDesktop}
 				<Dialog.Root bind:open={newFormOpen}>
 					<Dialog.Trigger asChild let:builder>
-						<Button builders={[builder]} class=" justify-center lg:justify-start gap-2">
+						<Button
+							builders={[builder]}
+							class=" justify-center lg:justify-start gap-2"
+							on:click={() => (selectedEvent = undefined)}
+						>
 							<PlusIcon class="h-4 w-4" />
 							<span class="hidden lg:block">Add Event</span>
 						</Button>
@@ -186,13 +264,17 @@
 							<Dialog.Title>Create your Event</Dialog.Title>
 							<Dialog.Description>Allow members mark attendance on your events</Dialog.Description>
 						</Dialog.Header>
-						<EventForm data={data.form} event={undefined} {forms} formOpen={newFormOpen} />
+						<EventForm data={data.form} event={selectedEvent} {forms} formOpen={newFormOpen} />
 					</Dialog.Content>
 				</Dialog.Root>
 			{:else}
 				<Drawer.Root bind:open={newFormOpen}>
 					<Drawer.Trigger asChild let:builder>
-						<Button builders={[builder]} class=" justify-center lg:justify-start gap-2">
+						<Button
+							builders={[builder]}
+							class=" justify-center lg:justify-start gap-2"
+							on:click={() => (selectedEvent = undefined)}
+						>
 							<PlusIcon class="h-4 w-4" />
 							<span class="hidden lg:block">Add Event</span>
 						</Button>
@@ -202,7 +284,7 @@
 							<Drawer.Title>Create your Event</Drawer.Title>
 							<Drawer.Description>Allow members mark attendance on your events</Drawer.Description>
 						</Drawer.Header>
-						<EventForm data={data.form} event={undefined} {forms} formOpen={newFormOpen} />
+						<EventForm data={data.form} event={selectedEvent} {forms} formOpen={newFormOpen} />
 						<Drawer.Footer class="pt-2">
 							<Drawer.Close asChild let:builder>
 								<Button variant="outline" builders={[builder]}>Cancel</Button>
@@ -214,6 +296,34 @@
 		{/await}
 	</div>
 </div>
+
+<form class="my-3 flex gap-2 flex-start">
+	<Select.Root
+		{selected}
+		onSelectedChange={(e) => {
+			selected = e;
+		}}
+	>
+		<Select.Trigger class="w-[100px]">
+			<Select.Value placeholder="Filter by" />
+		</Select.Trigger>
+		<Select.Content>
+			<Select.Item value="name">Name</Select.Item>
+			<Select.Item value="tag">Tag</Select.Item>
+		</Select.Content>
+	</Select.Root>
+	<Input
+		bind:value={$filterValue}
+		on:keydown={(e) => e.key === 'Enter' && handleFilterSubmit()}
+		placeholder={`Filter ${!!selected?.label ? `by ${selected?.label}` : ''}`}
+		class="max-w-md"
+	/>
+	<Button on:click={() => handleFilterSubmit()}>Apply</Button>
+	<Button on:click={() => handleReset()} variant="outline">
+		<XIcon class="w-4 h-4" />
+		Reset
+	</Button>
+</form>
 
 {#if data.events.length == 0}
 	<div
@@ -227,8 +337,8 @@
 			<Button on:click={() => (newFormOpen = true)} class="mt-4">Add Event</Button>
 		</div>
 	</div>
-{:else}
-	<div class={cn(' shadow rounded-lg p-6 hidden', $selectedView.value === 'list' && 'block')}>
+{:else if $selectedView.value === 'list'}
+	<div class={cn(' shadow rounded-lg p-6')}>
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 			{#each data.events as event}
 				<Card.Root class="w-full">
@@ -275,6 +385,13 @@
 										>
 											<span>Attendance QRCode</span>
 											<QrCode class="ml-2 h-4 w-4" />
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
+											on:click={() => handleOpenDuplicate(event.id)}
+											class="justify-between"
+										>
+											<span>Duplicate Event</span>
+											<CopyPlus class="ml-2 h-4 w-4" />
 										</DropdownMenu.Item>
 										{#if event.formId}
 											<DropdownMenu.Item
@@ -438,8 +555,8 @@
 			{/each}
 		</div>
 	</div>
-
-	<div class={cn('relative hidden', $selectedView.value === 'calendar' && 'block')}>
+{:else}
+	<div class={cn('relative')}>
 		<div id="calendar" class="m-0 p-0 w-full h-[80vh]"></div>
 		<div class="absolute right-0">
 			{#if browser}

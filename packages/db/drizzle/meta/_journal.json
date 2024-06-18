@@ -141,6 +141,13 @@
       "when": 1718662085052,
       "tag": "0020_strong_gunslinger",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "5",
+      "when": 1718687622407,
+      "tag": "0021_ambitious_wendell_vaughn",
+      "breakpoints": true
     }
   ]
 }

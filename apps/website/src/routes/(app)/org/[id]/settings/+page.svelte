@@ -13,12 +13,49 @@
 	import { toast } from 'svelte-sonner';
 	import * as Avatar from '$lib/components/ui/avatar';
 	import { invalidate } from '$app/navigation';
-	import { PUBLIC_APIKEY_PREFIX } from '$env/static/public';
+	import { PUBLIC_APIKEY_PREFIX, PUBLIC_STRIPE_KEY } from '$env/static/public';
 	import { Label } from '$lib/components/ui/label';
 	import InviteBox from './InviteBox.svelte';
 	import { Switch } from '$lib/components/ui/switch';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { formatName } from '$lib/utils';
+	import { onMount } from 'svelte';
+	import { loadConnectAndInitialize } from '@stripe/connect-js';
+	import { mode } from 'mode-watcher';
+
+	onMount(() => {
+		if (data.stripeClientSecret) {
+			const stripeConnectInstance = loadConnectAndInitialize({
+				// This is your test publishable API key.
+				publishableKey: PUBLIC_STRIPE_KEY,
+				fetchClientSecret: async () => {
+					return data.stripeClientSecret ?? '';
+				},
+				fonts: [
+					{
+						cssSrc: 'https://fonts.googleapis.com/css2?family=Onest'
+					}
+				],
+				appearance: {
+					variables: {
+						colorBackground: $mode === 'light' ? '#f3f2f1' : '#1B1918'
+					}
+				}
+			});
+			mode.subscribe((value) =>
+				stripeConnectInstance.update({
+					appearance: {
+						variables: {
+							colorBackground: value === 'light' ? '#f3f2f1' : '#1B1918'
+						}
+					}
+				})
+			);
+			const accountManagement = stripeConnectInstance.create('account-management');
+			const container = document.getElementById('accountManagementElement');
+			container?.appendChild(accountManagement);
+		}
+	});
 
 	page.subscribe((info) => console.log(info.form));
 	let open = true;
@@ -185,6 +222,8 @@
 			</Card.Root>
 		</Dialog.Root>
 	</div>
+
+	<div id="accountManagementElement"></div>
 
 	{#if techieMode}
 		<form method="post" action="?/create">

@@ -4,7 +4,19 @@ import { eventCreationSchema, eventUpdationSchema } from './schema';
 import { error, fail, redirect } from '@sveltejs/kit';
 import db from '$lib/server/db';
 import schema from '@repo/db/schema';
-import { eq, and, not, inArray, isNotNull } from '@repo/db';
+import {
+	eq,
+	and,
+	not,
+	inArray,
+	isNotNull,
+	desc,
+	ilike,
+	type OrgForm,
+	type EventTag,
+	type Event,
+	arrayContains
+} from '@repo/db';
 import { parseZonedDateTime } from '@internationalized/date';
 import posthog, { dummyClient } from '$lib/server/posthog';
 import { newId } from '@repo/db/utils/createId';
@@ -12,15 +24,9 @@ import { zod } from 'sveltekit-superforms/adapters';
 import svix from '$lib/server/svix';
 import { z } from 'zod';
 
-export const load: PageServerLoad = async ({ params }) => {
-	const events = await db.query.event.findMany({
-		where: eq(schema.event.orgId, params.id),
-		orderBy: (events, { desc }) => [desc(events.start)],
-		with: {
-			form: true,
-			tags: true
-		}
-	});
+export const load: PageServerLoad = async ({ params, url }) => {
+	const name = url.searchParams.get('name');
+	const tag = url.searchParams.get('tag');
 
 	const availableForms = db.query.organizationForm.findMany({
 		where: and(
@@ -32,21 +38,40 @@ export const load: PageServerLoad = async ({ params }) => {
 			name: true
 		}
 	});
-	console.log(events.map((event) => event.tags));
+
+	const events_with_join = await db
+		.select()
+		.from(schema.event)
+		.leftJoin(schema.organizationForm, eq(schema.organizationForm.id, schema.event.formId))
+		.leftJoin(schema.eventTag, eq(schema.eventTag.id, schema.event.id))
+		.where(
+			and(
+				eq(schema.event.orgId, params.id),
+				name ? ilike(schema.event.name, `%${name}%`) : undefined,
+				tag ? arrayContains(schema.eventTag.names, [tag]) : undefined
+			)
+		)
+		.orderBy(desc(schema.event.start));
+
+	const result = events_with_join.reduce<
+		(Event & { form: OrgForm | null; tags: EventTag | null })[]
+	>((acc, row) => {
+		const event = row.Event;
+		const eventTag = row.EventTag;
+		const eventForm = row.OrganizationForm;
+		acc.push({ ...event, tags: eventTag, form: eventForm });
+		return acc;
+	}, []);
+
+	console.log(result.map((event) => event.tags));
 	return {
-		events,
+		events: result,
 		form: await superValidate(zod(eventCreationSchema)),
 		updateForms: await Promise.all(
-			events.map((event) =>
+			result.map((event) =>
 				superValidate(
 					{
-						id: event.id,
-						name: event.name,
-						description: event.description,
-						start: event.start,
-						end: event.end,
-						image: event.image,
-						formId: event.formId,
+						...event,
 						tags: event.tags?.names
 					},
 					zod(eventUpdationSchema),
@@ -85,6 +110,16 @@ export const actions: Actions = {
 				formId: form.data.formId
 			})
 			.returning();
+
+		if (form.data.tags.length > 0) {
+			await db
+				.insert(schema.eventTag)
+				.values({ id: newEvent.id, names: form.data.tags })
+				.onConflictDoUpdate({
+					target: schema.eventTag.id,
+					set: { names: form.data.tags }
+				});
+		}
 		const useragent = event.request.headers.get('user-agent');
 		event.locals.user &&
 			dummyClient.capture({
@@ -216,12 +251,15 @@ export const actions: Actions = {
 			error(404, 'Event not found');
 		}
 
-		const deletedResponse = await db.delete(schema.formResponse).where(
-			inArray(
-				schema.formResponse.id,
-				dbEvent.attendances.map((attendance) => attendance.responseId as string)
-			)
-		);
+		const formResponseIds = dbEvent.attendances
+			.filter((attendance) => !!attendance.responseId)
+			.map((attendance) => attendance.responseId as string);
+
+		if (formResponseIds.length > 0) {
+			const deletedResponse = await db
+				.delete(schema.formResponse)
+				.where(inArray(schema.formResponse.id, formResponseIds));
+		}
 
 		await db.delete(schema.event).where(eq(schema.event.id, id));
 
