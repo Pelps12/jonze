@@ -15,7 +15,9 @@ import {
 	type OrgForm,
 	type EventTag,
 	type Event,
-	arrayContains
+	arrayContains,
+	getTableColumns,
+	count
 } from '@repo/db';
 import { parseZonedDateTime } from '@internationalized/date';
 import posthog, { dummyClient } from '$lib/server/posthog';
@@ -28,22 +30,30 @@ export const load: PageServerLoad = async ({ params, url }) => {
 	const name = url.searchParams.get('name');
 	const tag = url.searchParams.get('tag');
 
-	const availableForms = db.query.organizationForm.findMany({
-		where: and(
-			eq(schema.organizationForm.orgId, params.id),
-			not(eq(schema.organizationForm.name, 'User Info'))
-		),
-		columns: {
-			id: true,
-			name: true
-		}
-	});
+	const availableForms = Promise.resolve(
+		await db.query.organizationForm.findMany({
+			where: and(
+				eq(schema.organizationForm.orgId, params.id),
+				not(eq(schema.organizationForm.name, 'User Info'))
+			),
+			columns: {
+				id: true,
+				name: true
+			}
+		})
+	);
 
-	const events_with_join = await db
-		.select()
+	let query = db
+		.select({
+			Event: getTableColumns(schema.event),
+			EventTag: getTableColumns(schema.eventTag),
+			OrganizationForm: getTableColumns(schema.organizationForm),
+			AttendanceCount: count(schema.attendance.id)
+		})
 		.from(schema.event)
 		.leftJoin(schema.organizationForm, eq(schema.organizationForm.id, schema.event.formId))
 		.leftJoin(schema.eventTag, eq(schema.eventTag.id, schema.event.id))
+		.leftJoin(schema.attendance, eq(schema.attendance.eventId, schema.event.id))
 		.where(
 			and(
 				eq(schema.event.orgId, params.id),
@@ -51,17 +61,27 @@ export const load: PageServerLoad = async ({ params, url }) => {
 				tag ? arrayContains(schema.eventTag.names, [tag]) : undefined
 			)
 		)
-		.orderBy(desc(schema.event.start));
+		.orderBy(desc(schema.event.start))
+		.groupBy((t) => [t.Event.id, t.EventTag.id, t.OrganizationForm.id])
+		.$dynamic();
+
+	const events_with_join = await query;
+	console.log(events_with_join.length, 'ROW COUNT');
 
 	const result = events_with_join.reduce<
-		(Event & { form: OrgForm | null; tags: EventTag | null })[]
+		(Event & { form: OrgForm | null; tags: EventTag | null; attendanceCount: number })[]
 	>((acc, row) => {
 		const event = row.Event;
 		const eventTag = row.EventTag;
 		const eventForm = row.OrganizationForm;
-		acc.push({ ...event, tags: eventTag, form: eventForm });
+		acc.push({ ...event, tags: eventTag, form: eventForm, attendanceCount: row.AttendanceCount });
 		return acc;
 	}, []);
+
+	const chartData = {
+		labels: result.map((event) => event.name).reverse(),
+		data: result.map((event) => event.attendanceCount).reverse()
+	};
 
 	console.log(result.map((event) => event.tags));
 	return {
@@ -81,7 +101,8 @@ export const load: PageServerLoad = async ({ params, url }) => {
 				)
 			)
 		),
-		forms: availableForms
+		forms: availableForms,
+		chartData
 	};
 };
 

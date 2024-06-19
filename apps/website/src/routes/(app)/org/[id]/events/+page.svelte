@@ -14,7 +14,7 @@
 	import { toast } from 'svelte-sonner';
 	import Preview from '$lib/components/custom/form/UI/Preview.svelte';
 	import QRCode from 'qrcode';
-	import { writable } from 'svelte/store';
+	import { derived, writable } from 'svelte/store';
 	import UpdateEventForm from './UpdateEventForm.svelte';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
@@ -25,7 +25,8 @@
 	import { json2csv } from 'json-2-csv';
 	import type { PageData } from './$types';
 	import * as Select from '$lib/components/ui/select';
-
+	import { Chart, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
+	import { Bar } from 'svelte-chartjs';
 	import { Calendar } from '@fullcalendar/core';
 	import dayGridPlugin from '@fullcalendar/daygrid';
 	import timeGridPlugin from '@fullcalendar/timegrid';
@@ -33,33 +34,8 @@
 	import { cn } from '$lib/utils';
 	import { Badge } from '$lib/components/ui/badge';
 	import type { ArrayElement } from '$lib/types/misc';
+	import { mode } from 'mode-watcher';
 	let newFormOpen = $page.url.searchParams.has('newevent');
-
-	const calendarEvents = [
-		{ title: 'Team Meeting', start: '2024-06-15T09:00:00', end: '2024-06-15T10:00:00' },
-		{ title: 'Lunch with Sarah', start: '2024-06-16T12:00:00', end: '2024-06-16T13:00:00' },
-		{ title: 'Conference', start: '2024-06-20', end: '2024-06-23' },
-		{ title: 'Webinar', start: '2024-06-18T15:00:00', end: '2024-06-18T17:00:00' },
-		{ title: 'Doctor Appointment', start: '2024-06-19T11:00:00', end: '2024-06-19T12:00:00' },
-		{ title: 'Workshop', start: '2024-06-21' },
-		{ title: 'Birthday Party', start: '2024-06-24T19:00:00', end: '2024-06-24T23:00:00' },
-		{ title: 'Yoga Class', start: '2024-06-25T07:00:00', end: '2024-06-25T08:00:00' },
-		{ title: 'Software Release', start: '2024-06-27T00:00:00' }, // All-day event
-		{ title: 'Annual General Meeting', start: '2024-06-29T10:00:00', end: '2024-06-29T12:00:00' },
-		{ title: 'Project Kickoff', start: '2024-07-01T09:00:00', end: '2024-07-01T10:30:00' },
-		{ title: 'Dentist Appointment', start: '2024-07-03T15:00:00', end: '2024-07-03T16:00:00' },
-		{ title: 'Independence Day Party', start: '2024-07-04' }, // All-day event
-		{ title: 'Team Lunch', start: '2024-07-08T12:00:00', end: '2024-07-08T13:00:00' },
-		{ title: 'Client Review Meeting', start: '2024-07-10T11:00:00', end: '2024-07-10T12:30:00' },
-		{ title: 'Software Training', start: '2024-07-15T09:00:00', end: '2024-07-15T17:00:00' },
-		{ title: 'Book Club', start: '2024-07-17T19:00:00', end: '2024-07-17T20:30:00' },
-		{ title: 'Family BBQ', start: '2024-07-20' }, // All-day event
-		{ title: 'Quarterly Review', start: '2024-07-22T10:00:00', end: '2024-07-22T12:00:00' },
-		{ title: 'Yoga Class', start: '2024-07-25T18:00:00', end: '2024-07-25T19:00:00' },
-		{ title: 'Marketing Presentation', start: '2024-07-28T14:00:00', end: '2024-07-28T15:30:00' },
-		{ title: 'Tech Meetup', start: '2024-07-30T18:00:00', end: '2024-07-30T20:00:00' },
-		{ title: 'Summer Concert', start: '2024-07-31T20:00:00', end: '2024-07-31T23:00:00' }
-	];
 
 	let selectedEvent: ArrayElement<PageData['events']> | undefined = undefined;
 
@@ -185,6 +161,30 @@
 		window.location.href = url.toString();
 	};
 
+	Chart.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
+
+	Chart.defaults.font.family = 'Onest';
+
+	const isLight = derived(mode, ($mode) => $mode === 'light');
+
+	isLight.subscribe((a) => console.log(a));
+
+	const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
+	const chartData = {
+		labels: data.chartData.labels,
+		datasets: [
+			{
+				label: 'Attendance',
+				data: data.chartData.data,
+				borderColor: $isLight ? '#000' : '#fff',
+				backgroundColor: $isLight ? '#000' : '#fff',
+				borderWidth: 0,
+				borderRadius: 5,
+				borderSkipped: false
+			}
+		]
+	};
+
 	selectedView.subscribe((view) => {
 		if (view.value === 'calendar') {
 			setTimeout(() => {
@@ -240,6 +240,7 @@
 					<Select.Group>
 						<Select.Item value="list" label="List View">List View</Select.Item>
 						<Select.Item value="calendar" label="Calendar View">Calendar View</Select.Item>
+						<Select.Item value="graph" label="Graph View">Graph View</Select.Item>
 					</Select.Group>
 				</Select.Content>
 				<Select.Input name="favoriteFruit" />
@@ -555,7 +556,7 @@
 			{/each}
 		</div>
 	</div>
-{:else}
+{:else if $selectedView.value === 'calendar'}
 	<div class={cn('relative')}>
 		<div id="calendar" class="m-0 p-0 w-full h-[80vh]"></div>
 		<div class="absolute right-0">
@@ -568,5 +569,17 @@
 				</div>
 			{/if}
 		</div>
+	</div>
+{:else}
+	<div>
+		<Bar
+			data={chartData}
+			on:click={(e) => console.log(e)}
+			options={{
+				maintainAspectRatio: false,
+				aspectRatio: 1,
+				scales: { x: { display: false }, y: { ticks: { stepSize: 1 } } }
+			}}
+		/>
 	</div>
 {/if}
