@@ -1,0 +1,1 @@
+ALTER TABLE "EventTag" ALTER COLUMN "names" SET DATA TYPE jsonb;

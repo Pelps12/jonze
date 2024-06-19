@@ -1,5 +1,5 @@
 import db from '$lib/server/db';
-import { and, eq, desc, like, gt, asc, lt, gte, lte, sql, ilike } from '@repo/db';
+import { and, eq, desc, like, gt, asc, lt, gte, lte, sql, ilike, arrayContains } from '@repo/db';
 import type { PageServerLoad } from './$types';
 import schema from '@repo/db/schema';
 import type { FormResponse, Member, User } from '@repo/db/types';
@@ -78,8 +78,8 @@ export const load: PageServerLoad = async ({ params, url }) => {
 	}
 
 	if (customValue && customType) {
-		const id = JSON.stringify([{ label: customType, response: customValue }]);
-		query = query.where(sql`${schema.formResponse.response} @> ${id}`);
+		const id = [{ label: customType, response: customValue }];
+		query = query.where(arrayContains(schema.formResponse.response, id));
 	}
 
 	const rows = await query;

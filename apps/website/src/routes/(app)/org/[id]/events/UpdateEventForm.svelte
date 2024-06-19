@@ -1,7 +1,12 @@
 <script lang="ts">
 	import * as Form from '$lib/components/ui/form';
 	import { type EventUpdationSchema, eventUpdationSchema } from './schema';
-	import { type SuperValidated, type Infer, superForm, dateProxy } from 'sveltekit-superforms';
+	import SuperDebug, {
+		type SuperValidated,
+		type Infer,
+		superForm,
+		dateProxy
+	} from 'sveltekit-superforms';
 	import { Input } from '$lib/components/ui/input';
 	import { client } from '$lib/client/uploadcare';
 	import type { OrgForm, Event as dbEvent } from '@repo/db/types';
@@ -14,6 +19,9 @@
 	import { cn } from '$lib/utils';
 	import { Check, ChevronsUpDown } from 'lucide-svelte';
 	import type { Writable } from 'svelte/store';
+	import { MultiSelect } from 'svelte-multiselect';
+	import { badgeVariants } from '$lib/components/ui/badge';
+	import { browser } from '$app/environment';
 
 	export let data: SuperValidated<Infer<EventUpdationSchema>>;
 	export let forms: { id: string; name: string }[] = [];
@@ -23,6 +31,8 @@
 	const form = superForm(data, {
 		validators: zodClient(eventUpdationSchema)
 	});
+
+	const default_tags = [`#social`, `#gbm`, `#study-session`];
 
 	async function handleUpload(
 		e: Event & { currentTarget: EventTarget & HTMLInputElement }
@@ -52,6 +62,8 @@
 	}
 	const startProxy = dateProxy(form, 'start', { format: 'datetime-local' });
 	const endProxy = dateProxy(form, 'end', { format: 'datetime-local' });
+
+	const handleTagSelect = () => {};
 </script>
 
 <form
@@ -164,5 +176,26 @@
 		</Popover.Root>
 	</Form.Field>
 
+	<Form.Field {form} name="tags" class="mb-2">
+		<Form.Control let:attrs>
+			<Form.Label>Tags</Form.Label>
+			<MultiSelect
+				{...attrs}
+				bind:selected={$formData.tags}
+				options={default_tags}
+				allowUserOptions={true}
+				outerDivClass={'!flex !h-auto !w-full !items-center !justify-between !rounded-md !border !border-input !bg-background !px-3 !py-2 !text-sm !ring-offset-background placeholder:!text-muted-foreground focus:!outline-none focus:!ring-2 focus:!ring-ring focus:!ring-offset-2 disabled:!cursor-not-allowed disabled:!opacity-50 [&>span]:!line-clamp-1'}
+				liSelectedClass={badgeVariants({ variant: 'outline' })}
+				liOptionClass="!relative !flex !w-full !cursor-default !select-none !items-center !rounded-sm !py-1.5 !pl-8 !pr-2 !text-sm !outline-none data-[highlighted]:!bg-accent data-[highlighted]:!text-accent-foreground data-[disabled]:!pointer-events-none data-[disabled]:!opacity-50"
+				ulOptionsClass={' !z-50 !min-w-[8rem] !overflow-hidden! rounded-md border !bg-popover !text-popover-foreground !shadow-md !outline-none'}
+				allowEmpty={true}
+			/>
+		</Form.Control>
+	</Form.Field>
+
 	<Form.Button>{actionType === 'create' ? 'Create' : 'Update'}</Form.Button>
+	<!-- 
+	{#if browser}
+		<SuperDebug data={$formData} />
+	{/if} -->
 </form>

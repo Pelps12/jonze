@@ -12,7 +12,7 @@
 	import type { Organization, User } from '@workos-inc/node';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { formatName, getInitials } from '$lib/utils';
+	import { cn, formatName, getInitials } from '$lib/utils';
 	let open = false;
 	const isDesktop = mediaQuery('(min-width: 768px)');
 
@@ -79,9 +79,68 @@
 						<DropdownMenu.Item on:click={() => resetMode()}>System</DropdownMenu.Item>
 					</DropdownMenu.SubContent>
 				</DropdownMenu.Sub>
-				<DropdownMenu.Item href="/api/auth">Log In / Sign Up</DropdownMenu.Item>
+				{#if !user}
+					<DropdownMenu.Item href="/api/auth">Log In / Sign Up</DropdownMenu.Item>
+				{/if}
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
+
+		{#if user}
+			<DropdownMenu.Root>
+				<DropdownMenu.Trigger asChild let:builder>
+					<Button
+						variant="ghost"
+						builders={[builder]}
+						class={cn('relative h-8 w-8 ml-3 rounded-full block md:hidden')}
+					>
+						<Avatar.Root>
+							<Avatar.Image src={user?.profilePictureUrl} alt="@shadcn" />
+							<Avatar.Fallback>{getInitials(username)}</Avatar.Fallback>
+						</Avatar.Root>
+					</Button>
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Content class="w-56 ml-5" align="end">
+					<DropdownMenu.Label class="font-normal">
+						<div class="flex flex-col space-y-1">
+							<p class="text-sm font-medium leading-none">{username}</p>
+							<p class="text-xs leading-none text-muted-foreground">{user.email}</p>
+						</div>
+					</DropdownMenu.Label>
+					<DropdownMenu.Separator />
+					<DropdownMenu.Group>
+						<DropdownMenu.Sub>
+							<DropdownMenu.SubTrigger>
+								<UserPlus class="mr-2 h-4 w-4" />
+								<span>Teams</span>
+							</DropdownMenu.SubTrigger>
+							<DropdownMenu.SubContent>
+								{#each user.orgs as org}
+									<a href={`/org/${org.id}`} data-sveltekit-preload-data="tap">
+										<DropdownMenu.CheckboxItem id={org.id} checked={org.id === $page.params?.id}>
+											{org.name}
+										</DropdownMenu.CheckboxItem>
+									</a>
+								{/each}
+
+								<DropdownMenu.Item href="/org/create">
+									<PlusCircle class="mr-2 h-4 w-4" />
+									<span>New Org</span>
+								</DropdownMenu.Item>
+							</DropdownMenu.SubContent>
+						</DropdownMenu.Sub>
+					</DropdownMenu.Group>
+					<DropdownMenu.Separator />
+
+					<DropdownMenu.Item on:click={() => handleLogout()}>
+						Log out
+						<DropdownMenu.Shortcut>⇧⌘Q</DropdownMenu.Shortcut>
+					</DropdownMenu.Item>
+				</DropdownMenu.Content>
+			</DropdownMenu.Root>
+		{:else}
+			<Button variant="secondary" class="gap-2" href="/api/auth">Log In</Button>
+			<Button class="gap-2" href="/api/auth">Sign Up</Button>
+		{/if}
 
 		<div class="w-full items-center justify-end ms-auto sm:gap-x-3 sm:order-3 hidden md:flex">
 			<div class="flex flex-row items-center justify-end gap-2">

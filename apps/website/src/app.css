@@ -158,3 +158,45 @@ html {
 	all: revert;
 	font-family: 'Onest', 'system-ui';
 }
+
+/*full-calendar-shadcn.css*/
+.fc.fc-theme-standard {
+	--fc-small-font-size: 0.85em;
+	--fc-page-bg-color: hsla(var(--background));
+	--fc-neutral-bg-color: hsla(var(--muted) / 0.7);
+	--fc-neutral-text-color: hsla(var(--muted-foreground));
+	--fc-border-color: hsla(var(--border));
+	--fc-button-text-color: hsla(var(--primary-foreground));
+	--fc-button-bg-color: hsla(var(--primary));
+	--fc-button-border-color: hsla(var(--border));
+	--fc-button-hover-bg-color: hsla(var(--primary) / 0.9);
+	--fc-button-hover-border-color: hsla(var(--border));
+	--fc-button-active-bg-color: hsla(var(--primary) / 0.8);
+	--fc-button-active-border-color: hsla(var(--border));
+	--fc-event-bg-color: hsla(var(--primary-foreground));
+	--fc-event-border-color: hsla(var(--border));
+	--fc-event-text-color: hsla(var(--primary));
+	--fc-event-selected-overlay-color: hsla(var(--primary) / 0.4);
+	--fc-more-link-bg-color: hsla(var(--primary));
+	--fc-more-link-text-color: hsla(var(--primary-foreground));
+	--fc-event-resizer-thickness: 8px;
+	--fc-event-resizer-dot-total-width: 8px;
+	--fc-event-resizer-dot-border-width: 1px;
+	--fc-non-business-color: hsla(var(--muted) / 0.2);
+	--fc-bg-event-color: #8fdf82;
+	--fc-bg-event-opacity: 0.3;
+	--fc-highlight-color: hsla(var(--ring));
+	--fc-today-bg-color: hsla(var(--accent));
+	--fc-now-indicator-color: red;
+	--fc-button-border-radius: var(--radius);
+}
+
+.fc .fc-button {
+	border-radius: var(--radius);
+}
+
+/*Custom Multi-Select CSS*/
+:global(div.multiselect > ul.options) {
+	background: var(--sms-options-bg, red);
+	font-size: large;
+}

@@ -9,6 +9,7 @@ import { PUBLIC_APIKEY_PREFIX, PUBLIC_UPLODCARE_SECRET_KEY } from '$env/static/p
 import posthog, { dummyClient } from '$lib/server/posthog';
 import workos from '$lib/server/workos';
 import svix from '$lib/server/svix';
+import { stripe } from '$lib/server/stripe';
 
 export const load: PageServerLoad = async ({ locals, params, url }) => {
 	if (!locals.user) {
@@ -38,7 +39,8 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
 						}
 					}
 				}
-			}
+			},
+			subaccount: true
 		}
 	});
 
@@ -54,9 +56,17 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
 		console.log(err);
 	}
 
+	let stripeClientSecret: string | undefined = undefined;
+
 	const keys = organization.members.flatMap((member) => member.keys);
 	console.log(keys.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()));
-	return { keys, members: organization.members, logo: organization.logo, webhookUrl };
+	return {
+		keys,
+		members: organization.members,
+		logo: organization.logo,
+		webhookUrl,
+		stripeClientSecret
+	};
 };
 
 export const actions: Actions = {

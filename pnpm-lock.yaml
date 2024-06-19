@@ -22,7 +22,7 @@ importers:
         version: 3.2.5
       prettier-plugin-svelte:
         specifier: ^3.1.2
-        version: 3.1.2(prettier@3.2.5)(svelte@4.2.10)
+        version: 3.1.2(prettier@3.2.5)(svelte@4.2.12)
       turbo:
         specifier: ^1.12.1
         version: 1.12.4
@@ -66,6 +66,18 @@ importers:
 
   apps/website:
     dependencies:
+      '@fullcalendar/core':
+        specifier: ^6.1.14
+        version: 6.1.14
+      '@fullcalendar/daygrid':
+        specifier: ^6.1.14
+        version: 6.1.14(@fullcalendar/core@6.1.14)
+      '@fullcalendar/list':
+        specifier: ^6.1.14
+        version: 6.1.14(@fullcalendar/core@6.1.14)
+      '@fullcalendar/timegrid':
+        specifier: ^6.1.14
+        version: 6.1.14(@fullcalendar/core@6.1.14)
       '@internationalized/date':
         specifier: ^3.5.2
         version: 3.5.2
@@ -73,8 +85,8 @@ importers:
         specifier: ^1.16.0
         version: 1.16.0
       '@stripe/connect-js':
-        specifier: ^3.3.1
-        version: 3.3.1
+        specifier: ^3.3.6
+        version: 3.3.6
       '@stripe/stripe-js':
         specifier: ^3.1.0
         version: 3.1.0
@@ -186,6 +198,9 @@ importers:
       svelte-legos:
         specifier: ^0.2.2
         version: 0.2.2(svelte@4.2.10)
+      svelte-multiselect:
+        specifier: ^10.3.0
+        version: 10.3.0
       svelte-sonner:
         specifier: ^0.3.17
         version: 0.3.17(svelte@4.2.10)
@@ -224,7 +239,7 @@ importers:
         specifier: ^4.0.8
         version: 4.0.8
       '@types/eslint':
-        specifier: 8.56.0
+        specifier: ^8.56.0
         version: 8.56.0
       '@types/qrcode':
         specifier: ^1.5.5
@@ -303,7 +318,7 @@ importers:
         version: 1.12.4(eslint@8.56.0)
       eslint-plugin-svelte:
         specifier: ^2.35.1
-        version: 2.35.1(eslint@8.56.0)(svelte@4.2.10)
+        version: 2.35.1(eslint@8.56.0)(svelte@4.2.12)
 
   packages/db:
     dependencies:
@@ -1152,6 +1167,37 @@ packages:
 
   /@floating-ui/utils@0.2.1:
     resolution: {integrity: sha512-9TANp6GPoMtYzQdt54kfAyMmz1+osLlXdg2ENroU7zzrtflTLrrC/lgrIfaSe+Wu0b89GKccT7vxXA0MoAIO+Q==}
+    dev: false
+
+  /@fullcalendar/core@6.1.14:
+    resolution: {integrity: sha512-hIPRBevm0aMc2aHy1hRIJgXmI1QTvQM1neQa9oxtuqUmF1+ApYC3oAdwcQMTuI7lHHw3pKJDyJFkKLPPnL6HXA==}
+    dependencies:
+      preact: 10.12.1
+    dev: false
+
+  /@fullcalendar/daygrid@6.1.14(@fullcalendar/core@6.1.14):
+    resolution: {integrity: sha512-DSyjiA1dEM8k3bOCrZpZOmAOZu71KGtH02ze+4QKuhxkmn/zQghmmLRdfzpOrcyJg6xGKkoB4pBcO+2lXar8XQ==}
+    peerDependencies:
+      '@fullcalendar/core': ~6.1.14
+    dependencies:
+      '@fullcalendar/core': 6.1.14
+    dev: false
+
+  /@fullcalendar/list@6.1.14(@fullcalendar/core@6.1.14):
+    resolution: {integrity: sha512-eV0/6iCumYfvlPzIUTAONWH17/JlQCyCChUz8m06L4E/sOiNjkHGz8vlVTmZKqXzx9oWOOyV/Nm3pCtHmVZh+Q==}
+    peerDependencies:
+      '@fullcalendar/core': ~6.1.14
+    dependencies:
+      '@fullcalendar/core': 6.1.14
+    dev: false
+
+  /@fullcalendar/timegrid@6.1.14(@fullcalendar/core@6.1.14):
+    resolution: {integrity: sha512-ZByc3BVAtxWSVfyaNedROLlg/Tb2NQ43+MZZAfBSrVwVm2xyfQ+Bsx3pJyCXsRsUh2TFFTO07q7nMWe0jet3KQ==}
+    peerDependencies:
+      '@fullcalendar/core': ~6.1.14
+    dependencies:
+      '@fullcalendar/core': 6.1.14
+      '@fullcalendar/daygrid': 6.1.14(@fullcalendar/core@6.1.14)
     dev: false
 
   /@gcornut/valibot-json-schema@0.0.22(@types/json-schema@7.0.15)(esbuild-runner@2.2.2)(esbuild@0.19.12)(valibot@0.28.1):
@@ -2067,8 +2113,8 @@ packages:
     resolution: {integrity: sha512-1bnPQqSxSuc3Ii6MhBysoWCg58j97aUjuCSZrGSmDxNqtytIi0k8utUenAwTZN4V5mXXYGsVUI9zeBqy+jBOSQ==}
     dev: false
 
-  /@stripe/connect-js@3.3.1:
-    resolution: {integrity: sha512-+WVKHkGgtMjfV35R89lAJoG2louQLzIG+VsGRBMiLWSLuaqt9YMUgChLmhIYq1LWh6+dyRXze1qKP4udg+bGKw==}
+  /@stripe/connect-js@3.3.6:
+    resolution: {integrity: sha512-Y1NFI+5cQMgX8kD1MSuHeuY3Ocsz4/Y2c0S3/U9S+TUoY1VHEcIwFW1mpgDdl/rS5hMtlPLIkEScmwOd0Ka4lg==}
     dev: false
 
   /@stripe/stripe-js@3.1.0:
@@ -4416,6 +4462,36 @@ packages:
     transitivePeerDependencies:
       - supports-color
       - ts-node
+    dev: true
+
+  /eslint-plugin-svelte@2.35.1(eslint@8.56.0)(svelte@4.2.12):
+    resolution: {integrity: sha512-IF8TpLnROSGy98Z3NrsKXWDSCbNY2ReHDcrYTuXZMbfX7VmESISR78TWgO9zdg4Dht1X8coub5jKwHzP0ExRug==}
+    engines: {node: ^14.17.0 || >=16.0.0}
+    peerDependencies:
+      eslint: ^7.0.0 || ^8.0.0-0
+      svelte: ^3.37.0 || ^4.0.0
+    peerDependenciesMeta:
+      svelte:
+        optional: true
+    dependencies:
+      '@eslint-community/eslint-utils': 4.4.0(eslint@8.56.0)
+      '@jridgewell/sourcemap-codec': 1.4.15
+      debug: 4.3.4
+      eslint: 8.56.0
+      eslint-compat-utils: 0.1.2(eslint@8.56.0)
+      esutils: 2.0.3
+      known-css-properties: 0.29.0
+      postcss: 8.4.35
+      postcss-load-config: 3.1.4(postcss@8.4.35)
+      postcss-safe-parser: 6.0.0(postcss@8.4.35)
+      postcss-selector-parser: 6.0.15
+      semver: 7.6.0
+      svelte: 4.2.12
+      svelte-eslint-parser: 0.33.1(svelte@4.2.12)
+    transitivePeerDependencies:
+      - supports-color
+      - ts-node
+    dev: false
 
   /eslint-plugin-turbo@1.12.4(eslint@8.56.0):
     resolution: {integrity: sha512-3AGmXvH7E4i/XTWqBrcgu+G7YKZJV/8FrEn79kTd50ilNsv+U3nS2IlcCrQB6Xm2m9avGD9cadLzKDR1/UF2+g==}
@@ -7130,6 +7206,10 @@ packages:
       - debug
     dev: false
 
+  /preact@10.12.1:
+    resolution: {integrity: sha512-l8386ixSsBdbreOAkqtrwqHwdvR35ID8c3rKPa8lCWuO86dBi32QWHV4vfsZK1utLLFMvw+Z5Ad4XLkZzchscg==}
+    dev: false
+
   /preact@10.19.6:
     resolution: {integrity: sha512-gympg+T2Z1fG1unB8NH29yHJwnEaCH37Z32diPDku316OTnRPeMbiRV9kTrfZpocXjdfnWuFUl/Mj4BHaf6gnw==}
     dev: false
@@ -7146,6 +7226,16 @@ packages:
     dependencies:
       prettier: 3.2.5
       svelte: 4.2.10
+    dev: true
+
+  /prettier-plugin-svelte@3.1.2(prettier@3.2.5)(svelte@4.2.12):
+    resolution: {integrity: sha512-7xfMZtwgAWHMT0iZc8jN4o65zgbAQ3+O32V6W7pXrqNvKnHnkoyQCGCbKeUyXKZLbYE0YhFRnamfxfkEGxm8qA==}
+    peerDependencies:
+      prettier: ^3.0.0
+      svelte: ^3.2.0 || ^4.0.0-next.0 || ^5.0.0-next.0
+    dependencies:
+      prettier: 3.2.5
+      svelte: 4.2.12
     dev: true
 
   /prettier@3.2.5:
@@ -8054,6 +8144,24 @@ packages:
       postcss: 8.4.35
       postcss-scss: 4.0.9(postcss@8.4.35)
       svelte: 4.2.10
+    dev: true
+
+  /svelte-eslint-parser@0.33.1(svelte@4.2.12):
+    resolution: {integrity: sha512-vo7xPGTlKBGdLH8T5L64FipvTrqv3OQRx9d2z5X05KKZDlF4rQk8KViZO4flKERY+5BiVdOh7zZ7JGJWo5P0uA==}
+    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    peerDependencies:
+      svelte: ^3.37.0 || ^4.0.0
+    peerDependenciesMeta:
+      svelte:
+        optional: true
+    dependencies:
+      eslint-scope: 7.2.2
+      eslint-visitor-keys: 3.4.3
+      espree: 9.6.1
+      postcss: 8.4.35
+      postcss-scss: 4.0.9(postcss@8.4.35)
+      svelte: 4.2.12
+    dev: false
 
   /svelte-headless-table@0.18.2(svelte@4.2.10):
     resolution: {integrity: sha512-dnDTaXW5CNzRUjHVbc/Hb0Zv80zU4VcIUnAja6OuZriXvim1AqcWYQCHPRzBGwqj1m3YEHHNvspSzY0o5HzA0A==}
@@ -8103,6 +8211,12 @@ packages:
     transitivePeerDependencies:
       - typescript
     dev: true
+
+  /svelte-multiselect@10.3.0:
+    resolution: {integrity: sha512-Pyvlcn4TK3dB2WWo6hDEeNH+x2O/DP82UuUf61PQFX8KMB3cm1Cam+zTKrcrOoRRVI2SwH/8dPF8hSTfJFaMmA==}
+    dependencies:
+      svelte: 4.2.12
+    dev: false
 
   /svelte-preprocess@5.1.3(postcss@8.4.35)(svelte@4.2.10)(typescript@5.3.3):
     resolution: {integrity: sha512-xxAkmxGHT+J/GourS5mVJeOXZzne1FR5ljeOUAMXUkfEhkLEllRreXpbl3dIYJlcJRfL1LO1uIAPpBpBfiqGPw==}
@@ -8179,6 +8293,25 @@ packages:
 
   /svelte@4.2.10:
     resolution: {integrity: sha512-Ep06yCaCdgG1Mafb/Rx8sJ1QS3RW2I2BxGp2Ui9LBHSZ2/tO/aGLc5WqPjgiAP6KAnLJGaIr/zzwQlOo1b8MxA==}
+    engines: {node: '>=16'}
+    dependencies:
+      '@ampproject/remapping': 2.2.1
+      '@jridgewell/sourcemap-codec': 1.4.15
+      '@jridgewell/trace-mapping': 0.3.22
+      '@types/estree': 1.0.5
+      acorn: 8.11.3
+      aria-query: 5.3.0
+      axobject-query: 4.0.0
+      code-red: 1.0.4
+      css-tree: 2.3.1
+      estree-walker: 3.0.3
+      is-reference: 3.0.2
+      locate-character: 3.0.0
+      magic-string: 0.30.7
+      periscopic: 3.1.0
+
+  /svelte@4.2.12:
+    resolution: {integrity: sha512-d8+wsh5TfPwqVzbm4/HCXC783/KPHV60NvwitJnyTA5lWn1elhXMNWhXGCJ7PwPa8qFUnyJNIyuIRt2mT0WMug==}
     engines: {node: '>=16'}
     dependencies:
       '@ampproject/remapping': 2.2.1

@@ -6,13 +6,20 @@
 		type EventUpdationSchema,
 		type EventCreationSchema
 	} from './schema';
-	import { type SuperValidated, type Infer, superForm, dateProxy } from 'sveltekit-superforms';
+	import SuperDebug, {
+		type SuperValidated,
+		type Infer,
+		superForm,
+		dateProxy,
+		defaults
+	} from 'sveltekit-superforms';
 	import { Input } from '$lib/components/ui/input';
 	import { client } from '$lib/client/uploadcare';
 	import { parseISO, format } from 'date-fns';
 	import enUS from 'date-fns/locale/en-US';
 	import { formatInTimeZone } from 'date-fns-tz';
-	import type { OrgForm, Event as dbEvent } from '@repo/db/types';
+	import { zod } from 'sveltekit-superforms/adapters';
+
 	import { onMount, tick } from 'svelte';
 	import { browser } from '$app/environment';
 	import { zodClient } from 'sveltekit-superforms/adapters';
@@ -20,6 +27,7 @@
 	import * as Popover from '$lib/components/ui/popover';
 	import * as Command from '$lib/components/ui/command';
 	import { buttonVariants } from '$lib/components/ui/button';
+	import type { PageData } from './$types';
 
 	import { getAttrs } from 'bits-ui';
 	import { cn } from '$lib/utils';
@@ -29,7 +37,7 @@
 	export let data: SuperValidated<Infer<EventCreationSchema>>;
 	export let forms: { id: string; name: string }[] = [];
 	export let formOpen: boolean;
-	export let event: (dbEvent & { form: OrgForm | null }) | undefined;
+	export let event: ArrayElement<PageData['events']> | undefined;
 	export let actionType: 'create' | 'update' = 'create';
 
 	function formatToBrowserTimeZone(date: Date) {
@@ -43,9 +51,37 @@
 		return formattedDate;
 	}
 
-	const form = superForm(data, {
+	const serverForm = superForm(data, {
 		validators: zodClient(eventCreationSchema)
 	});
+
+	const form = superForm(
+		defaults(
+			event
+				? {
+						...event,
+						tags: event.tags?.names ?? []
+					}
+				: undefined,
+			zod(eventCreationSchema)
+		),
+		{
+			validators: zod(eventCreationSchema),
+			onUpdate({ form }) {
+				if (form.valid) {
+					// TODO: Call an external API with form.data, await the result and update form
+					console.log(form.data);
+				}
+			},
+			dataType: 'json'
+		}
+	);
+	import { badgeVariants } from '$lib/components/ui/badge';
+	import MultiSelect from 'svelte-multiselect';
+
+	import type { ArrayElement } from '$lib/types/misc';
+
+	const default_tags = [`#social`, `#gbm`, `#study-session`];
 
 	async function handleUpload(
 		e: Event & { currentTarget: EventTarget & HTMLInputElement }
@@ -220,6 +256,22 @@
 				</Command.Root>
 			</Popover.Content>
 		</Popover.Root>
+	</Form.Field>
+	<Form.Field {form} name="tags" class="mb-2">
+		<Form.Control let:attrs>
+			<Form.Label>Tags</Form.Label>
+			<MultiSelect
+				{...attrs}
+				bind:selected={$formData.tags}
+				options={default_tags}
+				allowUserOptions={true}
+				outerDivClass={'!flex !h-auto !w-full !items-center !justify-between !rounded-md !border !border-input !bg-background !px-3 !py-2 !text-sm !ring-offset-background placeholder:!text-muted-foreground focus:!outline-none focus:!ring-2 focus:!ring-ring focus:!ring-offset-2 disabled:!cursor-not-allowed disabled:!opacity-50 [&>span]:!line-clamp-1'}
+				liSelectedClass={badgeVariants({ variant: 'outline' })}
+				liOptionClass="!relative !flex !w-full !cursor-default !select-none !items-center !rounded-sm !py-1.5 !pl-8 !pr-2 !text-sm !outline-none data-[highlighted]:!bg-accent data-[highlighted]:!text-accent-foreground data-[disabled]:!pointer-events-none data-[disabled]:!opacity-50"
+				ulOptionsClass={' !z-50 !min-w-[8rem] !overflow-hidden! rounded-md border !bg-popover !text-popover-foreground !shadow-md !outline-none'}
+				allowEmpty={true}
+			/>
+		</Form.Control>
 	</Form.Field>
 
 	<Form.Button class="w-full">{actionType === 'create' ? 'Create' : 'Update'}</Form.Button>

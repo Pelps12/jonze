@@ -8,7 +8,7 @@
 	import { mediaQuery } from 'svelte-legos';
 	import EventForm from './EventForm.svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { Copy, FileDown, MoreHorizontal, QrCode } from 'lucide-svelte';
+	import { Copy, CopyPlus, FileDown, MoreHorizontal, PlusIcon, QrCode, XIcon } from 'lucide-svelte';
 	import { browser } from '$app/environment';
 	import { PUBLIC_URL } from '$env/static/public';
 	import { toast } from 'svelte-sonner';
@@ -24,7 +24,54 @@
 	import { Image } from '@unpic/svelte';
 	import { json2csv } from 'json-2-csv';
 	import type { PageData } from './$types';
+	import * as Select from '$lib/components/ui/select';
+
+	import { Calendar } from '@fullcalendar/core';
+	import dayGridPlugin from '@fullcalendar/daygrid';
+	import timeGridPlugin from '@fullcalendar/timegrid';
+	import listPlugin from '@fullcalendar/list';
+	import { cn } from '$lib/utils';
+	import { Badge } from '$lib/components/ui/badge';
+	import type { ArrayElement } from '$lib/types/misc';
 	let newFormOpen = $page.url.searchParams.has('newevent');
+
+	const calendarEvents = [
+		{ title: 'Team Meeting', start: '2024-06-15T09:00:00', end: '2024-06-15T10:00:00' },
+		{ title: 'Lunch with Sarah', start: '2024-06-16T12:00:00', end: '2024-06-16T13:00:00' },
+		{ title: 'Conference', start: '2024-06-20', end: '2024-06-23' },
+		{ title: 'Webinar', start: '2024-06-18T15:00:00', end: '2024-06-18T17:00:00' },
+		{ title: 'Doctor Appointment', start: '2024-06-19T11:00:00', end: '2024-06-19T12:00:00' },
+		{ title: 'Workshop', start: '2024-06-21' },
+		{ title: 'Birthday Party', start: '2024-06-24T19:00:00', end: '2024-06-24T23:00:00' },
+		{ title: 'Yoga Class', start: '2024-06-25T07:00:00', end: '2024-06-25T08:00:00' },
+		{ title: 'Software Release', start: '2024-06-27T00:00:00' }, // All-day event
+		{ title: 'Annual General Meeting', start: '2024-06-29T10:00:00', end: '2024-06-29T12:00:00' },
+		{ title: 'Project Kickoff', start: '2024-07-01T09:00:00', end: '2024-07-01T10:30:00' },
+		{ title: 'Dentist Appointment', start: '2024-07-03T15:00:00', end: '2024-07-03T16:00:00' },
+		{ title: 'Independence Day Party', start: '2024-07-04' }, // All-day event
+		{ title: 'Team Lunch', start: '2024-07-08T12:00:00', end: '2024-07-08T13:00:00' },
+		{ title: 'Client Review Meeting', start: '2024-07-10T11:00:00', end: '2024-07-10T12:30:00' },
+		{ title: 'Software Training', start: '2024-07-15T09:00:00', end: '2024-07-15T17:00:00' },
+		{ title: 'Book Club', start: '2024-07-17T19:00:00', end: '2024-07-17T20:30:00' },
+		{ title: 'Family BBQ', start: '2024-07-20' }, // All-day event
+		{ title: 'Quarterly Review', start: '2024-07-22T10:00:00', end: '2024-07-22T12:00:00' },
+		{ title: 'Yoga Class', start: '2024-07-25T18:00:00', end: '2024-07-25T19:00:00' },
+		{ title: 'Marketing Presentation', start: '2024-07-28T14:00:00', end: '2024-07-28T15:30:00' },
+		{ title: 'Tech Meetup', start: '2024-07-30T18:00:00', end: '2024-07-30T20:00:00' },
+		{ title: 'Summer Concert', start: '2024-07-31T20:00:00', end: '2024-07-31T23:00:00' }
+	];
+
+	let selectedEvent: ArrayElement<PageData['events']> | undefined = undefined;
+
+	const handleOpenDuplicate = (eventId: string) => {
+		const duplicatedEvent = data.events.find((event) => event.id === eventId);
+		if (!duplicatedEvent) {
+			toast.error('Event not found');
+		} else {
+			selectedEvent = duplicatedEvent;
+			newFormOpen = true;
+		}
+	};
 
 	const isDesktop = mediaQuery('(min-width: 768px)');
 	const handleCopyAttendance = (eventId: string) => {
@@ -83,6 +130,88 @@
 		(o, { id }) => Object.assign(o, { [id]: false }),
 		{}
 	);
+
+	let selectedView = writable({ label: 'List View', value: 'list' });
+
+	onMount(() => {});
+
+	let selected: any = undefined;
+	const defaultFilters = ['name', 'tag'];
+	const nameFilter = $page.url.searchParams.get('name');
+	const tagFilter = $page.url.searchParams.get('tag');
+	const filterValue = writable<string>();
+	if (nameFilter) {
+		selected = {
+			value: 'name',
+			label: 'Name'
+		};
+		filterValue.set(nameFilter);
+	} else if (tagFilter) {
+		selected = {
+			value: 'tag',
+			label: 'Tag'
+		};
+
+		filterValue.set(tagFilter);
+	}
+
+	const removeAllFilters = (url: URL) => {
+		url.searchParams.delete('tag');
+		url.searchParams.delete('name');
+
+		return url;
+	};
+
+	const handleFilterSubmit = async () => {
+		if (selected && selected.value) {
+			const url = removeAllFilters(new URL($page.url));
+			if (defaultFilters.includes(selected.value)) {
+				url.searchParams.set(selected.value, $filterValue);
+			} else {
+				url.searchParams.set('custom_type', selected.value);
+				url.searchParams.set('custom_value', $filterValue);
+			}
+
+			window.location.href = url.toString();
+
+			//$page.url.searchParams.set('email', $emailFilter);
+		} else {
+			toast.warning('Pick a filter');
+		}
+	};
+
+	const handleReset = () => {
+		const url = removeAllFilters(new URL($page.url));
+		window.location.href = url.toString();
+	};
+
+	selectedView.subscribe((view) => {
+		if (view.value === 'calendar') {
+			setTimeout(() => {
+				var calendarEl = document.getElementById('calendar');
+				console.log(calendarEl);
+				if (calendarEl) {
+					const calendar = new Calendar(calendarEl, {
+						initialView: 'dayGridMonth',
+						plugins: [dayGridPlugin, timeGridPlugin, listPlugin],
+						events: data.events.map((event) => ({
+							title: event.name,
+							...event,
+							url: `${PUBLIC_URL}/org/${$page.params.id}/events/${event.id}`
+						})),
+						headerToolbar: {
+							left: 'prev,next today',
+							center: 'title',
+
+							right: 'dayGridMonth,timeGridWeek,listWeek'
+						},
+						eventInteractive: true
+					});
+					calendar.render();
+				}
+			}, 100);
+		}
+	});
 </script>
 
 {#if !data.events.find((event) => !!event.form)}
@@ -103,33 +232,59 @@
 		{#await data.forms}
 			<Button disabled>Add Event</Button>
 		{:then forms}
+			<Select.Root portal={null} bind:selected={$selectedView}>
+				<Select.Trigger class="w-[150px]">
+					<Select.Value placeholder="Select a fruit" />
+				</Select.Trigger>
+				<Select.Content>
+					<Select.Group>
+						<Select.Item value="list" label="List View">List View</Select.Item>
+						<Select.Item value="calendar" label="Calendar View">Calendar View</Select.Item>
+					</Select.Group>
+				</Select.Content>
+				<Select.Input name="favoriteFruit" />
+			</Select.Root>
 			<Button variant="outline" on:click={() => handleExport(data.events, 'events.csv')}
 				><FileDown class="h-4 w-4 mr-2" /><span class="hidden sm:block">Export</span></Button
 			>
 			{#if $isDesktop}
 				<Dialog.Root bind:open={newFormOpen}>
 					<Dialog.Trigger asChild let:builder>
-						<Button builders={[builder]}>Add Event</Button>
+						<Button
+							builders={[builder]}
+							class=" justify-center lg:justify-start gap-2"
+							on:click={() => (selectedEvent = undefined)}
+						>
+							<PlusIcon class="h-4 w-4" />
+							<span class="hidden lg:block">Add Event</span>
+						</Button>
 					</Dialog.Trigger>
 					<Dialog.Content class="sm:max-w-[425px]">
 						<Dialog.Header>
 							<Dialog.Title>Create your Event</Dialog.Title>
 							<Dialog.Description>Allow members mark attendance on your events</Dialog.Description>
 						</Dialog.Header>
-						<EventForm data={data.form} event={undefined} {forms} formOpen={newFormOpen} />
+						<EventForm data={data.form} event={selectedEvent} {forms} formOpen={newFormOpen} />
 					</Dialog.Content>
 				</Dialog.Root>
 			{:else}
 				<Drawer.Root bind:open={newFormOpen}>
 					<Drawer.Trigger asChild let:builder>
-						<Button builders={[builder]}>Add Event</Button>
+						<Button
+							builders={[builder]}
+							class=" justify-center lg:justify-start gap-2"
+							on:click={() => (selectedEvent = undefined)}
+						>
+							<PlusIcon class="h-4 w-4" />
+							<span class="hidden lg:block">Add Event</span>
+						</Button>
 					</Drawer.Trigger>
 					<Drawer.Content class="p-4">
 						<Drawer.Header class="text-left">
 							<Drawer.Title>Create your Event</Drawer.Title>
 							<Drawer.Description>Allow members mark attendance on your events</Drawer.Description>
 						</Drawer.Header>
-						<EventForm data={data.form} event={undefined} {forms} formOpen={newFormOpen} />
+						<EventForm data={data.form} event={selectedEvent} {forms} formOpen={newFormOpen} />
 						<Drawer.Footer class="pt-2">
 							<Drawer.Close asChild let:builder>
 								<Button variant="outline" builders={[builder]}>Cancel</Button>
@@ -141,6 +296,34 @@
 		{/await}
 	</div>
 </div>
+
+<form class="my-3 flex gap-2 flex-start">
+	<Select.Root
+		{selected}
+		onSelectedChange={(e) => {
+			selected = e;
+		}}
+	>
+		<Select.Trigger class="w-[100px]">
+			<Select.Value placeholder="Filter by" />
+		</Select.Trigger>
+		<Select.Content>
+			<Select.Item value="name">Name</Select.Item>
+			<Select.Item value="tag">Tag</Select.Item>
+		</Select.Content>
+	</Select.Root>
+	<Input
+		bind:value={$filterValue}
+		on:keydown={(e) => e.key === 'Enter' && handleFilterSubmit()}
+		placeholder={`Filter ${!!selected?.label ? `by ${selected?.label}` : ''}`}
+		class="max-w-md"
+	/>
+	<Button on:click={() => handleFilterSubmit()}>Apply</Button>
+	<Button on:click={() => handleReset()} variant="outline">
+		<XIcon class="w-4 h-4" />
+		Reset
+	</Button>
+</form>
 
 {#if data.events.length == 0}
 	<div
@@ -154,14 +337,22 @@
 			<Button on:click={() => (newFormOpen = true)} class="mt-4">Add Event</Button>
 		</div>
 	</div>
-{:else}
-	<div class=" shadow rounded-lg p-6">
+{:else if $selectedView.value === 'list'}
+	<div class={cn(' shadow rounded-lg p-6')}>
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 			{#each data.events as event}
 				<Card.Root class="w-full">
 					<Card.Header>
 						<Card.Title class="flex justify-between">
-							<p>{event.name}</p>
+							<div class="flex items-center gap-2">
+								<p>{event.name}</p>
+								{#if event.tags}
+									{#each event.tags.names as tagName}
+										<Badge class="my-2" variant="outline">{tagName}</Badge>
+									{/each}
+								{/if}
+							</div>
+
 							<Dialog.Root>
 								<DropdownMenu.Root>
 									<DropdownMenu.Trigger asChild let:builder>
@@ -194,6 +385,13 @@
 										>
 											<span>Attendance QRCode</span>
 											<QrCode class="ml-2 h-4 w-4" />
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
+											on:click={() => handleOpenDuplicate(event.id)}
+											class="justify-between"
+										>
+											<span>Duplicate Event</span>
+											<CopyPlus class="ml-2 h-4 w-4" />
 										</DropdownMenu.Item>
 										{#if event.formId}
 											<DropdownMenu.Item
@@ -254,7 +452,7 @@
 					</Card.Content>
 					<Card.Footer class="flex justify-between">
 						{#await data.forms}
-							<Button variant="outline" disabled>Add Event</Button>
+							<Button variant="outline" disabled>Edit</Button>
 						{:then forms}
 							{#if $isDesktop}
 								<Dialog.Root
@@ -355,6 +553,20 @@
 					</Card.Footer>
 				</Card.Root>
 			{/each}
+		</div>
+	</div>
+{:else}
+	<div class={cn('relative')}>
+		<div id="calendar" class="m-0 p-0 w-full h-[80vh]"></div>
+		<div class="absolute right-0">
+			{#if browser}
+				<div
+					class=" text-sm bg-secondary rounded-bl-md rounded-br-md font-semibold px-4 py-2 flex items-start w-20 gap-0.5"
+				>
+					<img src="/logo.svg" alt="Logo" class="h-4 w-4" />
+					Jonze
+				</div>
+			{/if}
 		</div>
 	</div>
 {/if}

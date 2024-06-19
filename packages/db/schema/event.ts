@@ -4,6 +4,7 @@ import { relations, sql } from 'drizzle-orm';
 import { organization } from './organization';
 import { attendance } from './attendance';
 import { organizationForm } from './organizationForm';
+import { eventTag } from './eventTag';
 
 export const event = pgTable('Event', {
 	id: varchar('id', { length: 128 })
@@ -33,5 +34,6 @@ export const event = pgTable('Event', {
 export const eventRelations = relations(event, ({ one, many }) => ({
 	organization: one(organization, { fields: [event.orgId], references: [organization.id] }),
 	form: one(organizationForm, { fields: [event.formId], references: [organizationForm.id] }),
+	tags: one(eventTag),
 	attendances: many(attendance)
 }));
