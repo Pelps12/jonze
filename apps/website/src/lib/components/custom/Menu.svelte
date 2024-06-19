@@ -137,10 +137,7 @@
 					</DropdownMenu.Item>
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
-		{:else}
-			<Button variant="secondary" class="gap-2" href="/api/auth">Log In</Button>
-			<Button class="gap-2" href="/api/auth">Sign Up</Button>
-		{/if}
+		{:else}{/if}
 
 		<div class="w-full items-center justify-end ms-auto sm:gap-x-3 sm:order-3 hidden md:flex">
 			<div class="flex flex-row items-center justify-end gap-2">
