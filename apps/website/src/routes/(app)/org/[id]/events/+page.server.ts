@@ -19,12 +19,10 @@ import {
 	getTableColumns,
 	count
 } from '@repo/db';
-import { parseZonedDateTime } from '@internationalized/date';
-import posthog, { dummyClient } from '$lib/server/posthog';
+import { dummyClient } from '$lib/server/posthog';
 import { newId } from '@repo/db/utils/createId';
 import { zod } from 'sveltekit-superforms/adapters';
 import svix from '$lib/server/svix';
-import { z } from 'zod';
 
 export const load: PageServerLoad = async ({ params, url }) => {
 	const name = url.searchParams.get('name');

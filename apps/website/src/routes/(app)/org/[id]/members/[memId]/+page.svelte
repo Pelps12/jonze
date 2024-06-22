@@ -2,7 +2,7 @@
 	import type { PageData } from './$types';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
-	import { ChevronDown, CopyIcon, Pencil, PlusCircle, TrashIcon } from 'lucide-svelte';
+	import { ChevronDown, CopyIcon, Pencil, PlusCircle, PlusIcon, TrashIcon } from 'lucide-svelte';
 	import * as Drawer from '$lib/components/ui/drawer';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { mediaQuery } from 'svelte-legos';
@@ -13,7 +13,9 @@
 	import Link from './link.svelte';
 	import MembershipForm from './MembershipForm.svelte';
 	import { page } from '$app/stores';
-	import { formatName, getInitials } from '$lib/utils';
+	import { cn, formatName, getInitials } from '$lib/utils';
+	import { Badge, badgeVariants } from '$lib/components/ui/badge';
+	import MemberUpdateForm from './MemberUpdateForm.svelte';
 
 	export let data: PageData;
 
@@ -52,14 +54,81 @@
 
 	let open = false;
 
+	let updateModalOpen = false;
+
 	const isDesktop = mediaQuery('(min-width: 768px)');
 </script>
 
 <Card.Root class="max-w-md">
 	<Card.Header>
 		<Card.Title
-			>{data.member.role.charAt(0).toUpperCase() +
-				data.member.role.slice(1).toLowerCase()}</Card.Title
+			><div class="flex gap-2 flex-wrap items-center">
+				<p>
+					{data.member.role.charAt(0).toUpperCase() + data.member.role.slice(1).toLowerCase()}
+				</p>
+
+				{#if data.member.tags}
+					{#each data.member.tags.names as tagName}
+						<Badge variant="outline">{tagName}</Badge>
+					{/each}
+				{/if}
+
+				{#if $isDesktop}
+					<Dialog.Root bind:open={updateModalOpen}>
+						<Dialog.Trigger asChild let:builder>
+							<Button
+								size="sm"
+								class={cn(badgeVariants({ variant: 'outline' }), 'h-6 border-dotted border-2')}
+								builders={[builder]}
+								variant="outline"
+							>
+								<PlusIcon class="h-2 w-2 mr-2" /> Add Tags
+							</Button>
+						</Dialog.Trigger>
+						<Dialog.Content class="sm:max-w-[425px]">
+							<Dialog.Header>
+								<Dialog.Title>Change user's plan</Dialog.Title>
+								<Dialog.Description>Update users membership</Dialog.Description>
+							</Dialog.Header>
+
+							<MemberUpdateForm
+								data={data.memberForm}
+								closeForm={() => (updateModalOpen = false)}
+							/>
+						</Dialog.Content>
+					</Dialog.Root>
+				{:else}
+					<Drawer.Root bind:open={updateModalOpen}>
+						<Drawer.Trigger asChild let:builder>
+							<Button
+								size="sm"
+								class={cn(badgeVariants({ variant: 'outline' }), 'h-6 border-dotted border-2')}
+								builders={[builder]}
+								variant="outline"
+							>
+								<PlusIcon class="h-2 w-2 mr-2" /> Add Tags
+							</Button>
+						</Drawer.Trigger>
+						<Drawer.Content class="p-4">
+							<Dialog.Header>
+								<Dialog.Title>Change user's plan</Dialog.Title>
+								<Dialog.Description>Update users membership</Dialog.Description>
+							</Dialog.Header>
+
+							<MemberUpdateForm
+								data={data.memberForm}
+								closeForm={() => (updateModalOpen = false)}
+							/>
+
+							<Drawer.Footer class="pt-2">
+								<Drawer.Close asChild let:builder>
+									<Button variant="outline" builders={[builder]}>Cancel</Button>
+								</Drawer.Close>
+							</Drawer.Footer>
+						</Drawer.Content>
+					</Drawer.Root>
+				{/if}
+			</div></Card.Title
 		>
 	</Card.Header>
 	<Card.Content class="grid gap-6 ">
@@ -115,7 +184,7 @@
 							<Dialog.Description>Update users membership</Dialog.Description>
 						</Dialog.Header>
 
-						<MembershipForm data={data.form} {plans} />
+						<MembershipForm data={data.form} {plans} closeForm={() => (open = false)} />
 					</Dialog.Content>
 				</Dialog.Root>
 			{:else}
@@ -130,6 +199,7 @@
 							<Dialog.Title>Change user's plan</Dialog.Title>
 							<Dialog.Description>Update users membership</Dialog.Description>
 						</Dialog.Header>
+						<MembershipForm data={data.form} {plans} closeForm={() => (open = false)} />
 
 						<Drawer.Footer class="pt-2">
 							<Drawer.Close asChild let:builder>

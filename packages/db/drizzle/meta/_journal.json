@@ -162,6 +162,13 @@
       "when": 1718947142100,
       "tag": "0023_military_doorman",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "5",
+      "when": 1719044523775,
+      "tag": "0024_military_namor",
+      "breakpoints": true
     }
   ]
 }

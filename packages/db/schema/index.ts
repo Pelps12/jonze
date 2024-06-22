@@ -5,6 +5,7 @@ import * as eventTag from './eventTag';
 import * as customer from './customer';
 import * as formResponse from './formResponse';
 import * as member from './member';
+import * as memberTag from './memberTag';
 import * as membership from './membership';
 import * as organization from './organization';
 import * as organizationForm from './organizationForm';
@@ -22,6 +23,7 @@ const schema = {
 	...blog,
 	...formResponse,
 	...member,
+	...memberTag,
 	...membership,
 	...plan,
 	...organization,
