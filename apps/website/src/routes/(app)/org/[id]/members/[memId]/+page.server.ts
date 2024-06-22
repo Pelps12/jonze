@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
 import schema from '@repo/db/schema';
 import { error, fail, redirect } from '@sveltejs/kit';
-import { membershipCreationSchema } from './schema';
+import { memberUpdationSchema, membershipCreationSchema } from './schema';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { dummyClient } from '$lib/server/posthog';
@@ -44,7 +44,8 @@ export const load: PageServerLoad = async ({ params }) => {
 					profilePictureUrl: true,
 					email: true
 				}
-			}
+			},
+			tags: true
 		}
 	});
 
@@ -71,6 +72,10 @@ export const load: PageServerLoad = async ({ params }) => {
 				: {},
 			zod(membershipCreationSchema)
 		),
+		memberForm: await superValidate(
+			member.tags ? { tags: member.tags.names } : {},
+			zod(memberUpdationSchema)
+		),
 		plans: availablePlans
 	};
 };
@@ -86,10 +91,7 @@ export const actions: Actions = {
 		console.log(form.data, 'Update Data');
 
 		const member = await db.query.member.findFirst({
-			where: eq(schema.member.id, event.params.memId),
-			with: {
-				additionalInfo: true
-			}
+			where: eq(schema.member.id, event.params.memId)
 		});
 
 		if (!member) {
@@ -138,6 +140,52 @@ export const actions: Actions = {
 			);
 			redirect(302, event.url);
 		}
+
+		return {
+			form
+		};
+	},
+	updatemember: async (event) => {
+		const form = await superValidate(event, zod(memberUpdationSchema));
+		if (!form.valid) {
+			return fail(400, {
+				form
+			});
+		}
+		console.log(form.data, 'Update Data');
+
+		const member = await db.query.member.findFirst({
+			where: eq(schema.member.id, event.params.memId)
+		});
+
+		if (!member) {
+			error(404, 'Member not found');
+		}
+
+		if (form.data.tags.length > 0) {
+			await db
+				.insert(schema.memberTag)
+				.values({ id: member.id, names: form.data.tags })
+				.onConflictDoUpdate({
+					target: schema.memberTag.id,
+					set: { names: form.data.tags }
+				});
+		}
+
+		const useragent = event.request.headers.get('user-agent');
+		event.locals.user &&
+			dummyClient.capture({
+				distinctId: event.locals.user.id,
+				event: 'new user tags',
+				properties: {
+					$ip: event.getClientAddress(),
+					orgId: event.params.id,
+					memId: event.params.memId,
+					...(useragent && { $useragent: useragent })
+				}
+			});
+
+		event.platform?.context.waitUntil(Promise.all([dummyClient.flushAsync()]));
 
 		return {
 			form

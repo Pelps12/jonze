@@ -20,10 +20,11 @@
 	export let data;
 
 	let selected: any = undefined;
-	const defaultFilters = ['name', 'email', 'plan'];
+	const defaultFilters = ['name', 'email', 'plan', 'tag'];
 	const nameFilter = $page.url.searchParams.get('name');
 	const emailFilter = $page.url.searchParams.get('email');
 	const planFilter = $page.url.searchParams.get('plan');
+	const tagFilter = $page.url.searchParams.get('tag');
 	const customFilter = $page.url.searchParams.get('custom_value');
 	const customFilterType = $page.url.searchParams.get('custom_type');
 	const filterValue = writable<string>();
@@ -47,6 +48,13 @@
 		};
 
 		filterValue.set(planFilter);
+	} else if (tagFilter) {
+		selected = {
+			value: 'tag',
+			label: 'Tag'
+		};
+
+		filterValue.set(tagFilter);
 	} else if (customFilter && customFilterType) {
 		selected = {
 			value: customFilterType,
@@ -81,6 +89,10 @@
 		url.searchParams.delete('email');
 		url.searchParams.delete('name');
 		url.searchParams.delete('plan');
+		url.searchParams.delete('tag');
+		url.searchParams.delete('before');
+		url.searchParams.delete('after');
+		url.searchParams.delete('limit');
 		url.searchParams.delete('custom_type');
 		url.searchParams.delete('custom_value');
 
@@ -165,6 +177,7 @@
 			<Select.Item value="email">Email</Select.Item>
 			<Select.Item value="name">Name</Select.Item>
 			<Select.Item value="plan">Plan</Select.Item>
+			<Select.Item value="tag">Tag</Select.Item>
 			{#each data.organizationForm?.form ?? [] as formValue}
 				<Select.Item value={formValue.label}>{formValue.label}</Select.Item>
 			{/each}

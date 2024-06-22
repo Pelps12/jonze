@@ -7,6 +7,7 @@ import { attendance } from './attendance';
 import { apiKey } from './apikey';
 import { membership } from './membership';
 import { customer } from './customer';
+import { memberTag } from './memberTag';
 
 export const roleEnum = pgEnum('role', ['OWNER', 'ADMIN', 'MEMBER']);
 
@@ -39,5 +40,6 @@ export const memberRelations = relations(member, ({ one, many }) => ({
 	memberships: many(membership),
 	attendances: many(attendance),
 	keys: many(apiKey),
-	responses: many(formResponse)
+	responses: many(formResponse),
+	tags: one(memberTag)
 }));

@@ -17,6 +17,9 @@ export const load: PageServerLoad = async ({ params, url }) => {
 	const customValue = url.searchParams.get('custom_value');
 	const customType = url.searchParams.get('custom_type');
 
+	const tag = url.searchParams.get('tag');
+	console.log(tag, 'TAGGGGGGG');
+
 	const limit =
 		url.searchParams.get('limit') === 'all'
 			? Number.MAX_SAFE_INTEGER
@@ -35,6 +38,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
 		.from(schema.member)
 		.innerJoin(schema.user, eq(schema.user.id, schema.member.userId))
 		.leftJoin(schema.formResponse, eq(schema.formResponse.id, schema.member.additionalInfoId))
+		.leftJoin(schema.memberTag, eq(schema.memberTag.id, schema.member.id))
 		.where(
 			and(
 				cursor
@@ -46,7 +50,8 @@ export const load: PageServerLoad = async ({ params, url }) => {
 				emailFilter ? like(schema.user.email, `%${emailFilter}%`) : undefined,
 				formattedName
 					? sql`CONCAT(${schema.user.firstName}, ' ', ${schema.user.lastName}) ILIKE ${formattedName}`
-					: undefined
+					: undefined,
+				tag ? arrayContains(schema.memberTag.names, [tag]) : undefined
 			)
 		)
 		.orderBy(direction === 'prev' ? asc(schema.member.createdAt) : desc(schema.member.createdAt))

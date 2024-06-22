@@ -7,4 +7,10 @@ export const membershipCreationSchema = z.object({
 	createdAt: z.date().optional()
 });
 
+export const memberUpdationSchema = z.object({
+	tags: z.array(z.string()).default([])
+});
+
+export type MemberUpdationSchema = typeof memberUpdationSchema;
+
 export type MembershipCreationSchema = typeof membershipCreationSchema;

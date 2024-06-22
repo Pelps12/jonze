@@ -148,6 +148,27 @@
       "when": 1718687622407,
       "tag": "0021_ambitious_wendell_vaughn",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "5",
+      "when": 1718921418660,
+      "tag": "0022_keen_hannibal_king",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1718947142100,
+      "tag": "0023_military_doorman",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "5",
+      "when": 1719044523775,
+      "tag": "0024_military_namor",
+      "breakpoints": true
     }
   ]
 }

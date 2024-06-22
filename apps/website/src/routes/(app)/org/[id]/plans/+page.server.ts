@@ -1,5 +1,5 @@
 import db from '$lib/server/db';
-import { eq } from 'drizzle-orm';
+import { and, eq, not } from '@repo/db';
 import type { Actions, PageServerLoad } from './$types';
 import schema from '@repo/db/schema';
 import type { ArrayElement } from '$lib/types/misc';
@@ -14,6 +14,18 @@ export const load: PageServerLoad = async ({ params }) => {
 	const plans = await db.query.plan.findMany({
 		where: eq(schema.plan.orgId, params.id)
 	});
+
+	const availableForms = await db.query.organizationForm.findMany({
+		where: and(
+			eq(schema.organizationForm.orgId, params.id),
+			not(eq(schema.organizationForm.name, 'User Info'))
+		),
+		columns: {
+			id: true,
+			name: true
+		}
+	});
+
 	console.log(plans);
 	const transformedPlans = plans.map((plan) => ({
 		...plan,
@@ -22,6 +34,7 @@ export const load: PageServerLoad = async ({ params }) => {
 
 	return {
 		plans: transformedPlans,
+		availableForms,
 		form: await superValidate(zod(planCreationSchema))
 	};
 };

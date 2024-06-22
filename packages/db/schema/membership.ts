@@ -3,6 +3,7 @@ import { newId } from '../utils/createId';
 import { relations } from 'drizzle-orm';
 import { member } from './member';
 import { plan } from './plan';
+import { formResponse } from './formResponse';
 
 export const providerEnum = pgEnum('provider', [
 	'Jonze',
@@ -28,6 +29,9 @@ export const membership = pgTable('Membership', {
 		.references(() => plan.id, {
 			onDelete: 'cascade'
 		}),
+	responseId: varchar('responseId', { length: 128 }).references(() => formResponse.id, {
+		onDelete: 'set null'
+	}),
 	provider: providerEnum('provider').notNull().default('None'),
 	createdAt: timestamp('createdAt', { mode: 'date', precision: 6, withTimezone: true })
 		.defaultNow()
@@ -41,6 +45,10 @@ export const membershipRelations = relations(membership, ({ one, many }) => ({
 	member: one(member, {
 		fields: [membership.memId],
 		references: [member.id]
+	}),
+	response: one(formResponse, {
+		fields: [membership.responseId],
+		references: [formResponse.id]
 	}),
 	plan: one(plan, {
 		fields: [membership.planId],

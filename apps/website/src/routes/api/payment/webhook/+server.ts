@@ -23,13 +23,16 @@ export const POST: RequestHandler = async ({ request }) => {
 				const data = event.data.object;
 				const memId = data.metadata?.memId;
 				const planId = data.metadata?.planId;
+				const responseId = data.metadata?.responseId;
 				if (!memId || !planId) error(400, 'Invalid Metadata');
 
 				await db.insert(schema.membership).values({
 					planId,
 					memId,
-					provider: 'Jonze'
+					provider: 'Jonze',
+					responseId
 				});
+
 				break;
 			default:
 				error(400, `Unhandled event type ${event.type}`);
