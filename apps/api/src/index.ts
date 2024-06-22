@@ -48,7 +48,6 @@ app.get('/', async (c) => {
 });
 
 app.use('*', async (c, next) => {
-	console.log(c.env.DATABASE_HOST, c.env.DATABASE_PASSWORD, c.env.DATABASE_USERNAME);
 	console.log('abc', c.env.TEST_SECRET);
 	const connection = neon(c.env.DATABASE_URL);
 	const db = drizzle(connection, { schema });
@@ -71,6 +70,9 @@ app.doc('/doc', (c) => ({
 	servers: [
 		{
 			url: 'https://api.jonze.co'
+		},
+		{
+			url: 'http://127.0.0.1:8787'
 		}
 	]
 }));

@@ -1,5 +1,5 @@
 // forms.ts
-import { and, eq } from '@repo/db';
+import { and, arrayContains, eq, getTableColumns } from '@repo/db';
 import schema from '@repo/db/schema';
 import { DbType } from '@repo/db/typeaid';
 import { UnkeyContext, unkey } from '@unkey/hono';
@@ -54,7 +54,25 @@ const listResponsesRoute = createRoute({
 				},
 				example: 'form_FDCxyzsw9oBrkEBZ',
 				description: 'ID of form'
-			})
+			}),
+			responseField: z
+				.string()
+				.openapi({
+					param: {
+						name: 'responseField',
+						in: 'query'
+					}
+				})
+				.optional(),
+			responseValue: z
+				.string()
+				.openapi({
+					param: {
+						name: 'responseValue',
+						in: 'query'
+					}
+				})
+				.optional()
 		})
 	},
 	responses: {
@@ -87,26 +105,32 @@ app.openapi(listResponsesRoute, async (c) => {
 		});
 	}
 
-	const form = await c.get('db').query.organizationForm.findFirst({
-		where: and(eq(schema.organizationForm.id, c.req.valid('query').id)),
-		with: {
-			responses: true
-		}
-	});
-
-	if (!form) {
-		throw new HTTPException(404, {
-			message: 'Form not found'
+	if (!!c.req.valid('query').responseField !== !!c.req.valid('query').responseValue) {
+		throw new HTTPException(400, {
+			message: 'Both Field and Value must be present'
 		});
 	}
+	const responseField = c.req.valid('query').responseField;
+	const responseValue = c.req.valid('query').responseValue;
 
-	if (form.orgId !== metadata.orgId) {
-		throw new HTTPException(401, {
-			message: 'Invalide API Token'
-		});
-	}
+	const responses = await c
+		.get('db')
+		.select({ ...getTableColumns(schema.formResponse) })
+		.from(schema.formResponse)
+		.innerJoin(schema.organizationForm, eq(schema.organizationForm.id, schema.formResponse.formId))
+		.where(
+			and(
+				eq(schema.organizationForm.id, c.req.valid('query').id),
+				eq(schema.organizationForm.orgId, metadata.orgId),
+				responseField && responseValue
+					? arrayContains(schema.formResponse.response, [
+							{ label: responseField, response: responseValue }
+						])
+					: undefined
+			)
+		);
 
-	return c.json(form.responses);
+	return c.json(responses);
 });
 
 export default app;
