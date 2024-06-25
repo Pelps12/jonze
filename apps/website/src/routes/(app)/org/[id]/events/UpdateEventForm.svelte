@@ -27,9 +27,13 @@
 	export let forms: { id: string; name: string }[] = [];
 	export let event: (dbEvent & { form: OrgForm | null }) | undefined;
 	export let actionType: 'create' | 'update' = 'create';
+	export let closeForm: () => void;
 
 	const form = superForm(data, {
-		validators: zodClient(eventUpdationSchema)
+		validators: zodClient(eventUpdationSchema),
+		onResult: () => {
+			closeForm();
+		}
 	});
 
 	const default_tags = [`#social`, `#gbm`, `#study-session`];

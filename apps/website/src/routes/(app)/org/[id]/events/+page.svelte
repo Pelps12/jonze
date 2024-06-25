@@ -265,7 +265,12 @@
 							<Dialog.Title>Create your Event</Dialog.Title>
 							<Dialog.Description>Allow members mark attendance on your events</Dialog.Description>
 						</Dialog.Header>
-						<EventForm data={data.form} event={selectedEvent} {forms} formOpen={newFormOpen} />
+						<EventForm
+							data={data.form}
+							event={selectedEvent}
+							{forms}
+							closeForm={() => (newFormOpen = false)}
+						/>
 					</Dialog.Content>
 				</Dialog.Root>
 			{:else}
@@ -285,7 +290,12 @@
 							<Drawer.Title>Create your Event</Drawer.Title>
 							<Drawer.Description>Allow members mark attendance on your events</Drawer.Description>
 						</Drawer.Header>
-						<EventForm data={data.form} event={selectedEvent} {forms} formOpen={newFormOpen} />
+						<EventForm
+							data={data.form}
+							event={selectedEvent}
+							{forms}
+							closeForm={() => (newFormOpen = false)}
+						/>
 						<Drawer.Footer class="pt-2">
 							<Drawer.Close asChild let:builder>
 								<Button variant="outline" builders={[builder]}>Cancel</Button>
@@ -474,6 +484,7 @@
 										<UpdateEventForm
 											{forms}
 											data={data.updateForms.find((form) => form.id === event.id)}
+											closeForm={() => (editFormOpen[event.id] = false)}
 											{event}
 											actionType="update"
 										/>
@@ -497,6 +508,7 @@
 										<UpdateEventForm
 											{forms}
 											data={data.updateForms.find((form) => form.id === event.id)}
+											closeForm={() => (editFormOpen[event.id] = false)}
 											{event}
 											actionType="update"
 										/>

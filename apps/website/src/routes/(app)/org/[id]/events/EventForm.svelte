@@ -36,7 +36,8 @@
 
 	export let data: SuperValidated<Infer<EventCreationSchema>>;
 	export let forms: { id: string; name: string }[] = [];
-	export let formOpen: boolean;
+
+	export let closeForm: () => void;
 	export let event: ArrayElement<PageData['events']> | undefined;
 	export let actionType: 'create' | 'update' = 'create';
 
@@ -52,7 +53,10 @@
 	}
 
 	const serverForm = superForm(data, {
-		validators: zodClient(eventCreationSchema)
+		validators: zodClient(eventCreationSchema),
+		onResult: () => {
+			closeForm();
+		}
 	});
 
 	const form = superForm(
