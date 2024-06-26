@@ -1,6 +1,5 @@
 import { superValidate } from 'sveltekit-superforms/server';
 import type { Actions, PageServerLoad } from './$types';
-import { eventCreationSchema, eventUpdationSchema } from './schema';
 import { error, fail, redirect } from '@sveltejs/kit';
 import db from '$lib/server/db';
 import schema from '@repo/db/schema';
@@ -23,8 +22,9 @@ import { dummyClient } from '$lib/server/posthog';
 import { newId } from '@repo/db/utils/createId';
 import { zod } from 'sveltekit-superforms/adapters';
 import svix from '$lib/server/svix';
+import { eventCreationSchema, eventUpdationSchema } from '$lib/formSchema/event';
 
-export const load: PageServerLoad = async ({ params, url }) => {
+/* export const load: PageServerLoad = async ({ params, url }) => {
 	const name = url.searchParams.get('name');
 	const tag = url.searchParams.get('tag');
 
@@ -102,7 +102,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
 		forms: availableForms,
 		chartData
 	};
-};
+}; */
 
 export const actions: Actions = {
 	create: async (event) => {

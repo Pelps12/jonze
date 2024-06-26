@@ -51,6 +51,9 @@
 		"@stripe/stripe-js": "^3.1.0",
 		"@sveltejs/adapter-cloudflare": "^4.1.0",
 		"@t3-oss/env-core": "^0.9.2",
+		"@tanstack/svelte-query": "^5.48.0",
+		"@trpc/client": "^10.45.2",
+		"@trpc/server": "^10.45.2",
 		"@types/d3": "^7.4.3",
 		"@unkey/api": "^0.17.0",
 		"@unpic/svelte": "^0.0.53",
@@ -83,6 +86,7 @@
 		"posthog-node": "^3.6.3",
 		"qrcode": "^1.5.3",
 		"stripe": "^15.11.0",
+		"superjson": "^2.2.1",
 		"svelte-chartjs": "^3.1.5",
 		"svelte-legos": "^0.2.2",
 		"svelte-multiselect": "^10.3.0",
@@ -91,6 +95,7 @@
 		"svix": "^1.21.0",
 		"tailwind-merge": "^2.2.1",
 		"tailwind-variants": "^0.1.20",
+		"trpc-svelte-query-adapter": "^2.3.4",
 		"vaul-svelte": "^0.2.3",
 		"zod": "^3.22.4"
 	}

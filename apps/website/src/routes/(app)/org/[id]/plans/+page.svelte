@@ -14,9 +14,14 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Copy, MoreHorizontal, QrCode } from 'lucide-svelte';
 	import * as Alert from '$lib/components/ui/alert';
+	import { trpc } from '$lib/client/trpc';
 	let newFormOpen = writable($page.url.searchParams.has('newplan'));
 
 	export let data;
+
+	const result = trpc().planRouter.getPlans.createQuery({ id: $page.params.id });
+
+	result.subscribe((val) => console.log(val.data));
 
 	const isDesktop = mediaQuery('(min-width: 768px)');
 
@@ -55,106 +60,108 @@
 	>
 </Alert.Root>
 
-<div class="flex justify-between items-center mb-6">
-	<h2 class="text-xl font-semibold">Membership Plans</h2>
+{#if $result.data}
+	<div class="flex justify-between items-center mb-6">
+		<h2 class="text-xl font-semibold">Membership Plans</h2>
 
-	<div class="flex space-x-2">
-		{#if $isDesktop}
-			<Dialog.Root bind:open={$newFormOpen}>
-				<Dialog.Trigger asChild let:builder>
-					<Button variant="outline" builders={[builder]}>Add Plan</Button>
-				</Dialog.Trigger>
-				<Dialog.Content class="sm:max-w-[425px]">
-					<Dialog.Header>
-						<Dialog.Title>Create your Plan</Dialog.Title>
-						<Dialog.Description>Enables tiers for memberships</Dialog.Description>
-					</Dialog.Header>
-					<PlanForm data={data.form} />
-				</Dialog.Content>
-			</Dialog.Root>
-		{:else}
-			<Drawer.Root bind:open={$newFormOpen}>
-				<Drawer.Trigger asChild let:builder>
-					<Button variant="outline" builders={[builder]}>Add Plan</Button>
-				</Drawer.Trigger>
-				<Drawer.Content class="p-4">
-					<Drawer.Header class="text-left">
-						<Drawer.Title>Create your Plan</Drawer.Title>
-						<Drawer.Description>Enables tiers for memberships</Drawer.Description>
-					</Drawer.Header>
-					<PlanForm data={data.form} />
-					<Drawer.Footer class="pt-2">
-						<Drawer.Close asChild let:builder>
-							<Button variant="outline" builders={[builder]}>Cancel</Button>
-						</Drawer.Close>
-					</Drawer.Footer>
-				</Drawer.Content>
-			</Drawer.Root>
-		{/if}
+		<div class="flex space-x-2">
+			{#if $isDesktop}
+				<Dialog.Root bind:open={$newFormOpen}>
+					<Dialog.Trigger asChild let:builder>
+						<Button variant="outline" builders={[builder]}>Add Plan</Button>
+					</Dialog.Trigger>
+					<Dialog.Content class="sm:max-w-[425px]">
+						<Dialog.Header>
+							<Dialog.Title>Create your Plan</Dialog.Title>
+							<Dialog.Description>Enables tiers for memberships</Dialog.Description>
+						</Dialog.Header>
+						<PlanForm data={$result.data.form} />
+					</Dialog.Content>
+				</Dialog.Root>
+			{:else}
+				<Drawer.Root bind:open={$newFormOpen}>
+					<Drawer.Trigger asChild let:builder>
+						<Button variant="outline" builders={[builder]}>Add Plan</Button>
+					</Drawer.Trigger>
+					<Drawer.Content class="p-4">
+						<Drawer.Header class="text-left">
+							<Drawer.Title>Create your Plan</Drawer.Title>
+							<Drawer.Description>Enables tiers for memberships</Drawer.Description>
+						</Drawer.Header>
+						<PlanForm data={$result.data.form} />
+						<Drawer.Footer class="pt-2">
+							<Drawer.Close asChild let:builder>
+								<Button variant="outline" builders={[builder]}>Cancel</Button>
+							</Drawer.Close>
+						</Drawer.Footer>
+					</Drawer.Content>
+				</Drawer.Root>
+			{/if}
+		</div>
 	</div>
-</div>
 
-<div class=" rounded-lg p-6">
-	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-		{#each data.plans as plan}
-			<Card.Root class="max-w-xs">
-				<Card.Header>
-					<Card.Title class="flex justify-between">
-						<p>{plan.name}</p>
-						<DropdownMenu.Root>
-							<DropdownMenu.Trigger asChild let:builder>
-								<Button
-									variant="ghost"
-									builders={[builder]}
-									class="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
-								>
-									<MoreHorizontal class="h-4 w-4" />
-									<span class="sr-only">Open menu</span>
-								</Button>
-							</DropdownMenu.Trigger>
+	<div class=" rounded-lg p-6">
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+			{#each $result.data.plans as plan}
+				<Card.Root class="max-w-xs">
+					<Card.Header>
+						<Card.Title class="flex justify-between">
+							<p>{plan.name}</p>
+							<DropdownMenu.Root>
+								<DropdownMenu.Trigger asChild let:builder>
+									<Button
+										variant="ghost"
+										builders={[builder]}
+										class="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
+									>
+										<MoreHorizontal class="h-4 w-4" />
+										<span class="sr-only">Open menu</span>
+									</Button>
+								</DropdownMenu.Trigger>
 
-							<DropdownMenu.Content class="w-[200px]" align="end">
-								<DropdownMenu.Item
-									on:click={() => handleCopyAttendance(plan.id)}
-									class="justify-between"
-								>
-									<span>Plan Link</span>
-									<Copy class="ml-2 h-4 w-4" />
-								</DropdownMenu.Item>
+								<DropdownMenu.Content class="w-[200px]" align="end">
+									<DropdownMenu.Item
+										on:click={() => handleCopyAttendance(plan.id)}
+										class="justify-between"
+									>
+										<span>Plan Link</span>
+										<Copy class="ml-2 h-4 w-4" />
+									</DropdownMenu.Item>
 
-								<DropdownMenu.Item
-									class="justify-between"
-									on:click={() =>
-										createQRCode(
-											`${plan.name} - QR Code`,
-											`${PUBLIC_URL}/pay/${$page.params.id}/plan/${plan.id}`
-										)}
-								>
-									<span>Plan QRCode</span>
-									<QrCode class="ml-2 h-4 w-4" />
-								</DropdownMenu.Item>
-							</DropdownMenu.Content>
-						</DropdownMenu.Root>
-					</Card.Title>
-					{#if plan.start}
-						<Card.Description
-							>Expires: {new Date(plan.start).toLocaleDateString('en-US', {
-								month: 'long',
-								day: 'numeric'
-							})}
-						</Card.Description>
-					{/if}
-				</Card.Header>
+									<DropdownMenu.Item
+										class="justify-between"
+										on:click={() =>
+											createQRCode(
+												`${plan.name} - QR Code`,
+												`${PUBLIC_URL}/pay/${$page.params.id}/plan/${plan.id}`
+											)}
+									>
+										<span>Plan QRCode</span>
+										<QrCode class="ml-2 h-4 w-4" />
+									</DropdownMenu.Item>
+								</DropdownMenu.Content>
+							</DropdownMenu.Root>
+						</Card.Title>
+						{#if plan.start}
+							<Card.Description
+								>Expires: {new Date(plan.start).toLocaleDateString('en-US', {
+									month: 'long',
+									day: 'numeric'
+								})}
+							</Card.Description>
+						{/if}
+					</Card.Header>
 
-				<Card.Content>
-					<h1 class="text-xl font-semibold">
-						${plan.amount}
-					</h1>
-					<p class="text-sm">
-						{plan.interval.years} year(s)
-					</p>
-				</Card.Content>
-			</Card.Root>
-		{/each}
+					<Card.Content>
+						<h1 class="text-xl font-semibold">
+							${plan.amount}
+						</h1>
+						<p class="text-sm">
+							{plan.interval.years} year(s)
+						</p>
+					</Card.Content>
+				</Card.Root>
+			{/each}
+		</div>
 	</div>
-</div>
+{/if}

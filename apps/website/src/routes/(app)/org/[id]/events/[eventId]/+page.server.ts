@@ -4,7 +4,7 @@ import type { PageServerLoad } from './$types';
 import schema from '@repo/db/schema';
 import { error } from '@sveltejs/kit';
 
-export const load: PageServerLoad = async ({ params }) => {
+/* export const load: PageServerLoad = async ({ params }) => {
 	//ADD AUTHENTICATION
 
 	//Gets event with all attendants, their user information and their responses
@@ -40,4 +40,4 @@ export const load: PageServerLoad = async ({ params }) => {
 	}
 
 	return { event };
-};
+}; */

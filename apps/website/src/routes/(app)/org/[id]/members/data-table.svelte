@@ -17,6 +17,7 @@
 	import { FileDown } from 'lucide-svelte';
 	import { json2csv } from 'json-2-csv';
 	import * as Select from '$lib/components/ui/select';
+	import type { RouterOutput } from '$lib/server/trpc/routes';
 
 	const isDesktop = mediaQuery('(min-width: 768px)');
 
@@ -24,7 +25,8 @@
 	$: perPage = $isDesktop ? 3 : 8;
 	$: siblingCount = $isDesktop ? 1 : 0;
 
-	export let data: PageData;
+	export let data: RouterOutput['memberRouter']['getMembers'];
+	export let isLoading: boolean;
 
 	const { members, organizationForm, pagination } = data;
 
@@ -120,7 +122,7 @@
 		}
 	};
 
-	const handleExport = async (members: PageData['members']) => {
+	const handleExport = async (members: RouterOutput['memberRouter']['getMembers']['members']) => {
 		const csv = json2csv(
 			members.map((member) => {
 				const additionalInfo = member.additionalInfo?.response?.reduce<any>(
@@ -174,7 +176,7 @@
 		><FileDown class="h-4 w-4 mr-2" /><span class="hidden sm:block">Export</span></Button
 	>
 	<Button
-		disabled={!data.pagination.prevCursor}
+		disabled={!data.pagination.prevCursor || isLoading}
 		variant="outline"
 		on:click={() => handlePagination('prev')}
 	>
@@ -195,7 +197,7 @@
 	</Select.Root>
 
 	<Button
-		disabled={!data.pagination.nextCursor}
+		disabled={!data.pagination.nextCursor || isLoading}
 		variant="outline"
 		on:click={() => handlePagination('next')}
 	>
@@ -241,7 +243,7 @@
 
 <div class="flex justify-end gap-2">
 	<Button
-		disabled={!data.pagination.prevCursor}
+		disabled={!data.pagination.prevCursor || isLoading}
 		variant="outline"
 		on:click={() => handlePagination('prev')}
 	>
@@ -250,7 +252,7 @@
 	</Button>
 
 	<Button
-		disabled={!data.pagination.nextCursor}
+		disabled={!data.pagination.nextCursor || isLoading}
 		variant="outline"
 		on:click={() => handlePagination('next')}
 	>

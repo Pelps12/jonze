@@ -96,6 +96,15 @@ importers:
       '@t3-oss/env-core':
         specifier: ^0.9.2
         version: 0.9.2(typescript@5.3.3)(zod@3.22.4)
+      '@tanstack/svelte-query':
+        specifier: ^5.48.0
+        version: 5.48.0(svelte@4.2.10)
+      '@trpc/client':
+        specifier: ^10.45.2
+        version: 10.45.2(@trpc/server@10.45.2)
+      '@trpc/server':
+        specifier: ^10.45.2
+        version: 10.45.2
       '@types/d3':
         specifier: ^7.4.3
         version: 7.4.3
@@ -192,6 +201,9 @@ importers:
       stripe:
         specifier: ^15.11.0
         version: 15.11.0
+      superjson:
+        specifier: ^2.2.1
+        version: 2.2.1
       svelte-chartjs:
         specifier: ^3.1.5
         version: 3.1.5(chart.js@4.4.1)(svelte@4.2.10)
@@ -216,6 +228,9 @@ importers:
       tailwind-variants:
         specifier: ^0.1.20
         version: 0.1.20(tailwindcss@3.4.1)
+      trpc-svelte-query-adapter:
+        specifier: ^2.3.4
+        version: 2.3.4(@tanstack/svelte-query@5.48.0)(@trpc/client@10.45.2)(@trpc/server@10.45.2)(svelte@4.2.10)(typescript@5.3.3)
       vaul-svelte:
         specifier: ^0.2.3
         version: 0.2.3(svelte@4.2.10)
@@ -2232,6 +2247,31 @@ packages:
       zod: 3.22.4
     dev: false
 
+  /@tanstack/query-core@5.48.0:
+    resolution: {integrity: sha512-lZAfPPeVIqXCswE9SSbG33B6/91XOWt/Iq41bFeWb/mnHwQSIfFRbkS4bfs+WhIk9abRArF9Id2fp0Mgo+hq6Q==}
+    dev: false
+
+  /@tanstack/svelte-query@5.48.0(svelte@4.2.10):
+    resolution: {integrity: sha512-0XzCAsmls0hmr6dijDiALJxuUpo4IlDZ00sML3Q1h2n/DFm5i6HdZ4Tzn52OurJ7/hqoOF+pzxv1XDpNsCjW6w==}
+    peerDependencies:
+      svelte: ^3.54.0 || ^4.0.0 || ^5.0.0-next.0
+    dependencies:
+      '@tanstack/query-core': 5.48.0
+      svelte: 4.2.10
+    dev: false
+
+  /@trpc/client@10.45.2(@trpc/server@10.45.2):
+    resolution: {integrity: sha512-ykALM5kYWTLn1zYuUOZ2cPWlVfrXhc18HzBDyRhoPYN0jey4iQHEFSEowfnhg1RvYnrAVjNBgHNeSAXjrDbGwg==}
+    peerDependencies:
+      '@trpc/server': 10.45.2
+    dependencies:
+      '@trpc/server': 10.45.2
+    dev: false
+
+  /@trpc/server@10.45.2:
+    resolution: {integrity: sha512-wOrSThNNE4HUnuhJG6PfDRp4L2009KDVxsd+2VYH8ro6o/7/jwYZ8Uu5j+VaW+mOmc8EHerHzGcdbGNQSAUPgg==}
+    dev: false
+
   /@tsconfig/node10@1.0.9:
     resolution: {integrity: sha512-jNsYVVxU8v5g43Erja32laIDHXeoNvFEpX33OK4d6hljo3jDhCBDhx5dhCCTMWUojscpAagGiRkBKxpdl9fxqA==}
     dev: false
@@ -3415,7 +3455,6 @@ packages:
     engines: {node: '>=12.13'}
     dependencies:
       is-what: 4.1.16
-    dev: true
 
   /cors@2.8.5:
     resolution: {integrity: sha512-KIHbLJqu73RGr/hnbrO9uBeixNGuvSQjul/jdFvS/KFSIH1hWVd1ng7zOHx+YrEfInLG7q4n6GHQ9cDtxv/P6g==}
@@ -5598,7 +5637,6 @@ packages:
   /is-what@4.1.16:
     resolution: {integrity: sha512-ZhMwEosbFJkA0YhFnNDgTM4ZxDRsS6HqTo7qsZM08fehyRYIYa0yHu5R6mgo1n/8MgaPBXiPimPD77baVFYg+A==}
     engines: {node: '>=12.13'}
-    dev: true
 
   /is-wsl@2.2.0:
     resolution: {integrity: sha512-fKzAra0rGJUUBwGBgNkHZuToZcn+TtXHpeCgmkMJMMYx1sQDYaCSyjJBSCa2nH1DGm7s3n1oBnohoVTBaN7Lww==}
@@ -7275,6 +7313,10 @@ packages:
       ipaddr.js: 1.9.1
     dev: false
 
+  /proxy-deep@3.1.1:
+    resolution: {integrity: sha512-kppbvLUNJ4IOMZds9/4gz/rtT5OFiesy3XosLsgMKlF3vb6GA5Y3ptyDlzKLcOcUBW+zaY+RiMINTsgE+O6e+Q==}
+    dev: false
+
   /proxy-from-env@1.1.0:
     resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
     dev: false
@@ -8065,7 +8107,6 @@ packages:
     engines: {node: '>=16'}
     dependencies:
       copy-anything: 3.0.5
-    dev: true
 
   /superstruct@1.0.3:
     resolution: {integrity: sha512-8iTn3oSS8nRGn+C2pgXSKPI3jmpm6FExNazNpjvqS6ZUJQCej3PUXEKM8NjHBOs54ExM+LPW/FBRhymrdcCiSg==}
@@ -8510,6 +8551,23 @@ packages:
 
   /trough@2.2.0:
     resolution: {integrity: sha512-tmMpK00BjZiUyVyvrBK7knerNgmgvcV/KLVyuma/SC+TQN167GrMRciANTz09+k3zW8L8t60jWO1GpfkZdjTaw==}
+    dev: false
+
+  /trpc-svelte-query-adapter@2.3.4(@tanstack/svelte-query@5.48.0)(@trpc/client@10.45.2)(@trpc/server@10.45.2)(svelte@4.2.10)(typescript@5.3.3):
+    resolution: {integrity: sha512-TnqMV6h7gYbTtkXbnonZ+aGbRrZzmCGQ66J4fqoQz2at6z4xZPUtAT4KaoZruFpegXoKQQQfBLV9We6JkVXedw==}
+    peerDependencies:
+      '@tanstack/svelte-query': ^5.8.2
+      '@trpc/client': ^10.43.3
+      '@trpc/server': ^10.43.3
+      svelte: ^4.2.3
+      typescript: ^5.2.2
+    dependencies:
+      '@tanstack/svelte-query': 5.48.0(svelte@4.2.10)
+      '@trpc/client': 10.45.2(@trpc/server@10.45.2)
+      '@trpc/server': 10.45.2
+      proxy-deep: 3.1.1
+      svelte: 4.2.10
+      typescript: 5.3.3
     dev: false
 
   /ts-api-utils@1.2.1(typescript@5.3.3):

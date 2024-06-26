@@ -1,11 +1,6 @@
 <script lang="ts">
 	import * as Form from '$lib/components/ui/form';
-	import {
-		ACCEPTED_IMAGE_TYPES,
-		eventCreationSchema,
-		type EventUpdationSchema,
-		type EventCreationSchema
-	} from './schema';
+	import { eventCreationSchema, type EventCreationSchema } from '$lib/formSchema/event';
 	import SuperDebug, {
 		type SuperValidated,
 		type Infer,
@@ -31,15 +26,22 @@
 
 	import { getAttrs } from 'bits-ui';
 	import { cn } from '$lib/utils';
-	import { Check, ChevronsUpDown } from 'lucide-svelte';
+	import { Check, ChevronsUpDown, LoaderCircle } from 'lucide-svelte';
 	import type { Writable } from 'svelte/store';
 
 	export let data: SuperValidated<Infer<EventCreationSchema>>;
 	export let forms: { id: string; name: string }[] = [];
 
+	const uploadMutation = trpc().eventRouter.createEvent.createMutation();
+	const utils = trpc().createUtils();
+
 	export let closeForm: () => void;
-	export let event: ArrayElement<PageData['events']> | undefined;
+	export let event: ArrayElement<RouterOutput['eventRouter']['getEvents']['events']> | undefined;
 	export let actionType: 'create' | 'update' = 'create';
+
+	onMount(() => {
+		console.log(forms);
+	});
 
 	function formatToBrowserTimeZone(date: Date) {
 		// Format the date and time in the desired format, using the browser's timezone
@@ -52,13 +54,6 @@
 		return formattedDate;
 	}
 
-	const serverForm = superForm(data, {
-		validators: zodClient(eventCreationSchema),
-		onResult: () => {
-			closeForm();
-		}
-	});
-
 	const form = superForm(
 		defaults(
 			event
@@ -70,11 +65,18 @@
 			zod(eventCreationSchema)
 		),
 		{
+			SPA: true,
 			validators: zod(eventCreationSchema),
-			onUpdate({ form }) {
+			onUpdate: async ({ form }) => {
 				if (form.valid) {
 					// TODO: Call an external API with form.data, await the result and update form
 					console.log(form.data);
+					await $uploadMutation.mutateAsync({
+						orgId: $page.params.id,
+						...form.data
+					});
+					await utils.eventRouter.getEvents.invalidate();
+					closeForm();
 				}
 			},
 			dataType: 'json'
@@ -84,6 +86,9 @@
 	import MultiSelect from 'svelte-multiselect';
 
 	import type { ArrayElement } from '$lib/types/misc';
+	import type { RouterOutput } from '$lib/server/trpc/routes';
+	import { trpc } from '$lib/client/trpc';
+	import { page } from '$app/stores';
 
 	const default_tags = [`#social`, `#gbm`, `#study-session`];
 
@@ -229,7 +234,7 @@
 					role="combobox"
 					{...attrs}
 				>
-					{forms.find((f) => f.id === $formData.formId)?.name ?? 'Select form'}
+					{forms?.find((f) => f.id === $formData.formId)?.name ?? 'Select form'}
 					<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
 				</Popover.Trigger>
 				<input hidden value={$formData.formId} name={attrs.name} />
@@ -278,5 +283,9 @@
 		</Form.Control>
 	</Form.Field>
 
-	<Form.Button class="w-full">{actionType === 'create' ? 'Create' : 'Update'}</Form.Button>
+	<Form.Button class="w-full" disabled={$uploadMutation.isPending}
+		>{#if $uploadMutation.isPending}
+			<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+		{/if}{actionType === 'create' ? 'Create' : 'Update'}</Form.Button
+	>
 </form>

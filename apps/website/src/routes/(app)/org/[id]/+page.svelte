@@ -37,12 +37,24 @@
 	isLight.subscribe((a) => console.log(a));
 
 	const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
-	const chartData = {
-		labels: data.chartData.labels,
+	let chartData: {
+		labels: string[];
+		datasets: {
+			label: string;
+			data: number[];
+			borderColor: string;
+			backgroundColor: string;
+			borderWidth: number;
+			borderRadius: number;
+			borderSkipped: boolean;
+		}[];
+	};
+	$: chartData = {
+		labels: data?.chartData?.labels ?? [],
 		datasets: [
 			{
 				label: 'Attendance',
-				data: data.chartData.data,
+				data: data?.chartData.data ?? [],
 				borderColor: $isLight ? '#000' : '#fff',
 				backgroundColor: $isLight ? '#000' : '#fff',
 				borderWidth: 0,

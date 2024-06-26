@@ -6,7 +6,7 @@ import type { FormResponse, Member, User } from '@repo/db/types';
 import { error, type Actions } from '@sveltejs/kit';
 import { alias } from 'drizzle-orm/pg-core';
 
-export const load: PageServerLoad = async ({ params, url }) => {
+/* export const load: PageServerLoad = async ({ params, url }) => {
 	const emailFilter = url.searchParams.get('email');
 	const name = url.searchParams.get('name');
 	const formattedName = name ? `%${name}%` : null;
@@ -120,3 +120,4 @@ export const load: PageServerLoad = async ({ params, url }) => {
 		}
 	};
 };
+ */

@@ -6,18 +6,34 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Alert from '$lib/components/ui/alert';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { Copy, PlusCircle, QrCode, XIcon } from 'lucide-svelte';
+	import { Copy, LoaderCircle, PlusCircle, QrCode, XIcon } from 'lucide-svelte';
 	import { PUBLIC_URL } from '$env/static/public';
 	import { toast } from 'svelte-sonner';
 	import { browser } from '$app/environment';
 	import QRCode from 'qrcode';
 	import { Input } from '$lib/components/ui/input';
-	import { writable } from 'svelte/store';
+	import { derived, writable } from 'svelte/store';
 	import { goto, invalidate } from '$app/navigation';
 	import { organizationForm } from '@repo/db/schema/organizationForm';
 	import * as Select from '$lib/components/ui/select';
+	import { trpc } from '$lib/client/trpc';
 
-	export let data;
+	const queryParams = derived(page, ($page) => ({
+		orgId: $page.params.id,
+		email: $page.url.searchParams.get('email'),
+		name: $page.url.searchParams.get('name'),
+		customValue: $page.url.searchParams.get('custom_value'),
+		customType: $page.url.searchParams.get('custom_type'),
+		tag: $page.url.searchParams.get('tag'),
+		limit: $page.url.searchParams.get('limit'),
+		plan: $page.url.searchParams.get('plan'),
+		before: $page.url.searchParams.get('before'),
+		after: $page.url.searchParams.get('after')
+	}));
+
+	$: result = trpc().memberRouter.getMembers.createQuery($queryParams);
+
+	$: $page.url.searchParams.get('tag'), console.log($page.url.searchParams.get('tag'));
 
 	let selected: any = undefined;
 	const defaultFilters = ['name', 'email', 'plan', 'tag'];
@@ -109,7 +125,7 @@
 				url.searchParams.set('custom_value', $filterValue);
 			}
 
-			window.location.href = url.toString();
+			goto(url.toString());
 
 			//$page.url.searchParams.set('email', $emailFilter);
 		} else {
@@ -119,13 +135,13 @@
 
 	const handleReset = () => {
 		const url = removeAllFilters(new URL($page.url));
-		window.location.href = url.toString();
+		goto(url.toString());
 	};
 
 	$: console.log(selected);
 </script>
 
-{#if !data.organizationForm}
+{#if !$result.data?.organizationForm}
 	<Alert.Root class="mb-2">
 		<Alert.Title>Quick Tip!</Alert.Title>
 		<Alert.Description
@@ -178,7 +194,7 @@
 			<Select.Item value="name">Name</Select.Item>
 			<Select.Item value="plan">Plan</Select.Item>
 			<Select.Item value="tag">Tag</Select.Item>
-			{#each data.organizationForm?.form ?? [] as formValue}
+			{#each $result.data?.organizationForm?.form ?? [] as formValue}
 				<Select.Item value={formValue.label}>{formValue.label}</Select.Item>
 			{/each}
 		</Select.Content>
@@ -189,12 +205,20 @@
 		placeholder={`Filter ${!!selected?.label ? `by ${selected?.label}` : ''}`}
 		class="max-w-md"
 	/>
-	<Button on:click={() => handleFilterSubmit()}>Apply</Button>
+	<Button on:click={() => handleFilterSubmit()} disabled={$result.isLoading}>
+		{#if $result.isLoading}
+			<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+		{/if}
+		Apply</Button
+	>
 	<Button on:click={() => handleReset()} variant="outline">
 		<XIcon class="w-4 h-4" />
 		Reset
 	</Button>
 </form>
-<div class=" mx-auto py-10">
-	<DataTable {data} />
-</div>
+
+{#if $result.data}
+	<div class=" mx-auto py-10">
+		<DataTable data={$result.data} isLoading={$result.isLoading} />
+	</div>
+{/if}

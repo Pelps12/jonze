@@ -16,41 +16,14 @@
 	import { cn, formatName, getInitials } from '$lib/utils';
 	import { Badge, badgeVariants } from '$lib/components/ui/badge';
 	import MemberUpdateForm from './MemberUpdateForm.svelte';
+	import { trpc } from '$lib/client/trpc';
+	import DataTable from './data-table.svelte';
 
-	export let data: PageData;
-
-	const table = createTable(readable(data.member.attendances));
-	const columns = table.createColumns([
-		table.column({
-			accessor: (item) => item.event.name,
-			header: 'Event Name',
-			cell: ({ value, row }) => {
-				if (row.isData()) {
-					return createRender(Link, {
-						value,
-						id: row.original.eventId
-					});
-				}
-				return '';
-			}
-		}),
-		table.column({
-			accessor: (item) => item.createdAt,
-			header: 'Attended At',
-			cell: ({ value }) => {
-				return value.toLocaleString('en-US', {
-					month: 'short',
-					day: 'numeric',
-					hour: 'numeric',
-					year: 'numeric',
-					minute: '2-digit',
-					second: 'numeric',
-					hour12: true
-				});
-			}
-		})
-	]);
-	const { headerRows, pageRows, tableAttrs, tableBodyAttrs } = table.createViewModel(columns);
+	const memberQuery = trpc().memberRouter.getMember.createQuery({
+		orgId: $page.params.id,
+		memberId: $page.params.memId
+	});
+	$: data = $memberQuery.data;
 
 	let open = false;
 
@@ -59,30 +32,127 @@
 	const isDesktop = mediaQuery('(min-width: 768px)');
 </script>
 
-<Card.Root class="max-w-md">
-	<Card.Header>
-		<Card.Title
-			><div class="flex gap-2 flex-wrap items-center">
-				<p>
-					{data.member.role.charAt(0).toUpperCase() + data.member.role.slice(1).toLowerCase()}
-				</p>
+{#if data}
+	<Card.Root class="max-w-md">
+		<Card.Header>
+			<Card.Title
+				><div class="flex gap-2 flex-wrap items-center">
+					<p>
+						{data.member.role.charAt(0).toUpperCase() + data.member.role.slice(1).toLowerCase()}
+					</p>
 
-				{#if data.member.tags}
-					{#each data.member.tags.names as tagName}
-						<Badge variant="outline">{tagName}</Badge>
-					{/each}
-				{/if}
+					{#if data.member.tags}
+						{#each data.member.tags.names as tagName}
+							<Badge variant="outline">{tagName}</Badge>
+						{/each}
+					{/if}
 
+					{#if $isDesktop}
+						<Dialog.Root bind:open={updateModalOpen}>
+							<Dialog.Trigger asChild let:builder>
+								<Button
+									size="sm"
+									class={cn(badgeVariants({ variant: 'outline' }), 'h-6 border-dotted border-2')}
+									builders={[builder]}
+									variant="outline"
+								>
+									<PlusIcon class="h-2 w-2 mr-2" /> Add Tags
+								</Button>
+							</Dialog.Trigger>
+							<Dialog.Content class="sm:max-w-[425px]">
+								<Dialog.Header>
+									<Dialog.Title>Change user's plan</Dialog.Title>
+									<Dialog.Description>Update users membership</Dialog.Description>
+								</Dialog.Header>
+
+								<MemberUpdateForm
+									data={data.memberForm}
+									closeForm={() => (updateModalOpen = false)}
+								/>
+							</Dialog.Content>
+						</Dialog.Root>
+					{:else}
+						<Drawer.Root bind:open={updateModalOpen}>
+							<Drawer.Trigger asChild let:builder>
+								<Button
+									size="sm"
+									class={cn(badgeVariants({ variant: 'outline' }), 'h-6 border-dotted border-2')}
+									builders={[builder]}
+									variant="outline"
+								>
+									<PlusIcon class="h-2 w-2 mr-2" /> Add Tags
+								</Button>
+							</Drawer.Trigger>
+							<Drawer.Content class="p-4">
+								<Dialog.Header>
+									<Dialog.Title>Change user's plan</Dialog.Title>
+									<Dialog.Description>Update users membership</Dialog.Description>
+								</Dialog.Header>
+
+								<MemberUpdateForm
+									data={data.memberForm}
+									closeForm={() => (updateModalOpen = false)}
+								/>
+
+								<Drawer.Footer class="pt-2">
+									<Drawer.Close asChild let:builder>
+										<Button variant="outline" builders={[builder]}>Cancel</Button>
+									</Drawer.Close>
+								</Drawer.Footer>
+							</Drawer.Content>
+						</Drawer.Root>
+					{/if}
+				</div></Card.Title
+			>
+		</Card.Header>
+		<Card.Content class="grid gap-6 ">
+			<div class="flex items-center justify-between space-x-4 relative">
+				<div class="flex items-center space-x-4">
+					<Avatar.Root>
+						<Avatar.Image
+							src={data.member.user.profilePictureUrl}
+							alt={data.member.user.firstName}
+						/>
+						<Avatar.Fallback
+							>{getInitials(
+								formatName(data.member.user.firstName, data.member.user.lastName)
+							)}</Avatar.Fallback
+						>
+					</Avatar.Root>
+					<div>
+						<p class="text-sm font-medium leading-none">
+							{formatName(data.member.user.firstName, data.member.user.lastName)}
+						</p>
+						<p class="text-sm text-muted-foreground">{data.member.user.email}</p>
+					</div>
+				</div>
+
+				<div class="ml-auto absolute right-0 text-sm self-center flex flex-col items-end">
+					<div>Joined</div>
+					<div>
+						{data.member.createdAt.toLocaleString('en-US', {
+							month: 'short',
+							day: 'numeric',
+							hour: 'numeric',
+							minute: 'numeric'
+						})}
+					</div>
+				</div>
+			</div>
+		</Card.Content>
+
+		<Card.Content class="flex gap-2 items-center my-2 py-0">
+			<p class="text-md font-medium leading-none">Membership Plan</p>
+			{#await data.plans}
+				<Button disabled size="icon" class="w-6 h-6">
+					<Pencil class="w-4 h-4" />
+				</Button>
+			{:then plans}
 				{#if $isDesktop}
-					<Dialog.Root bind:open={updateModalOpen}>
+					<Dialog.Root bind:open>
 						<Dialog.Trigger asChild let:builder>
-							<Button
-								size="sm"
-								class={cn(badgeVariants({ variant: 'outline' }), 'h-6 border-dotted border-2')}
-								builders={[builder]}
-								variant="outline"
-							>
-								<PlusIcon class="h-2 w-2 mr-2" /> Add Tags
+							<Button size="icon" class="w-6 h-6" builders={[builder]}>
+								<Pencil class="w-4 h-4" />
 							</Button>
 						</Dialog.Trigger>
 						<Dialog.Content class="sm:max-w-[425px]">
@@ -91,22 +161,14 @@
 								<Dialog.Description>Update users membership</Dialog.Description>
 							</Dialog.Header>
 
-							<MemberUpdateForm
-								data={data.memberForm}
-								closeForm={() => (updateModalOpen = false)}
-							/>
+							<MembershipForm data={data.form} {plans} closeForm={() => (open = false)} />
 						</Dialog.Content>
 					</Dialog.Root>
 				{:else}
-					<Drawer.Root bind:open={updateModalOpen}>
+					<Drawer.Root bind:open>
 						<Drawer.Trigger asChild let:builder>
-							<Button
-								size="sm"
-								class={cn(badgeVariants({ variant: 'outline' }), 'h-6 border-dotted border-2')}
-								builders={[builder]}
-								variant="outline"
-							>
-								<PlusIcon class="h-2 w-2 mr-2" /> Add Tags
+							<Button size="icon" class="w-6 h-6" builders={[builder]}>
+								<Pencil class="w-4 h-4" />
 							</Button>
 						</Drawer.Trigger>
 						<Drawer.Content class="p-4">
@@ -114,11 +176,7 @@
 								<Dialog.Title>Change user's plan</Dialog.Title>
 								<Dialog.Description>Update users membership</Dialog.Description>
 							</Dialog.Header>
-
-							<MemberUpdateForm
-								data={data.memberForm}
-								closeForm={() => (updateModalOpen = false)}
-							/>
+							<MembershipForm data={data.form} {plans} closeForm={() => (open = false)} />
 
 							<Drawer.Footer class="pt-2">
 								<Drawer.Close asChild let:builder>
@@ -128,164 +186,51 @@
 						</Drawer.Content>
 					</Drawer.Root>
 				{/if}
-			</div></Card.Title
-		>
-	</Card.Header>
-	<Card.Content class="grid gap-6 ">
-		<div class="flex items-center justify-between space-x-4 relative">
-			<div class="flex items-center space-x-4">
-				<Avatar.Root>
-					<Avatar.Image src={data.member.user.profilePictureUrl} alt={data.member.user.firstName} />
-					<Avatar.Fallback
-						>{getInitials(
-							formatName(data.member.user.firstName, data.member.user.lastName)
-						)}</Avatar.Fallback
-					>
-				</Avatar.Root>
-				<div>
-					<p class="text-sm font-medium leading-none">
-						{formatName(data.member.user.firstName, data.member.user.lastName)}
-					</p>
-					<p class="text-sm text-muted-foreground">{data.member.user.email}</p>
-				</div>
-			</div>
+			{/await}
+		</Card.Content>
 
-			<div class="ml-auto absolute right-0 text-sm self-center flex flex-col items-end">
-				<div>Joined</div>
-				<div>
-					{data.member.createdAt.toLocaleString('en-US', {
-						month: 'short',
-						day: 'numeric',
-						hour: 'numeric',
-						minute: 'numeric'
-					})}
-				</div>
-			</div>
-		</div>
-	</Card.Content>
-
-	<Card.Content class="flex gap-2 items-center my-2 py-0">
-		<p class="text-md font-medium leading-none">Membership Plan</p>
-		{#await data.plans}
-			<Button disabled size="icon" class="w-6 h-6">
-				<Pencil class="w-4 h-4" />
-			</Button>
-		{:then plans}
-			{#if $isDesktop}
-				<Dialog.Root bind:open>
-					<Dialog.Trigger asChild let:builder>
-						<Button size="icon" class="w-6 h-6" builders={[builder]}>
-							<Pencil class="w-4 h-4" />
-						</Button>
-					</Dialog.Trigger>
-					<Dialog.Content class="sm:max-w-[425px]">
-						<Dialog.Header>
-							<Dialog.Title>Change user's plan</Dialog.Title>
-							<Dialog.Description>Update users membership</Dialog.Description>
-						</Dialog.Header>
-
-						<MembershipForm data={data.form} {plans} closeForm={() => (open = false)} />
-					</Dialog.Content>
-				</Dialog.Root>
-			{:else}
-				<Drawer.Root bind:open>
-					<Drawer.Trigger asChild let:builder>
-						<Button size="icon" class="w-6 h-6" builders={[builder]}>
-							<Pencil class="w-4 h-4" />
-						</Button>
-					</Drawer.Trigger>
-					<Drawer.Content class="p-4">
-						<Dialog.Header>
-							<Dialog.Title>Change user's plan</Dialog.Title>
-							<Dialog.Description>Update users membership</Dialog.Description>
-						</Dialog.Header>
-						<MembershipForm data={data.form} {plans} closeForm={() => (open = false)} />
-
-						<Drawer.Footer class="pt-2">
-							<Drawer.Close asChild let:builder>
-								<Button variant="outline" builders={[builder]}>Cancel</Button>
-							</Drawer.Close>
-						</Drawer.Footer>
-					</Drawer.Content>
-				</Drawer.Root>
-			{/if}
-		{/await}
-	</Card.Content>
-
-	{#each data.member.memberships as membership}
-		<Card.Content class="grid gap-6 ">
-			<div class="flex items-center justify-between space-x-4 relative">
-				<div class="flex items- space-x-4">
-					<div>
-						<Button
-							variant="link"
-							class="text-sm text-muted-foreground p-0 m-0"
-							href={`/org/${$page.params.id}/plans`}>{membership.plan.name}</Button
-						>
-					</div>
-				</div>
-
-				<div class="ml-auto absolute right-0 text-sm self-center flex flex-col items-end">
-					<div>
-						{membership.createdAt.toLocaleString('en-US', {
-							month: 'short',
-							day: 'numeric',
-							year: 'numeric',
-							hour: 'numeric',
-							minute: 'numeric'
-						})}
-					</div>
-				</div>
-			</div>
-			{#if membership.provider !== 'None'}
+		{#each data.member.memberships as membership}
+			<Card.Content class="grid gap-6 ">
 				<div class="flex items-center justify-between space-x-4 relative">
-					<div class="flex items-center space-x-4">
-						<div class="text-sm text-muted-foreground flex gap-1 items-center">
-							<img
-								src={`/payment_providers/${membership.provider.toLowerCase()}.svg`}
-								alt=""
-								class="w-6 h-6"
-							/>
-							<span>{membership.provider}</span>
+					<div class="flex items- space-x-4">
+						<div>
+							<Button
+								variant="link"
+								class="text-sm text-muted-foreground p-0 m-0"
+								href={`/org/${$page.params.id}/plans`}>{membership.plan.name}</Button
+							>
+						</div>
+					</div>
+
+					<div class="ml-auto absolute right-0 text-sm self-center flex flex-col items-end">
+						<div>
+							{membership.createdAt.toLocaleString('en-US', {
+								month: 'short',
+								day: 'numeric',
+								year: 'numeric',
+								hour: 'numeric',
+								minute: 'numeric'
+							})}
 						</div>
 					</div>
 				</div>
-			{/if}
-		</Card.Content>
-	{/each}
-</Card.Root>
+				{#if membership.provider !== 'None'}
+					<div class="flex items-center justify-between space-x-4 relative">
+						<div class="flex items-center space-x-4">
+							<div class="text-sm text-muted-foreground flex gap-1 items-center">
+								<img
+									src={`/payment_providers/${membership.provider.toLowerCase()}.svg`}
+									alt=""
+									class="w-6 h-6"
+								/>
+								<span>{membership.provider}</span>
+							</div>
+						</div>
+					</div>
+				{/if}
+			</Card.Content>
+		{/each}
+	</Card.Root>
 
-<div class="rounded-md border my-4">
-	<Table.Root {...$tableAttrs}>
-		<Table.Header>
-			{#each $headerRows as headerRow}
-				<Subscribe rowAttrs={headerRow.attrs()}>
-					<Table.Row>
-						{#each headerRow.cells as cell (cell.id)}
-							<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()}>
-								<Table.Head {...attrs}>
-									<Render of={cell.render()} />
-								</Table.Head>
-							</Subscribe>
-						{/each}
-					</Table.Row>
-				</Subscribe>
-			{/each}
-		</Table.Header>
-		<Table.Body {...$tableBodyAttrs}>
-			{#each $pageRows as row (row.id)}
-				<Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-					<Table.Row {...rowAttrs}>
-						{#each row.cells as cell (cell.id)}
-							<Subscribe attrs={cell.attrs()} let:attrs>
-								<Table.Cell {...attrs}>
-									<Render of={cell.render()} />
-								</Table.Cell>
-							</Subscribe>
-						{/each}
-					</Table.Row>
-				</Subscribe>
-			{/each}
-		</Table.Body>
-	</Table.Root>
-</div>
+	<DataTable member={data.member} />
+{/if}

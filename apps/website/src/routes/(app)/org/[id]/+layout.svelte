@@ -11,6 +11,8 @@
 	import * as Command from '$lib/components/ui/command';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { QueryClientProvider } from '@tanstack/svelte-query';
+	export let data;
 
 	let commandBoxOpen = false;
 
@@ -29,12 +31,14 @@
 	});
 </script>
 
-<div class="lg:grid lg:grid-cols-5">
-	<Sidebar class="" />
-	<div class="lg:col-span-4 border-t lg:border-l p-3">
-		<slot />
+<QueryClientProvider client={data.queryClient}>
+	<div class="lg:grid lg:grid-cols-5">
+		<Sidebar class="" />
+		<div class="lg:col-span-4 border-t lg:border-l p-3">
+			<slot />
+		</div>
 	</div>
-</div>
+</QueryClientProvider>
 
 <Command.Dialog bind:open={commandBoxOpen}>
 	<Command.Input placeholder="Type a command or search..." />
