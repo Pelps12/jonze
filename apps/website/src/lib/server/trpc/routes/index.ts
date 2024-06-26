@@ -3,11 +3,13 @@ import { router } from '..';
 import { memberRouter } from './members';
 import { planRouter } from './plans';
 import { eventRouter } from './events';
+import { homePageRouter } from './homepage';
 
 export const appRouter = router({
 	memberRouter,
 	planRouter,
-	eventRouter
+	eventRouter,
+	homePageRouter
 });
 
 // export type definition of API

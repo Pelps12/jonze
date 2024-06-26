@@ -1,4 +1,4 @@
-import db from '$lib/server/db';
+/* import db from '$lib/server/db';
 import { stripe } from '$lib/server/stripe';
 import { eq } from '@repo/db';
 import type { PageServerLoad } from './$types';
@@ -46,3 +46,4 @@ export const load: PageServerLoad = async (event) => {
 	});
 	return { clientSecret: accountSession.client_secret };
 };
+ */

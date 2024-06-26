@@ -17,9 +17,7 @@
 	import { trpc } from '$lib/client/trpc';
 	let newFormOpen = writable($page.url.searchParams.has('newplan'));
 
-	export let data;
-
-	const result = trpc().planRouter.getPlans.createQuery({ id: $page.params.id });
+	const result = trpc().planRouter.getPlans.createQuery({ orgId: $page.params.id });
 
 	result.subscribe((val) => console.log(val.data));
 
@@ -75,7 +73,7 @@
 							<Dialog.Title>Create your Plan</Dialog.Title>
 							<Dialog.Description>Enables tiers for memberships</Dialog.Description>
 						</Dialog.Header>
-						<PlanForm data={$result.data.form} />
+						<PlanForm data={$result.data.form} closeForm={() => ($newFormOpen = false)} />
 					</Dialog.Content>
 				</Dialog.Root>
 			{:else}
@@ -88,7 +86,7 @@
 							<Drawer.Title>Create your Plan</Drawer.Title>
 							<Drawer.Description>Enables tiers for memberships</Drawer.Description>
 						</Drawer.Header>
-						<PlanForm data={$result.data.form} />
+						<PlanForm data={$result.data.form} closeForm={() => ($newFormOpen = false)} />
 						<Drawer.Footer class="pt-2">
 							<Drawer.Close asChild let:builder>
 								<Button variant="outline" builders={[builder]}>Cancel</Button>

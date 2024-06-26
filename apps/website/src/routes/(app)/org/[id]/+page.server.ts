@@ -6,7 +6,7 @@ import { error, redirect } from '@sveltejs/kit';
 import { attendance } from '@repo/db/schema/attendance';
 import { stripe } from '$lib/server/stripe';
 
-export const load: PageServerLoad = async ({ params, locals, cookies }) => {
+/* export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 	console.log('888888', locals.user);
 	if (!locals.user) {
 		redirect(302, '/');
@@ -93,7 +93,7 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 	};
 
 	return { organization, layout, chartData, clientSecret };
-};
+}; */
 
 export const actions: Actions = {
 	upgrade: async (event) => {

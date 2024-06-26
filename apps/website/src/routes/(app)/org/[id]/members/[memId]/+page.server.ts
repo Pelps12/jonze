@@ -1,13 +1,13 @@
-import db from '$lib/server/db';
+/* import db from '$lib/server/db';
 import { eq } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
 import schema from '@repo/db/schema';
 import { error, fail, redirect } from '@sveltejs/kit';
-import { memberUpdationSchema, membershipCreationSchema } from './schema';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { dummyClient } from '$lib/server/posthog';
 import svix from '$lib/server/svix';
+import { memberUpdationSchema, membershipCreationSchema } from '$lib/formSchema/member';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const member = await db.query.member.findFirst({
@@ -192,3 +192,4 @@ export const actions: Actions = {
 		};
 	}
 };
+ */

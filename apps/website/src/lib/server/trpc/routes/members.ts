@@ -21,6 +21,8 @@ import { TRPCError } from '@trpc/server';
 import { superValidate } from 'sveltekit-superforms/server';
 import { zod } from 'sveltekit-superforms/adapters';
 import { memberUpdationSchema, membershipCreationSchema } from '$lib/formSchema/member';
+import { dummyClient } from '$lib/server/posthog';
+import svix from '$lib/server/svix';
 
 function delay(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
@@ -106,6 +108,107 @@ export const memberRouter = router({
 				plans: availablePlans
 			};
 		}),
+	updateMembership: adminProcedure
+		.input(membershipCreationSchema.extend({ memberId: z.string() }))
+		.mutation(async ({ input, ctx }) => {
+			const member = await db.query.member.findFirst({
+				where: eq(schema.member.id, input.memberId)
+			});
+
+			if (!member) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Member not found'
+				});
+			}
+			const [newMembership] = await db
+				.insert(schema.membership)
+				.values({
+					planId: input.planId,
+					memId: input.memberId,
+					provider: input.provider,
+					...(input.createdAt ? { createdAt: input.createdAt } : {})
+				})
+				.returning();
+			console.log(newMembership, 'MEMBERSHIP');
+			//Capture event updated
+
+			const useragent = ctx.event.request.headers.get('user-agent');
+			ctx.event.locals.user &&
+				dummyClient.capture({
+					distinctId: ctx.event.locals.user.id,
+					event: 'new user membership',
+					properties: {
+						$ip: ctx.event.getClientAddress(),
+						planId: input.planId,
+						orgId: input.orgId,
+						memId: input.memberId,
+						id: newMembership.id,
+						...(useragent && { $useragent: useragent })
+					}
+				});
+			if (newMembership) {
+				ctx.event.platform?.context.waitUntil(
+					Promise.all([
+						dummyClient.flushAsync(),
+						svix.message.create(input.orgId, {
+							eventType: 'membership.updated',
+							payload: {
+								type: 'membership.updated',
+								data: {
+									...{ ...newMembership, member }
+								}
+							}
+						})
+					])
+				);
+				return {};
+			}
+
+			return {};
+		}),
+
+	updateMember: adminProcedure
+		.input(memberUpdationSchema.extend({ memberId: z.string() }))
+		.mutation(async ({ input, ctx }) => {
+			const member = await db.query.member.findFirst({
+				where: eq(schema.member.id, input.memberId)
+			});
+
+			if (!member) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Member not found'
+				});
+			}
+
+			if (input.tags.length > 0) {
+				await db
+					.insert(schema.memberTag)
+					.values({ id: member.id, names: input.tags })
+					.onConflictDoUpdate({
+						target: schema.memberTag.id,
+						set: { names: input.tags }
+					});
+			}
+
+			const useragent = ctx.event.request.headers.get('user-agent');
+			ctx.event.locals.user &&
+				dummyClient.capture({
+					distinctId: ctx.event.locals.user.id,
+					event: 'new user tags',
+					properties: {
+						$ip: ctx.event.getClientAddress(),
+						orgId: input.orgId,
+						memId: input.memberId,
+						...(useragent && { $useragent: useragent })
+					}
+				});
+
+			ctx.event.platform?.context.waitUntil(Promise.all([dummyClient.flushAsync()]));
+
+			return;
+		}),
 	getMembers: procedure
 		.input(
 			z.object({
@@ -166,7 +269,12 @@ export const memberRouter = router({
 						formattedName
 							? sql`CONCAT(${schema.user.firstName}, ' ', ${schema.user.lastName}) ILIKE ${formattedName}`
 							: undefined,
-						tag ? arrayContains(schema.memberTag.names, [tag]) : undefined
+						tag ? arrayContains(schema.memberTag.names, [tag]) : undefined,
+						customValue && customType
+							? arrayContains(schema.formResponse.response, [
+									{ label: customType, response: customValue }
+								])
+							: undefined
 					)
 				)
 				.orderBy(
@@ -197,11 +305,6 @@ export const memberRouter = router({
 						)
 					)
 					.where(ilike(schema.plan.name, `%${formattedPlan}%`));
-			}
-
-			if (customValue && customType) {
-				const id = [{ label: customType, response: customValue }];
-				query = query.where(arrayContains(schema.formResponse.response, id));
 			}
 
 			const rows = await query;

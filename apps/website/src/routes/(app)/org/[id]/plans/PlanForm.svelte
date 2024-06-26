@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as Form from '$lib/components/ui/form';
-	import { planCreationSchema, type PlanCreationSchema, intervals } from './schema';
+	import { planCreationSchema, type PlanCreationSchema, intervals } from '$lib/formSchema/plan';
 	import {
 		type SuperValidated,
 		type Infer,
@@ -22,7 +22,7 @@
 
 	import { getAttrs } from 'bits-ui';
 	import { cn } from '$lib/utils';
-	import { CalendarIcon, Check, ChevronsUpDown } from 'lucide-svelte';
+	import { CalendarIcon, Check, ChevronsUpDown, LoaderCircle } from 'lucide-svelte';
 	import type { Writable } from 'svelte/store';
 	import {
 		CalendarDate,
@@ -37,23 +37,31 @@
 	import { buttonVariants } from '$lib/components/ui/button';
 	import { Calendar } from '$lib/components/ui/calendar';
 	import Error from '../+error.svelte';
+	import { trpc } from '$lib/client/trpc';
+	import { page } from '$app/stores';
 
 	export let data: SuperValidated<Infer<PlanCreationSchema>>;
 	export let actionType: 'create' | 'update' = 'create';
-
-	function formatToBrowserTimeZone(date: Date) {
-		// Format the date and time in the desired format, using the browser's timezone
-		const formattedDate = formatInTimeZone(
-			date,
-			Intl.DateTimeFormat().resolvedOptions().timeZone,
-			"yyyy-MM-dd'T'HH:mm"
-		);
-		console.log(formattedDate);
-		return formattedDate;
-	}
+	export let closeForm: () => void;
+	const planCreationMutation = trpc().planRouter.createPlan.createMutation();
+	const utils = trpc().createUtils();
 
 	const form = superForm(data, {
-		validators: zodClient(planCreationSchema)
+		SPA: true,
+		validators: zodClient(planCreationSchema),
+		dataType: 'json',
+		onUpdate: async ({ form }) => {
+			if (form.valid) {
+				// TODO: Call an external API with form.data, await the result and update form
+				console.log(form.data);
+				await $planCreationMutation.mutateAsync({
+					orgId: $page.params.id,
+					...form.data
+				});
+				await utils.planRouter.getPlans.invalidate();
+				closeForm();
+			}
+		}
 	});
 
 	const { form: formData, enhance, constraints } = form;
@@ -194,5 +202,9 @@
 		<Form.FieldErrors />
 	</Form.Field>
 
-	<Form.Button>{actionType === 'create' ? 'Create' : 'Update'}</Form.Button>
+	<Form.Button class="w-full" disabled={$planCreationMutation.isPending}
+		>{#if $planCreationMutation.isPending}
+			<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+		{/if}Create</Form.Button
+	>
 </form>

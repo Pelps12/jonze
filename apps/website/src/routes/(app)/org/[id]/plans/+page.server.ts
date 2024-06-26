@@ -1,4 +1,4 @@
-import db from '$lib/server/db';
+/* import db from '$lib/server/db';
 import { and, eq, not } from '@repo/db';
 import type { Actions, PageServerLoad } from './$types';
 import schema from '@repo/db/schema';
@@ -82,3 +82,4 @@ export const actions: Actions = {
 		};
 	}
 };
+ */

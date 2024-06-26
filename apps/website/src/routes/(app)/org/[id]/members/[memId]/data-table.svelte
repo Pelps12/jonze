@@ -1,24 +1,10 @@
 <script lang="ts">
-	import type { PageData } from './$types';
-	import { Button } from '$lib/components/ui/button';
-	import * as Card from '$lib/components/ui/card';
-	import { ChevronDown, CopyIcon, Pencil, PlusCircle, PlusIcon, TrashIcon } from 'lucide-svelte';
-	import * as Drawer from '$lib/components/ui/drawer';
-	import * as Dialog from '$lib/components/ui/dialog';
 	import { mediaQuery } from 'svelte-legos';
 	import * as Table from '$lib/components/ui/table';
-	import * as Avatar from '$lib/components/ui/avatar';
 	import { createRender, createTable, Render, Subscribe } from 'svelte-headless-table';
 	import { readable } from 'svelte/store';
 	import Link from './link.svelte';
-	import MembershipForm from './MembershipForm.svelte';
-	import { page } from '$app/stores';
-	import { cn, formatName, getInitials } from '$lib/utils';
-	import { Badge, badgeVariants } from '$lib/components/ui/badge';
-	import MemberUpdateForm from './MemberUpdateForm.svelte';
-	import { trpc } from '$lib/client/trpc';
 	import type { RouterOutput } from '$lib/server/trpc/routes';
-
 	export let member: RouterOutput['memberRouter']['getMember']['member'];
 
 	const table = createTable(readable(member.attendances));
