@@ -72,6 +72,9 @@ app.doc('/doc', (c) => ({
 			url: 'https://api.jonze.co'
 		},
 		{
+			url: 'https://dev-api.jonze.co'
+		},
+		{
 			url: 'http://127.0.0.1:8787'
 		}
 	]
