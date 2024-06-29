@@ -1,6 +1,5 @@
 <script lang="ts">
 	import * as Form from '$lib/components/ui/form';
-	import { type MembershipCreationSchema, membershipCreationSchema } from './schema';
 	import { type SuperValidated, type Infer, superForm, dateProxy } from 'sveltekit-superforms';
 	import { Input } from '$lib/components/ui/input';
 	import { client } from '$lib/client/uploadcare';
@@ -12,19 +11,39 @@
 	import * as Command from '$lib/components/ui/command';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import { cn } from '$lib/utils';
-	import { Check, ChevronsUpDown } from 'lucide-svelte';
+	import { Check, ChevronsUpDown, LoaderCircle } from 'lucide-svelte';
 	import type { Writable } from 'svelte/store';
 	import { providerEnum } from '@repo/db/schema/membership';
+	import { membershipCreationSchema, type MembershipCreationSchema } from '$lib/formSchema/member';
+	import { trpc } from '$lib/client/trpc';
+	import { page } from '$app/stores';
 
 	export let data: SuperValidated<Infer<MembershipCreationSchema>>;
 	export let plans: { id: string; name: string }[] = [];
+	const membershipMutation = trpc().memberRouter.updateMembership.createMutation();
+	const utils = trpc().createUtils();
 
 	export let closeForm: () => void;
 
 	const form = superForm(data, {
 		validators: zodClient(membershipCreationSchema),
-		onResult: () => {
-			closeForm();
+		SPA: true,
+		dataType: 'json',
+		onUpdate: async ({ form }) => {
+			if (form.valid) {
+				// TODO: Call an external API with form.data, await the result and update form
+				console.log(form.data);
+				await $membershipMutation.mutateAsync({
+					orgId: $page.params.id,
+					memberId: $page.params.memId,
+					...form.data
+				});
+				await utils.memberRouter.getMember.invalidate({
+					memberId: $page.params.memId,
+					orgId: $page.params.id
+				});
+				closeForm();
+			}
 		}
 	});
 
@@ -154,5 +173,9 @@
 		</Form.Control>
 	</Form.Field>
 
-	<Form.Button>Change</Form.Button>
+	<Form.Button class="w-full" disabled={$membershipMutation.isPending}
+		>{#if $membershipMutation.isPending}
+			<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+		{/if}Change</Form.Button
+	>
 </form>

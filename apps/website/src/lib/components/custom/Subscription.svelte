@@ -4,8 +4,14 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Label } from '$lib/components/ui/label';
 	import { Switch } from '$lib/components/ui/switch';
+	import { trpc } from '$lib/client/trpc';
+	import { browser } from '$app/environment';
+	import { TRPCError } from '@trpc/server';
+	import { toast } from 'svelte-sonner';
 
 	let isYearly = false;
+
+	const upgradeMutation = trpc().homePageRouter.upgradePlan.createMutation();
 </script>
 
 <section class="flex items-center justify-center mt-10 pb-10">
@@ -45,7 +51,24 @@
 				<form method="post" action={`${PUBLIC_URL}/org/${$page.params.id}?/upgrade`}>
 					<input class="hidden" name="period" value={isYearly ? 'yearly' : 'monthly'} />
 					<Button
-						type="submit"
+						type="button"
+						on:click={async () =>
+							$upgradeMutation
+								.mutateAsync({
+									orgId: $page.params.id,
+									period: isYearly ? 'yearly' : 'monthly',
+									returnURL: $page.url.toString()
+								})
+								.then(({ sessionUrl }) => {
+									if (browser) {
+										window.location.href = sessionUrl;
+									}
+								})
+								.catch((err) => {
+									if (err instanceof TRPCError) {
+										toast.error(err.message);
+									}
+								})}
 						aria-describedby="tier-extended"
 						class="w-full shadow-sm  mt-6 block rounded-md py-2 px-3 text-center text-base font-medium leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
 						>Subscribe</Button

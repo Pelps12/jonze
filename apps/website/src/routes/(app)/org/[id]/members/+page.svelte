@@ -6,18 +6,46 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as Alert from '$lib/components/ui/alert';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { Copy, PlusCircle, QrCode, XIcon } from 'lucide-svelte';
+	import {
+		ChevronLeft,
+		ChevronRight,
+		Copy,
+		FileDown,
+		LoaderCircle,
+		PlusCircle,
+		QrCode,
+		XIcon
+	} from 'lucide-svelte';
 	import { PUBLIC_URL } from '$env/static/public';
 	import { toast } from 'svelte-sonner';
 	import { browser } from '$app/environment';
 	import QRCode from 'qrcode';
 	import { Input } from '$lib/components/ui/input';
-	import { writable } from 'svelte/store';
+	import { derived, writable } from 'svelte/store';
 	import { goto, invalidate } from '$app/navigation';
 	import { organizationForm } from '@repo/db/schema/organizationForm';
 	import * as Select from '$lib/components/ui/select';
+	import { trpc } from '$lib/client/trpc';
+	import type { RouterOutput } from '$lib/server/trpc/routes';
+	import { json2csv } from 'json-2-csv';
+	import LoadingTable from '$lib/components/custom/LoadingTable.svelte';
 
-	export let data;
+	const queryParams = derived(page, ($page) => ({
+		orgId: $page.params.id,
+		email: $page.url.searchParams.get('email'),
+		name: $page.url.searchParams.get('name'),
+		customValue: $page.url.searchParams.get('custom_value'),
+		customType: $page.url.searchParams.get('custom_type'),
+		tag: $page.url.searchParams.get('tag'),
+		limit: $page.url.searchParams.get('limit'),
+		plan: $page.url.searchParams.get('plan'),
+		before: $page.url.searchParams.get('before'),
+		after: $page.url.searchParams.get('after')
+	}));
+
+	$: result = trpc().memberRouter.getMembers.createQuery($queryParams);
+
+	queryParams.subscribe((params) => console.log(params));
 
 	let selected: any = undefined;
 	const defaultFilters = ['name', 'email', 'plan', 'tag'];
@@ -95,6 +123,7 @@
 		url.searchParams.delete('limit');
 		url.searchParams.delete('custom_type');
 		url.searchParams.delete('custom_value');
+		url.searchParams.delete('no_filter');
 
 		return url;
 	};
@@ -109,7 +138,7 @@
 				url.searchParams.set('custom_value', $filterValue);
 			}
 
-			window.location.href = url.toString();
+			goto(url.toString());
 
 			//$page.url.searchParams.set('email', $emailFilter);
 		} else {
@@ -119,13 +148,88 @@
 
 	const handleReset = () => {
 		const url = removeAllFilters(new URL($page.url));
-		window.location.href = url.toString();
+		url.searchParams.set('no_filter', 'true');
+		selected = undefined;
+		filterValue.update(() => '');
+		goto(url.toString());
 	};
 
 	$: console.log(selected);
+
+	const handlePagination = async (direction: 'prev' | 'next') => {
+		const newUrl = new URL($page.url);
+		const pagination = $result.data?.pagination;
+		if (pagination) {
+			if (direction == 'prev' && pagination.prevCursor) {
+				newUrl.searchParams.set('before', pagination.prevCursor);
+				newUrl.searchParams.delete('after');
+			} else if (direction == 'next' && pagination.nextCursor) {
+				newUrl.searchParams.set('after', pagination.nextCursor);
+				newUrl.searchParams.delete('before');
+			}
+		}
+
+		goto(newUrl);
+	};
+
+	const handleLimitChange = (newLimit: any) => {
+		const newUrl = new URL($page.url);
+		const currentLimit = newUrl.searchParams.get('limit') ?? '10';
+		if (currentLimit !== newLimit) {
+			newUrl.searchParams.set('limit', newLimit);
+			goto(newUrl);
+		}
+	};
+
+	const handleExport = async (members: RouterOutput['memberRouter']['getMembers']['members']) => {
+		const csv = json2csv(
+			members.map((member) => {
+				const additionalInfo = member.additionalInfo?.response?.reduce<any>(
+					(accumulator, current) => {
+						accumulator[current.label] =
+							typeof current.response === 'string' ? current.response : current.response[0];
+						return accumulator;
+					},
+					{}
+				);
+				const newMember = { ...member, additionalInfo };
+				return newMember;
+			}),
+			{
+				expandNestedObjects: true,
+				expandArrayObjects: true
+			}
+		);
+
+		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+
+		// Create a link element for the download
+		const link = document.createElement('a');
+		const url = URL.createObjectURL(blob);
+		link.setAttribute('href', url);
+		link.setAttribute('download', 'members.csv');
+		link.style.visibility = 'hidden';
+
+		// Append to the document and trigger the download
+		document.body.appendChild(link);
+		link.click();
+
+		// Clean up
+		document.body.removeChild(link);
+		window.URL.revokeObjectURL(url);
+	};
+
+	const limitelected = {
+		value: $page.url.searchParams.get('limit') ?? '10',
+		label:
+			$page.url.searchParams.get('limit') === 'all'
+				? 'All'
+				: $page.url.searchParams.get('limit') ?? '10'
+	};
+	$: console.log(selected);
 </script>
 
-{#if !data.organizationForm}
+{#if $result.data && !$result.data?.organizationForm}
 	<Alert.Root class="mb-2">
 		<Alert.Title>Quick Tip!</Alert.Title>
 		<Alert.Description
@@ -178,7 +282,7 @@
 			<Select.Item value="name">Name</Select.Item>
 			<Select.Item value="plan">Plan</Select.Item>
 			<Select.Item value="tag">Tag</Select.Item>
-			{#each data.organizationForm?.form ?? [] as formValue}
+			{#each $result.data?.organizationForm?.form ?? [] as formValue}
 				<Select.Item value={formValue.label}>{formValue.label}</Select.Item>
 			{/each}
 		</Select.Content>
@@ -189,12 +293,58 @@
 		placeholder={`Filter ${!!selected?.label ? `by ${selected?.label}` : ''}`}
 		class="max-w-md"
 	/>
-	<Button on:click={() => handleFilterSubmit()}>Apply</Button>
+	<Button on:click={() => handleFilterSubmit()} disabled={$result.isLoading}>
+		{#if $result.isLoading}
+			<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+		{/if}
+		Apply</Button
+	>
 	<Button on:click={() => handleReset()} variant="outline">
 		<XIcon class="w-4 h-4" />
 		Reset
 	</Button>
 </form>
+
+<div class="flex justify-end gap-2">
+	<Button
+		variant="outline"
+		on:click={() => $result.data?.members && handleExport($result.data.members)}
+		><FileDown class="h-4 w-4 mr-2" /><span class="hidden sm:block">Export</span></Button
+	>
+	<Button
+		disabled={!$result.data || !$result.data.pagination.prevCursor || $result.isLoading}
+		variant="outline"
+		on:click={() => handlePagination('prev')}
+	>
+		<ChevronLeft class="h-4 w-4" />
+		<span class="hidden sm:block">Previous</span>
+	</Button>
+
+	<Select.Root selected={limitelected} onSelectedChange={(e) => handleLimitChange(e?.value)}>
+		<Select.Trigger class="w-[80px]">
+			<Select.Value placeholder="10" />
+		</Select.Trigger>
+		<Select.Content>
+			<Select.Item value="10">10</Select.Item>
+			<Select.Item value="20">20</Select.Item>
+			<Select.Item value="50">50</Select.Item>
+			<Select.Item value="all">All</Select.Item>
+		</Select.Content>
+	</Select.Root>
+
+	<Button
+		disabled={!$result.data || !$result.data.pagination.nextCursor || $result.isLoading}
+		variant="outline"
+		on:click={() => handlePagination('next')}
+	>
+		<span class="hidden sm:block">Next</span>
+		<ChevronRight class="h-4 w-4" />
+	</Button>
+</div>
+
 <div class=" mx-auto py-10">
-	<DataTable {data} />
+	{#if $result.data}
+		<DataTable data={$result.data} />
+	{:else}
+		<LoadingTable />{/if}
 </div>

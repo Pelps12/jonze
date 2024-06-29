@@ -1,32 +1,44 @@
 <script lang="ts">
 	import * as Form from '$lib/components/ui/form';
-	import { type MemberUpdationSchema, memberUpdationSchema } from './schema';
 	import { type SuperValidated, type Infer, superForm, dateProxy } from 'sveltekit-superforms';
-	import { Input } from '$lib/components/ui/input';
-	import { client } from '$lib/client/uploadcare';
-	import type { OrgForm, Event as dbEvent } from '@repo/db/types';
 	import { onMount, tick } from 'svelte';
 	import { zodClient } from 'sveltekit-superforms/adapters';
-	import { Textarea } from '$lib/components/ui/textarea';
-	import * as Popover from '$lib/components/ui/popover';
-	import * as Command from '$lib/components/ui/command';
-	import { buttonVariants } from '$lib/components/ui/button';
-	import { cn } from '$lib/utils';
-	import { Check, ChevronsUpDown, LoaderCircle } from 'lucide-svelte';
+
+	import { LoaderCircle } from 'lucide-svelte';
 	import type { Writable } from 'svelte/store';
 	import { providerEnum } from '@repo/db/schema/membership';
 	import { MultiSelect } from 'svelte-multiselect';
 	import { badgeVariants } from '$lib/components/ui/badge';
+	import { memberUpdationSchema, type MemberUpdationSchema } from '$lib/formSchema/member';
+	import { trpc } from '$lib/client/trpc';
+	import { page } from '$app/stores';
 
 	export let data: SuperValidated<Infer<MemberUpdationSchema>>;
 
 	export let closeForm: () => void;
 
+	const updateMutation = trpc().memberRouter.updateMember.createMutation();
+	const utils = trpc().createUtils();
+
 	const form = superForm(data, {
 		validators: zodClient(memberUpdationSchema),
 		dataType: 'json',
-		onResult: () => {
-			closeForm();
+		SPA: true,
+		onUpdate: async ({ form }) => {
+			if (form.valid) {
+				// TODO: Call an external API with form.data, await the result and update form
+				console.log(form.data);
+				await $updateMutation.mutateAsync({
+					orgId: $page.params.id,
+					memberId: $page.params.memId,
+					...form.data
+				});
+				await utils.memberRouter.getMember.invalidate({
+					memberId: $page.params.memId,
+					orgId: $page.params.id
+				});
+				closeForm();
+			}
 		}
 	});
 
@@ -57,8 +69,8 @@
 		</Form.Control>
 	</Form.Field>
 
-	<Form.Button disabled={$submitting}>
-		{#if $submitting}
+	<Form.Button disabled={$updateMutation.isPending}>
+		{#if $updateMutation.isPending}
 			<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
 		{/if}
 

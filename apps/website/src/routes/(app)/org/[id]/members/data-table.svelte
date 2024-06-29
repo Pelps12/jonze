@@ -3,20 +3,13 @@
 	import Actions from './data-table-actions.svelte';
 	import { readable, writable } from 'svelte/store';
 	import * as Table from '$lib/components/ui/table';
-	import type { FormResponse, Member, OrgForm, User } from '@repo/db/types';
 	import { formatName } from '$lib/utils';
 
-	import ChevronLeft from 'lucide-svelte/icons/chevron-left';
-	import ChevronRight from 'lucide-svelte/icons/chevron-right';
 	import { mediaQuery } from 'svelte-legos';
-	import * as Pagination from '$lib/components/ui/pagination/index.js';
-	import { Button } from '$lib/components/ui/button';
-	import { page } from '$app/stores';
-	import { goto, invalidate, invalidateAll } from '$app/navigation';
-	import type { PageData } from './$types';
-	import { FileDown } from 'lucide-svelte';
-	import { json2csv } from 'json-2-csv';
-	import * as Select from '$lib/components/ui/select';
+
+	import type { RouterOutput } from '$lib/server/trpc/routes';
+	import { onMount } from 'svelte';
+	import { toast } from 'svelte-sonner';
 
 	const isDesktop = mediaQuery('(min-width: 768px)');
 
@@ -24,9 +17,26 @@
 	$: perPage = $isDesktop ? 3 : 8;
 	$: siblingCount = $isDesktop ? 1 : 0;
 
-	export let data: PageData;
+	export let data: RouterOutput['memberRouter']['getMembers'];
 
-	const { members, organizationForm, pagination } = data;
+	const { members, organizationForm } = data;
+
+	function isMonotonicallyIncreasing(arr: string[]): boolean {
+		for (let i = 1; i < arr.length; i++) {
+			if (arr[i] > arr[i - 1]) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	onMount(() => {
+		if (isMonotonicallyIncreasing(members.map((member) => member.id))) {
+			toast.info('NOICEEEE');
+		} else {
+			toast.error('Not monotic');
+		}
+	});
 
 	const table = createTable(readable(members));
 	const columns = table.createColumns([
@@ -97,112 +107,9 @@
 		})
 	]);
 	const { headerRows, pageRows, tableAttrs, tableBodyAttrs } = table.createViewModel(columns);
-
-	const handlePagination = async (direction: 'prev' | 'next') => {
-		const newUrl = new URL($page.url);
-		if (direction == 'prev' && pagination.prevCursor) {
-			newUrl.searchParams.set('before', pagination.prevCursor);
-			newUrl.searchParams.delete('after');
-		} else if (direction == 'next' && pagination.nextCursor) {
-			newUrl.searchParams.set('after', pagination.nextCursor);
-			newUrl.searchParams.delete('before');
-		}
-
-		window.location.href = newUrl.toString();
-	};
-
-	const handleLimitChange = (newLimit: any) => {
-		const newUrl = new URL($page.url);
-		const currentLimit = newUrl.searchParams.get('limit') ?? '10';
-		if (currentLimit !== newLimit) {
-			newUrl.searchParams.set('limit', newLimit);
-			window.location.href = newUrl.toString();
-		}
-	};
-
-	const handleExport = async (members: PageData['members']) => {
-		const csv = json2csv(
-			members.map((member) => {
-				const additionalInfo = member.additionalInfo?.response?.reduce<any>(
-					(accumulator, current) => {
-						accumulator[current.label] =
-							typeof current.response === 'string' ? current.response : current.response[0];
-						return accumulator;
-					},
-					{}
-				);
-				const newMember = { ...member, additionalInfo };
-				return newMember;
-			}),
-			{
-				expandNestedObjects: true,
-				expandArrayObjects: true
-			}
-		);
-
-		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-
-		// Create a link element for the download
-		const link = document.createElement('a');
-		const url = URL.createObjectURL(blob);
-		link.setAttribute('href', url);
-		link.setAttribute('download', 'members.csv');
-		link.style.visibility = 'hidden';
-
-		// Append to the document and trigger the download
-		document.body.appendChild(link);
-		link.click();
-
-		// Clean up
-		document.body.removeChild(link);
-		window.URL.revokeObjectURL(url);
-	};
-
-	const selected = {
-		value: $page.url.searchParams.get('limit') ?? '10',
-		label:
-			$page.url.searchParams.get('limit') === 'all'
-				? 'All'
-				: $page.url.searchParams.get('limit') ?? '10'
-	};
-	$: console.log(selected);
 </script>
 
 <!-- Options -->
-<div class="flex justify-end gap-2">
-	<Button variant="outline" on:click={() => handleExport(members)}
-		><FileDown class="h-4 w-4 mr-2" /><span class="hidden sm:block">Export</span></Button
-	>
-	<Button
-		disabled={!data.pagination.prevCursor}
-		variant="outline"
-		on:click={() => handlePagination('prev')}
-	>
-		<ChevronLeft class="h-4 w-4" />
-		<span class="hidden sm:block">Previous</span>
-	</Button>
-
-	<Select.Root {selected} onSelectedChange={(e) => handleLimitChange(e?.value)}>
-		<Select.Trigger class="w-[80px]">
-			<Select.Value placeholder="10" />
-		</Select.Trigger>
-		<Select.Content>
-			<Select.Item value="10">10</Select.Item>
-			<Select.Item value="20">20</Select.Item>
-			<Select.Item value="50">50</Select.Item>
-			<Select.Item value="all">All</Select.Item>
-		</Select.Content>
-	</Select.Root>
-
-	<Button
-		disabled={!data.pagination.nextCursor}
-		variant="outline"
-		on:click={() => handlePagination('next')}
-	>
-		<span class="hidden sm:block">Next</span>
-		<ChevronRight class="h-4 w-4" />
-	</Button>
-</div>
 
 <div class="rounded-md border my-4">
 	<Table.Root {...$tableAttrs} class="rounded-md">
@@ -237,24 +144,4 @@
 			{/each}
 		</Table.Body>
 	</Table.Root>
-</div>
-
-<div class="flex justify-end gap-2">
-	<Button
-		disabled={!data.pagination.prevCursor}
-		variant="outline"
-		on:click={() => handlePagination('prev')}
-	>
-		<ChevronLeft class="h-4 w-4" />
-		<span class="hidden sm:block">Previous</span>
-	</Button>
-
-	<Button
-		disabled={!data.pagination.nextCursor}
-		variant="outline"
-		on:click={() => handlePagination('next')}
-	>
-		<span class="hidden sm:block">Next</span>
-		<ChevronRight class="h-4 w-4" />
-	</Button>
 </div>

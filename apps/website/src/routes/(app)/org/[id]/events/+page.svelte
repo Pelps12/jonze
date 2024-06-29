@@ -4,7 +4,6 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 	import * as Drawer from '$lib/components/ui/drawer';
 	import { Input } from '$lib/components/ui/input';
-	import { Label } from '$lib/components/ui/label';
 	import { mediaQuery } from 'svelte-legos';
 	import EventForm from './EventForm.svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
@@ -23,7 +22,6 @@
 	import { enhance } from '$app/forms';
 	import { Image } from '@unpic/svelte';
 	import { json2csv } from 'json-2-csv';
-	import type { PageData } from './$types';
 	import * as Select from '$lib/components/ui/select';
 	import { Chart, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
 	import { Bar } from 'svelte-chartjs';
@@ -35,12 +33,26 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import type { ArrayElement } from '$lib/types/misc';
 	import { mode } from 'mode-watcher';
+	import { trpc } from '$lib/client/trpc';
+	import type { RouterOutput } from '$lib/server/trpc/routes';
+	import { goto } from '$app/navigation';
+
+	const queryParams = derived(page, ($page) => ({
+		orgId: $page.params.id,
+		name: $page.url.searchParams.get('name'),
+		tag: $page.url.searchParams.get('tag')
+	}));
+
+	$: eventQuery = trpc().eventRouter.getEvents.createQuery($queryParams);
+	const deleteEventMutation = trpc().eventRouter.deleteEvent.createMutation();
+
 	let newFormOpen = $page.url.searchParams.has('newevent');
 
-	let selectedEvent: ArrayElement<PageData['events']> | undefined = undefined;
+	let selectedEvent: ArrayElement<RouterOutput['eventRouter']['getEvents']['events']> | undefined =
+		undefined;
 
 	const handleOpenDuplicate = (eventId: string) => {
-		const duplicatedEvent = data.events.find((event) => event.id === eventId);
+		const duplicatedEvent = $eventQuery.data?.events.find((event) => event.id === eventId);
 		if (!duplicatedEvent) {
 			toast.error('Event not found');
 		} else {
@@ -72,7 +84,10 @@
 		}
 	};
 
-	const handleExport = async (events: PageData['events'], filename: string) => {
+	const handleExport = async (
+		events: RouterOutput['eventRouter']['getEvents']['events'],
+		filename: string
+	) => {
 		const csv = json2csv(events, {
 			expandNestedObjects: true,
 			expandArrayObjects: true
@@ -96,18 +111,37 @@
 		window.URL.revokeObjectURL(url);
 	};
 
-	export let data;
+	let editFormOpen: Record<string, boolean>;
 
-	onMount(() => {
-		console.log(data.updateForms);
-	});
+	$: editFormOpen = $eventQuery.data
+		? $eventQuery.data?.events?.reduce((o, { id }) => Object.assign(o, { [id]: false }), {})
+		: {};
 
-	let editFormOpen: Record<string, boolean> = data.events.reduce(
-		(o, { id }) => Object.assign(o, { [id]: false }),
-		{}
+	const selectableViews = [
+		{
+			label: 'List View',
+			value: 'list'
+		},
+		{
+			label: 'Calendar View',
+			value: 'calendar'
+		},
+		{
+			label: 'Graph View',
+			value: 'graph'
+		}
+	];
+
+	let selectedView = writable(
+		selectableViews.find((selectableView) => {
+			const view = $page.url.searchParams.get('view') ?? 'list';
+			if (selectableView.value === view) {
+				return true;
+			} else {
+				return false;
+			}
+		})
 	);
-
-	let selectedView = writable({ label: 'List View', value: 'list' });
 
 	onMount(() => {});
 
@@ -148,7 +182,7 @@
 				url.searchParams.set('custom_value', $filterValue);
 			}
 
-			window.location.href = url.toString();
+			goto(url.toString());
 
 			//$page.url.searchParams.set('email', $emailFilter);
 		} else {
@@ -158,7 +192,7 @@
 
 	const handleReset = () => {
 		const url = removeAllFilters(new URL($page.url));
-		window.location.href = url.toString();
+		goto(url.toString());
 	};
 
 	Chart.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
@@ -170,12 +204,25 @@
 	isLight.subscribe((a) => console.log(a));
 
 	const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
-	const chartData = {
-		labels: data.chartData.labels,
+
+	let chartData: {
+		labels: string[];
+		datasets: {
+			label: string;
+			data: number[];
+			borderColor: string;
+			backgroundColor: string;
+			borderWidth: number;
+			borderRadius: number;
+			borderSkipped: boolean;
+		}[];
+	};
+	$: chartData = {
+		labels: $eventQuery.data?.chartData?.labels ?? [],
 		datasets: [
 			{
 				label: 'Attendance',
-				data: data.chartData.data,
+				data: $eventQuery.data?.chartData.data ?? [],
 				borderColor: $isLight ? '#000' : '#fff',
 				backgroundColor: $isLight ? '#000' : '#fff',
 				borderWidth: 0,
@@ -186,35 +233,40 @@
 	};
 
 	selectedView.subscribe((view) => {
-		if (view.value === 'calendar') {
-			setTimeout(() => {
-				var calendarEl = document.getElementById('calendar');
-				console.log(calendarEl);
-				if (calendarEl) {
-					const calendar = new Calendar(calendarEl, {
-						initialView: 'dayGridMonth',
-						plugins: [dayGridPlugin, timeGridPlugin, listPlugin],
-						events: data.events.map((event) => ({
-							title: event.name,
-							...event,
-							url: `${PUBLIC_URL}/org/${$page.params.id}/events/${event.id}`
-						})),
-						headerToolbar: {
-							left: 'prev,next today',
-							center: 'title',
+		if (browser) {
+			const newURL = new URL($page.url);
+			newURL.searchParams.set('view', view.value);
+			goto(newURL);
+			if (view.value === 'calendar') {
+				setTimeout(() => {
+					var calendarEl = document.getElementById('calendar');
+					console.log(calendarEl);
+					if (calendarEl) {
+						const calendar = new Calendar(calendarEl, {
+							initialView: 'dayGridMonth',
+							plugins: [dayGridPlugin, timeGridPlugin, listPlugin],
+							events: $eventQuery.data?.events.map((event) => ({
+								title: event.name,
+								...event,
+								url: `${PUBLIC_URL}/org/${$page.params.id}/events/${event.id}`
+							})),
+							headerToolbar: {
+								left: 'prev,next today',
+								center: 'title',
 
-							right: 'dayGridMonth,timeGridWeek,listWeek'
-						},
-						eventInteractive: true
-					});
-					calendar.render();
-				}
-			}, 100);
+								right: 'dayGridMonth,timeGridWeek,listWeek'
+							},
+							eventInteractive: true
+						});
+						calendar.render();
+					}
+				}, 100);
+			}
 		}
 	});
 </script>
 
-{#if !data.events.find((event) => !!event.form)}
+{#if $eventQuery.data && !$eventQuery.data.events.find((event) => !!event.form)}
 	<Alert.Root class="mb-2">
 		<Alert.Title>Quick Tip!</Alert.Title>
 		<Alert.Description
@@ -229,9 +281,9 @@
 <div class="flex justify-between items-center mb-6">
 	<h2 class="text-xl font-semibold">Events</h2>
 	<div class="flex space-x-2">
-		{#await data.forms}
+		{#if !$eventQuery.data}
 			<Button disabled>Add Event</Button>
-		{:then forms}
+		{:else}
 			<Select.Root portal={null} bind:selected={$selectedView}>
 				<Select.Trigger class="w-[150px]">
 					<Select.Value placeholder="Select a fruit" />
@@ -245,7 +297,7 @@
 				</Select.Content>
 				<Select.Input name="favoriteFruit" />
 			</Select.Root>
-			<Button variant="outline" on:click={() => handleExport(data.events, 'events.csv')}
+			<Button variant="outline" on:click={() => handleExport($eventQuery.data.events, 'events.csv')}
 				><FileDown class="h-4 w-4 mr-2" /><span class="hidden sm:block">Export</span></Button
 			>
 			{#if $isDesktop}
@@ -265,7 +317,11 @@
 							<Dialog.Title>Create your Event</Dialog.Title>
 							<Dialog.Description>Allow members mark attendance on your events</Dialog.Description>
 						</Dialog.Header>
-						<EventForm data={data.form} event={selectedEvent} {forms} formOpen={newFormOpen} />
+						<EventForm
+							event={selectedEvent}
+							forms={$eventQuery.data.forms}
+							closeForm={() => (newFormOpen = false)}
+						/>
 					</Dialog.Content>
 				</Dialog.Root>
 			{:else}
@@ -285,7 +341,12 @@
 							<Drawer.Title>Create your Event</Drawer.Title>
 							<Drawer.Description>Allow members mark attendance on your events</Drawer.Description>
 						</Drawer.Header>
-						<EventForm data={data.form} event={selectedEvent} {forms} formOpen={newFormOpen} />
+						<EventForm
+							data={$eventQuery.data.form}
+							event={selectedEvent}
+							forms={$eventQuery.data.forms}
+							closeForm={() => (newFormOpen = false)}
+						/>
 						<Drawer.Footer class="pt-2">
 							<Drawer.Close asChild let:builder>
 								<Button variant="outline" builders={[builder]}>Cancel</Button>
@@ -294,7 +355,7 @@
 					</Drawer.Content>
 				</Drawer.Root>
 			{/if}
-		{/await}
+		{/if}
 	</div>
 </div>
 
@@ -319,267 +380,260 @@
 		placeholder={`Filter ${!!selected?.label ? `by ${selected?.label}` : ''}`}
 		class="max-w-md"
 	/>
-	<Button on:click={() => handleFilterSubmit()}>Apply</Button>
-	<Button on:click={() => handleReset()} variant="outline">
+	<Button on:click={() => handleFilterSubmit()} disabled={$eventQuery.isFetching}>Apply</Button>
+	<Button on:click={() => handleReset()} variant="outline" disabled={$eventQuery.isFetching}>
 		<XIcon class="w-4 h-4" />
 		Reset
 	</Button>
 </form>
 
-{#if data.events.length == 0}
-	<div
-		class="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm h-[60vh]"
-	>
-		<div class="flex flex-col items-center gap-1 text-center">
-			<h3 class="text-2xl font-bold tracking-tight">You have no events</h3>
-			<p class="text-sm text-muted-foreground">
-				Members can start marking attendace when you create an event.
-			</p>
-			<Button on:click={() => (newFormOpen = true)} class="mt-4">Add Event</Button>
+{#if $eventQuery.data}
+	{#if $eventQuery.data.events.length == 0}
+		<div
+			class="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm h-[60vh]"
+		>
+			<div class="flex flex-col items-center gap-1 text-center">
+				<h3 class="text-2xl font-bold tracking-tight">You have no events</h3>
+				<p class="text-sm text-muted-foreground">
+					Members can start marking attendace when you create an event.
+				</p>
+				<Button on:click={() => (newFormOpen = true)} class="mt-4">Add Event</Button>
+			</div>
 		</div>
-	</div>
-{:else if $selectedView.value === 'list'}
-	<div class={cn(' shadow rounded-lg p-6')}>
-		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-			{#each data.events as event}
-				<Card.Root class="w-full">
-					<Card.Header>
-						<Card.Title class="flex justify-between">
-							<div class="flex items-center gap-2">
-								<p>{event.name}</p>
-								{#if event.tags}
-									{#each event.tags.names as tagName}
-										<Badge class="my-2" variant="outline">{tagName}</Badge>
-									{/each}
-								{/if}
-							</div>
+	{:else if $selectedView.value === 'list'}
+		<div class={cn(' shadow rounded-lg p-6')}>
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+				{#each $eventQuery.data.events as event}
+					<Card.Root class="w-full">
+						<Card.Header>
+							<Card.Title class="flex justify-between">
+								<div class="flex items-center gap-2">
+									<p>{event.name}</p>
+									{#if event.tags}
+										{#each event.tags.names as tagName}
+											<Badge class="my-2" variant="outline">{tagName}</Badge>
+										{/each}
+									{/if}
+								</div>
 
-							<Dialog.Root>
-								<DropdownMenu.Root>
-									<DropdownMenu.Trigger asChild let:builder>
-										<Button
-											variant="ghost"
-											builders={[builder]}
-											class="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
-										>
-											<MoreHorizontal class="h-4 w-4" />
-											<span class="sr-only">Open menu</span>
-										</Button>
-									</DropdownMenu.Trigger>
-
-									<DropdownMenu.Content class="w-[200px]" align="end">
-										<DropdownMenu.Item
-											on:click={() => handleCopyAttendance(event.id)}
-											class="justify-between"
-										>
-											<span>Attendance Link</span>
-											<Copy class="ml-2 h-4 w-4" />
-										</DropdownMenu.Item>
-
-										<DropdownMenu.Item
-											class="justify-between"
-											on:click={() =>
-												createQRCode(
-													`${event.name} - QR Code`,
-													`${PUBLIC_URL}/event/attendance/${event.id}`
-												)}
-										>
-											<span>Attendance QRCode</span>
-											<QrCode class="ml-2 h-4 w-4" />
-										</DropdownMenu.Item>
-										<DropdownMenu.Item
-											on:click={() => handleOpenDuplicate(event.id)}
-											class="justify-between"
-										>
-											<span>Duplicate Event</span>
-											<CopyPlus class="ml-2 h-4 w-4" />
-										</DropdownMenu.Item>
-										{#if event.formId}
-											<DropdownMenu.Item
-												href={`/org/${$page.params.id}/forms/${event.formId}/responses?eventId=${event.id}`}
+								<Dialog.Root>
+									<DropdownMenu.Root>
+										<DropdownMenu.Trigger asChild let:builder>
+											<Button
+												variant="ghost"
+												builders={[builder]}
+												class="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
 											>
-												Form Responses
-											</DropdownMenu.Item>
-										{/if}
-										<DropdownMenu.Item href={`events/${event.id}`}
-											>View Attendance</DropdownMenu.Item
-										>
-									</DropdownMenu.Content>
+												<MoreHorizontal class="h-4 w-4" />
+												<span class="sr-only">Open menu</span>
+											</Button>
+										</DropdownMenu.Trigger>
 
-									{#if event.form}
+										<DropdownMenu.Content class="w-[200px]" align="end">
+											<DropdownMenu.Item
+												on:click={() => handleCopyAttendance(event.id)}
+												class="justify-between"
+											>
+												<span>Attendance Link</span>
+												<Copy class="ml-2 h-4 w-4" />
+											</DropdownMenu.Item>
+
+											<DropdownMenu.Item
+												class="justify-between"
+												on:click={() =>
+													createQRCode(
+														`${event.name} - QR Code`,
+														`${PUBLIC_URL}/event/attendance/${event.id}`
+													)}
+											>
+												<span>Attendance QRCode</span>
+												<QrCode class="ml-2 h-4 w-4" />
+											</DropdownMenu.Item>
+											<DropdownMenu.Item
+												on:click={() => handleOpenDuplicate(event.id)}
+												class="justify-between"
+											>
+												<span>Duplicate Event</span>
+												<CopyPlus class="ml-2 h-4 w-4" />
+											</DropdownMenu.Item>
+											{#if event.formId}
+												<DropdownMenu.Item
+													href={`/org/${$page.params.id}/forms/${event.formId}/responses?eventId=${event.id}`}
+												>
+													Form Responses
+												</DropdownMenu.Item>
+											{/if}
+											<DropdownMenu.Item href={`events/${event.id}`}
+												>View Attendance</DropdownMenu.Item
+											>
+										</DropdownMenu.Content>
+
+										{#if event.form}
+											<Dialog.Content class="sm:max-w-[425px]">
+												<Dialog.Header>
+													<Dialog.Title>{event.form.name}</Dialog.Title>
+													<Dialog.Description>Form attached to event attendance</Dialog.Description>
+												</Dialog.Header>
+
+												<Preview form={event.form.form} userResponse={undefined} />
+											</Dialog.Content>
+										{/if}
+									</DropdownMenu.Root>
+								</Dialog.Root>
+							</Card.Title>
+							<Card.Description
+								>{new Date(event.start).toLocaleDateString('en-US', {
+									year: 'numeric',
+									month: 'long',
+									day: 'numeric'
+								})}</Card.Description
+							>
+						</Card.Header>
+						<div class="flex justify-center rounded-lg m-3">
+							{#if event.image}
+								<Image
+									src={event.image}
+									layout="fullWidth"
+									height={350}
+									priority={false}
+									alt={event.name}
+									class="aspect-square object-cover m-5 w-auto rounded-lg"
+								/>
+							{:else}
+								<img
+									src={'/placeholder.svg'}
+									height={350}
+									alt={event.name}
+									class="aspect-square object-cover m-5 w-auto rounded-lg"
+								/>
+							{/if}
+						</div>
+						<Card.Content>
+							<p class="text-sm text-gray-600">
+								{event.description}
+							</p>
+						</Card.Content>
+						<Card.Footer class="flex justify-between">
+							{#await $eventQuery.data.forms}
+								<Button variant="outline" disabled>Edit</Button>
+							{:then forms}
+								{#if $isDesktop}
+									<Dialog.Root
+										open={editFormOpen[event.id]}
+										onOpenChange={(e) => (editFormOpen[event.id] = e)}
+									>
+										<Dialog.Trigger asChild let:builder>
+											<Button variant="outline" builders={[builder]}>Edit</Button>
+										</Dialog.Trigger>
 										<Dialog.Content class="sm:max-w-[425px]">
 											<Dialog.Header>
-												<Dialog.Title>{event.form.name}</Dialog.Title>
-												<Dialog.Description>Form attached to event attendance</Dialog.Description>
+												<Dialog.Title>Update your Event</Dialog.Title>
+												<Dialog.Description>
+													Allow members mark attendance on your events
+												</Dialog.Description>
 											</Dialog.Header>
 
-											<Preview form={event.form.form} userResponse={undefined} />
+											<UpdateEventForm
+												{forms}
+												data={$eventQuery.data.updateForms.find((form) => form.id === event.id)}
+												closeForm={() => (editFormOpen[event.id] = false)}
+												{event}
+												actionType="update"
+											/>
 										</Dialog.Content>
-									{/if}
-								</DropdownMenu.Root>
-							</Dialog.Root>
-						</Card.Title>
-						<Card.Description
-							>{new Date(event.start).toLocaleDateString('en-US', {
-								year: 'numeric',
-								month: 'long',
-								day: 'numeric'
-							})}</Card.Description
-						>
-					</Card.Header>
-					<div class="flex justify-center rounded-lg m-3">
-						{#if event.image}
-							<Image
-								src={event.image}
-								layout="fullWidth"
-								height={350}
-								priority={false}
-								alt={event.name}
-								class="aspect-square object-cover m-5 w-auto rounded-lg"
-							/>
-						{:else}
-							<img
-								src={'/placeholder.svg'}
-								height={350}
-								alt={event.name}
-								class="aspect-square object-cover m-5 w-auto rounded-lg"
-							/>
-						{/if}
-					</div>
-					<Card.Content>
-						<p class="text-sm text-gray-600">
-							{event.description}
-						</p>
-					</Card.Content>
-					<Card.Footer class="flex justify-between">
-						{#await data.forms}
-							<Button variant="outline" disabled>Edit</Button>
-						{:then forms}
-							{#if $isDesktop}
-								<Dialog.Root
-									open={editFormOpen[event.id]}
-									onOpenChange={(e) => (editFormOpen[event.id] = e)}
-								>
-									<Dialog.Trigger asChild let:builder>
-										<Button variant="outline" builders={[builder]}>Edit</Button>
-									</Dialog.Trigger>
-									<Dialog.Content class="sm:max-w-[425px]">
-										<Dialog.Header>
-											<Dialog.Title>Update your Event</Dialog.Title>
-											<Dialog.Description>
-												Allow members mark attendance on your events
-											</Dialog.Description>
-										</Dialog.Header>
-
-										<UpdateEventForm
-											{forms}
-											data={data.updateForms.find((form) => form.id === event.id)}
-											{event}
-											actionType="update"
-										/>
-									</Dialog.Content>
-								</Dialog.Root>
-							{:else}
-								<Drawer.Root
-									open={editFormOpen[event.id]}
-									onOpenChange={(e) => (editFormOpen[event.id] = e)}
-								>
-									<Drawer.Trigger asChild let:builder>
-										<Button variant="outline" builders={[builder]}>Edit</Button>
-									</Drawer.Trigger>
-									<Drawer.Content class="p-4">
-										<Drawer.Header class="text-left">
-											<Drawer.Title>Update your Event</Drawer.Title>
-											<Drawer.Description>
-												Allow members mark attendance on your events
-											</Drawer.Description>
-										</Drawer.Header>
-										<UpdateEventForm
-											{forms}
-											data={data.updateForms.find((form) => form.id === event.id)}
-											{event}
-											actionType="update"
-										/>
-										<Drawer.Footer class="pt-2">
-											<Drawer.Close asChild let:builder>
-												<Button variant="outline" builders={[builder]}>Cancel</Button>
-											</Drawer.Close>
-										</Drawer.Footer>
-									</Drawer.Content>
-								</Drawer.Root>
-							{/if}
-						{/await}
-
-						<AlertDialog.Root>
-							<AlertDialog.Trigger asChild let:builder>
-								<Button variant="destructive" builders={[builder]}>Delete</Button>
-							</AlertDialog.Trigger>
-							<AlertDialog.Content>
-								<AlertDialog.Header>
-									<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
-									<AlertDialog.Description>
-										This action cannot be undone. This will permanently delete the event, associated
-										attendances and responses.
-									</AlertDialog.Description>
-								</AlertDialog.Header>
-								<AlertDialog.Footer>
-									<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-									<form
-										action="?/delete"
-										method="post"
-										use:enhance={({ formElement, formData, action, cancel, submitter }) => {
-											// `formElement` is this `<form>` element
-											// `formData` is its `FormData` object that's about to be submitted
-											// `action` is the URL to which the form is posted
-											// calling `cancel()` will prevent the submission
-											// `submitter` is the `HTMLElement` that caused the form to be submitted
-
-											return async ({ result, update }) => {
-												// `result` is an `ActionResult` object
-												// `update` is a function which triggers the default logic that would be triggered if this callback wasn't set
-												toast.success('Event successfully deleted');
-											};
-										}}
+									</Dialog.Root>
+								{:else}
+									<Drawer.Root
+										open={editFormOpen[event.id]}
+										onOpenChange={(e) => (editFormOpen[event.id] = e)}
 									>
-										<input type="text" name="id" id="" class="hidden" value={event.id} />
+										<Drawer.Trigger asChild let:builder>
+											<Button variant="outline" builders={[builder]}>Edit</Button>
+										</Drawer.Trigger>
+										<Drawer.Content class="p-4">
+											<Drawer.Header class="text-left">
+												<Drawer.Title>Update your Event</Drawer.Title>
+												<Drawer.Description>
+													Allow members mark attendance on your events
+												</Drawer.Description>
+											</Drawer.Header>
+											<UpdateEventForm
+												{forms}
+												data={$eventQuery.data.updateForms.find((form) => form.id === event.id)}
+												closeForm={() => (editFormOpen[event.id] = false)}
+												{event}
+												actionType="update"
+											/>
+											<Drawer.Footer class="pt-2">
+												<Drawer.Close asChild let:builder>
+													<Button variant="outline" builders={[builder]}>Cancel</Button>
+												</Drawer.Close>
+											</Drawer.Footer>
+										</Drawer.Content>
+									</Drawer.Root>
+								{/if}
+							{/await}
+
+							<AlertDialog.Root>
+								<AlertDialog.Trigger asChild let:builder>
+									<Button variant="destructive" builders={[builder]}>Delete</Button>
+								</AlertDialog.Trigger>
+								<AlertDialog.Content>
+									<AlertDialog.Header>
+										<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
+										<AlertDialog.Description>
+											This action cannot be undone. This will permanently delete the event,
+											associated attendances and responses.
+										</AlertDialog.Description>
+									</AlertDialog.Header>
+									<AlertDialog.Footer>
+										<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+
 										<AlertDialog.Action
-											type="submit"
+											type="button"
+											on:click={async () => {
+												await $deleteEventMutation.mutateAsync({
+													orgId: $page.params.id,
+													eventId: event.id
+												});
+												await trpc().createUtils().eventRouter.getEvents.invalidate();
+											}}
 											class={buttonVariants({ variant: 'destructive' })}
 											>Continue</AlertDialog.Action
 										>
-									</form>
-								</AlertDialog.Footer>
-							</AlertDialog.Content>
-						</AlertDialog.Root>
-					</Card.Footer>
-				</Card.Root>
-			{/each}
+									</AlertDialog.Footer>
+								</AlertDialog.Content>
+							</AlertDialog.Root>
+						</Card.Footer>
+					</Card.Root>
+				{/each}
+			</div>
 		</div>
-	</div>
-{:else if $selectedView.value === 'calendar'}
-	<div class={cn('relative')}>
-		<div id="calendar" class="m-0 p-0 w-full h-[80vh]"></div>
-		<div class="absolute right-0">
-			{#if browser}
-				<div
-					class=" text-sm bg-secondary rounded-bl-md rounded-br-md font-semibold px-4 py-2 flex items-start w-20 gap-0.5"
-				>
-					<img src="/logo.svg" alt="Logo" class="h-4 w-4" />
-					Jonze
-				</div>
-			{/if}
+	{:else if $selectedView.value === 'calendar'}
+		<div class={cn('relative')}>
+			<div id="calendar" class="m-0 p-0 w-full h-[80vh]"></div>
+			<div class="absolute right-0">
+				{#if browser}
+					<div
+						class=" text-sm bg-secondary rounded-bl-md rounded-br-md font-semibold px-4 py-2 flex items-start w-20 gap-0.5"
+					>
+						<img src="/logo.svg" alt="Logo" class="h-4 w-4" />
+						Jonze
+					</div>
+				{/if}
+			</div>
 		</div>
-	</div>
-{:else}
-	<div>
-		<Bar
-			data={chartData}
-			on:click={(e) => console.log(e)}
-			options={{
-				maintainAspectRatio: false,
-				aspectRatio: 1,
-				scales: { x: { display: false }, y: { ticks: { stepSize: 1 } } }
-			}}
-		/>
-	</div>
+	{:else}
+		<div>
+			<Bar
+				data={chartData}
+				on:click={(e) => console.log(e)}
+				options={{
+					maintainAspectRatio: false,
+					aspectRatio: 1,
+					scales: { x: { display: false }, y: { ticks: { stepSize: 1 } } }
+				}}
+			/>
+		</div>
+	{/if}
 {/if}

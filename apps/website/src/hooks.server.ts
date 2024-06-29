@@ -62,6 +62,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			redirect(302, loginUrl);
 		}
 	}
+
 	const response = await resolve(event);
 	return response;
 };

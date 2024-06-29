@@ -22,49 +22,31 @@
 	"topbarLinks": [
 		{
 			"name": "Support",
-			"url": "mailto:hi@mintlify.com"
+			"url": "mailto:oluwapelps+jonze@gmail.com"
 		}
 	],
 	"topbarCtaButton": {
 		"name": "Dashboard",
-		"url": "https://dashboard.mintlify.com"
+		"url": "https://jonze.co"
 	},
 	"tabs": [
 		{
 			"name": "API Reference",
-			"url": "api-reference"
+			"url": "/",
+			"openapi": "https://api.jonze.co/doc",
+			"isDefaultHidden": true
 		}
 	],
 	"navigation": [
 		{
-			"group": "API Documentation",
+			"group": "API Reference",
 			"pages": ["api-reference/introduction"]
-		},
-		{
-			"group": "Events",
-			"pages": ["api-reference/events/list-events", "api-reference/events/get-event"]
-		},
-		{
-			"group": "Members",
-			"pages": ["api-reference/members/list-members", "api-reference/members/get-member"]
-		},
-		{
-			"group": "Attendance",
-			"pages": ["api-reference/attendance/get-attendance"]
-		},
-		{
-			"group": "Forms",
-			"pages": ["api-reference/forms/list-forms", "api-reference/forms/get-form"]
-		},
-		{
-			"group": "Responses",
-			"pages": ["api-reference/responses/list-responses"]
 		}
 	],
 	"footerSocials": {
-		"twitter": "https://twitter.com/mintlify",
-		"github": "https://github.com/mintlify",
-		"linkedin": "https://www.linkedin.com/company/mintsearch"
+		"twitter": "https://twitter.com/oluwapelps",
+		"github": "https://github.com/Pelps12/jonze",
+		"linkedin": "https://www.linkedin.com/in/oluwapelumi-adegoke-9634561b6/"
 	},
 	"openapi": "https://api.jonze.co/doc"
 }

@@ -1,0 +1,347 @@
+import { adminProcedure, procedure, router } from '..';
+import db from '$lib/server/db';
+import {
+	and,
+	eq,
+	gte,
+	lte,
+	like,
+	arrayContains,
+	sql,
+	asc,
+	desc,
+	type Member,
+	type FormResponse,
+	type User,
+	ilike
+} from '@repo/db';
+import schema from '@repo/db/schema';
+import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
+import { superValidate } from 'sveltekit-superforms/server';
+import { zod } from 'sveltekit-superforms/adapters';
+import { memberUpdationSchema, membershipCreationSchema } from '$lib/formSchema/member';
+import { dummyClient } from '$lib/server/posthog';
+import svix from '$lib/server/svix';
+
+function delay(ms: number) {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export const memberRouter = router({
+	getMember: adminProcedure
+		.input(
+			z.object({
+				memberId: z.string()
+			})
+		)
+		.query(async ({ input }) => {
+			const member = await db.query.member.findFirst({
+				where: eq(schema.member.id, input.memberId),
+				with: {
+					attendances: {
+						with: {
+							event: {
+								columns: {
+									id: true,
+									name: true
+								}
+							}
+						},
+						orderBy: (attendance, { desc }) => [desc(attendance.createdAt)]
+					},
+					memberships: {
+						with: {
+							plan: {
+								columns: {
+									id: true,
+									name: true
+								}
+							}
+						},
+						orderBy: (membership, { desc }) => [desc(membership.createdAt)],
+						limit: 1
+					},
+					user: {
+						columns: {
+							id: true,
+							firstName: true,
+							lastName: true,
+							profilePictureUrl: true,
+							email: true
+						}
+					},
+					tags: true
+				}
+			});
+
+			const availablePlans = await db.query.plan.findMany({
+				where: eq(schema.plan.orgId, input.orgId),
+				columns: {
+					id: true,
+					name: true
+				}
+			});
+			if (!member) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'User not Found'
+				});
+			}
+
+			console.log(member);
+			return {
+				member,
+				form: await superValidate(
+					member.memberships[0]
+						? {
+								planId: member.memberships[0].planId,
+								provider: member.memberships[0].provider
+							}
+						: {},
+					zod(membershipCreationSchema)
+				),
+				memberForm: await superValidate(
+					member.tags ? { tags: member.tags.names } : {},
+					zod(memberUpdationSchema)
+				),
+				plans: availablePlans
+			};
+		}),
+	updateMembership: adminProcedure
+		.input(membershipCreationSchema.extend({ memberId: z.string() }))
+		.mutation(async ({ input, ctx }) => {
+			const member = await db.query.member.findFirst({
+				where: eq(schema.member.id, input.memberId)
+			});
+
+			if (!member) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Member not found'
+				});
+			}
+			const [newMembership] = await db
+				.insert(schema.membership)
+				.values({
+					planId: input.planId,
+					memId: input.memberId,
+					provider: input.provider,
+					...(input.createdAt ? { createdAt: input.createdAt } : {})
+				})
+				.returning();
+			console.log(newMembership, 'MEMBERSHIP');
+			//Capture event updated
+
+			const useragent = ctx.event.request.headers.get('user-agent');
+			ctx.event.locals.user &&
+				dummyClient.capture({
+					distinctId: ctx.event.locals.user.id,
+					event: 'new user membership',
+					properties: {
+						$ip: ctx.event.getClientAddress(),
+						planId: input.planId,
+						orgId: input.orgId,
+						memId: input.memberId,
+						id: newMembership.id,
+						...(useragent && { $useragent: useragent })
+					}
+				});
+			if (newMembership) {
+				ctx.event.platform?.context.waitUntil(
+					Promise.all([
+						dummyClient.flushAsync(),
+						svix.message.create(input.orgId, {
+							eventType: 'membership.updated',
+							payload: {
+								type: 'membership.updated',
+								data: {
+									...{ ...newMembership, member }
+								}
+							}
+						})
+					])
+				);
+				return {};
+			}
+
+			return {};
+		}),
+
+	updateMember: adminProcedure
+		.input(memberUpdationSchema.extend({ memberId: z.string() }))
+		.mutation(async ({ input, ctx }) => {
+			const member = await db.query.member.findFirst({
+				where: eq(schema.member.id, input.memberId)
+			});
+
+			if (!member) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Member not found'
+				});
+			}
+
+			if (input.tags.length > 0) {
+				await db
+					.insert(schema.memberTag)
+					.values({ id: member.id, names: input.tags })
+					.onConflictDoUpdate({
+						target: schema.memberTag.id,
+						set: { names: input.tags }
+					});
+			}
+
+			const useragent = ctx.event.request.headers.get('user-agent');
+			ctx.event.locals.user &&
+				dummyClient.capture({
+					distinctId: ctx.event.locals.user.id,
+					event: 'new user tags',
+					properties: {
+						$ip: ctx.event.getClientAddress(),
+						orgId: input.orgId,
+						memId: input.memberId,
+						...(useragent && { $useragent: useragent })
+					}
+				});
+
+			ctx.event.platform?.context.waitUntil(Promise.all([dummyClient.flushAsync()]));
+
+			return;
+		}),
+	getMembers: procedure
+		.input(
+			z.object({
+				orgId: z.string(),
+				email: z.string().nullish(),
+				name: z.string().nullish(),
+				customValue: z.string().nullish(),
+				customType: z.string().nullish(),
+				tag: z.string().nullish(),
+				limit: z.string().nullish(),
+				plan: z.string().nullish(),
+				before: z.string().nullish(),
+				after: z.string().nullish()
+			})
+		)
+		.query(async ({ input }) => {
+			const emailFilter = input.email;
+			const name = input.name;
+			const formattedName = name ? `%${name}%` : null;
+
+			const plan = input.plan;
+			const formattedPlan = plan ? `%${plan}%` : null;
+
+			const customValue = input.customValue;
+			const customType = input.customType;
+
+			const tag = input.tag;
+			console.log(tag, 'TAGGGGGGG');
+
+			const limit = input.limit === 'all' ? Number.MAX_SAFE_INTEGER : parseInt(input.limit ?? '10');
+			const prevCursor = input.before;
+			const nextCursor = input.after;
+			if (prevCursor && nextCursor) {
+				throw new TRPCError({
+					code: 'BAD_REQUEST',
+					message: 'Cannot have both cursors'
+				});
+			}
+			const cursor = prevCursor ?? nextCursor;
+			const direction = prevCursor ? 'prev' : 'next';
+			const order: any = 'desc';
+
+			let query = db
+				.select()
+				.from(schema.member)
+				.innerJoin(schema.user, eq(schema.user.id, schema.member.userId))
+				.leftJoin(schema.formResponse, eq(schema.formResponse.id, schema.member.additionalInfoId))
+				.leftJoin(schema.memberTag, eq(schema.memberTag.id, schema.member.id))
+				.where(
+					and(
+						cursor
+							? direction === 'prev' //XOR comparison
+								? gte(schema.member.id, cursor)
+								: lte(schema.member.id, cursor)
+							: undefined,
+						eq(schema.member.orgId, input.orgId),
+						emailFilter ? like(schema.user.email, `%${emailFilter}%`) : undefined,
+						formattedName
+							? sql`CONCAT(${schema.user.firstName}, ' ', ${schema.user.lastName}) ILIKE ${formattedName}`
+							: undefined,
+						tag ? arrayContains(schema.memberTag.names, [tag]) : undefined,
+						customValue && customType
+							? arrayContains(schema.formResponse.response, [
+									{ label: customType, response: customValue }
+								])
+							: undefined
+					)
+				)
+				.orderBy(
+					direction === 'prev' ? asc(schema.member.createdAt) : desc(schema.member.createdAt)
+				)
+				.limit(limit + 1)
+				.offset(0)
+				.$dynamic();
+
+			if (formattedPlan) {
+				const latestMembershipSQ = db
+					.select({
+						memId: schema.membership.memId,
+						latest: sql<string>`MAX(${schema.membership.createdAt})`.as('latest')
+					})
+					.from(schema.membership)
+					.groupBy(schema.membership.memId)
+					.as('LatestMembership');
+
+				query = query
+					.innerJoin(schema.membership, eq(schema.membership.memId, schema.member.id))
+					.innerJoin(schema.plan, eq(schema.plan.id, schema.membership.planId))
+					.innerJoin(
+						latestMembershipSQ,
+						and(
+							eq(latestMembershipSQ.memId, schema.member.id),
+							eq(latestMembershipSQ.latest, schema.membership.createdAt)
+						)
+					)
+					.where(ilike(schema.plan.name, `%${formattedPlan}%`));
+			}
+
+			const rows = await query;
+			const result = rows.reduce<(Member & { user: User; additionalInfo: FormResponse | null })[]>(
+				(acc, row) => {
+					const user = row.User;
+					const member = row.Member;
+					acc.push({ ...member, user, additionalInfo: row.FormResponse });
+					return acc;
+				},
+				[]
+			);
+			console.log(result.map((item) => item.user.firstName));
+
+			const nextItem =
+				result.length > limit ? (direction == 'prev' ? result.shift() : result.pop()) : undefined;
+
+			const organizationForm = await db.query.organizationForm.findFirst({
+				where: and(
+					eq(schema.organizationForm.orgId, input.orgId),
+					eq(schema.organizationForm.name, 'User Info')
+				)
+			});
+
+			return {
+				members: direction === 'prev' ? result.reverse() : result,
+				organizationForm,
+				pagination: {
+					prevCursor:
+						direction === 'prev'
+							? result.length >= limit && result[0]
+								? result[0].id
+								: null
+							: cursor,
+					nextCursor:
+						direction === 'prev' ? cursor : result.length >= limit && nextItem ? nextItem.id : null
+				}
+			};
+		})
+});

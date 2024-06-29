@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as Form from '$lib/components/ui/form';
-	import { type EventUpdationSchema, eventUpdationSchema } from './schema';
+	import { type EventUpdationSchema, eventUpdationSchema } from '$lib/formSchema/event';
 	import SuperDebug, {
 		type SuperValidated,
 		type Infer,
@@ -17,19 +17,39 @@
 	import * as Command from '$lib/components/ui/command';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import { cn } from '$lib/utils';
-	import { Check, ChevronsUpDown } from 'lucide-svelte';
+	import { Check, ChevronsUpDown, LoaderCircle } from 'lucide-svelte';
 	import type { Writable } from 'svelte/store';
 	import { MultiSelect } from 'svelte-multiselect';
 	import { badgeVariants } from '$lib/components/ui/badge';
 	import { browser } from '$app/environment';
+	import { trpc } from '$lib/client/trpc';
+	import { page } from '$app/stores';
 
 	export let data: SuperValidated<Infer<EventUpdationSchema>>;
 	export let forms: { id: string; name: string }[] = [];
 	export let event: (dbEvent & { form: OrgForm | null }) | undefined;
 	export let actionType: 'create' | 'update' = 'create';
+	export let closeForm: () => void;
+
+	const updateMutation = trpc().eventRouter.updateEvent.createMutation();
+	const utils = trpc().createUtils();
 
 	const form = superForm(data, {
-		validators: zodClient(eventUpdationSchema)
+		SPA: true,
+		validators: zodClient(eventUpdationSchema),
+		dataType: 'json',
+		onUpdate: async ({ form }) => {
+			if (form.valid) {
+				// TODO: Call an external API with form.data, await the result and update form
+				console.log(form.data);
+				await $updateMutation.mutateAsync({
+					orgId: $page.params.id,
+					...form.data
+				});
+				await utils.eventRouter.getEvents.invalidate();
+				closeForm();
+			}
+		}
 	});
 
 	const default_tags = [`#social`, `#gbm`, `#study-session`];
@@ -193,7 +213,11 @@
 		</Form.Control>
 	</Form.Field>
 
-	<Form.Button>{actionType === 'create' ? 'Create' : 'Update'}</Form.Button>
+	<Form.Button class="w-full" disabled={$updateMutation.isPending}
+		>{#if $updateMutation.isPending}
+			<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+		{/if}{actionType === 'create' ? 'Create' : 'Update'}</Form.Button
+	>
 	<!-- 
 	{#if browser}
 		<SuperDebug data={$formData} />
