@@ -1,10 +1,10 @@
-import db from '$lib/server/db';
+/* import db from '$lib/server/db';
 import { and, eq, or } from 'drizzle-orm';
 import type { Actions, PageServerLoad } from './$types';
 import schema from '@repo/db/schema';
 import { error, redirect } from '@sveltejs/kit';
 import { attendance } from '@repo/db/schema/attendance';
-import { stripe } from '$lib/server/stripe';
+import { stripe } from '$lib/server/stripe'; */
 
 /* export const load: PageServerLoad = async ({ params, locals, cookies }) => {
 	console.log('888888', locals.user);
@@ -95,7 +95,7 @@ import { stripe } from '$lib/server/stripe';
 	return { organization, layout, chartData, clientSecret };
 }; */
 
-export const actions: Actions = {
+/* export const actions: Actions = {
 	upgrade: async (event) => {
 		if (!event.locals.user) error(401);
 		const member = await db.query.member.findFirst({
@@ -137,4 +137,4 @@ export const actions: Actions = {
 
 		return redirect(302, session.url);
 	}
-};
+}; */

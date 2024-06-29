@@ -18,8 +18,11 @@
 	import { Button } from '$lib/components/ui/button';
 	import { twJoin } from 'tailwind-merge';
 	import { trpc } from '$lib/client/trpc';
+	import { ChevronRight } from 'lucide-svelte';
 
 	export let layout: number[] | undefined = undefined;
+
+	const utils = trpc().createUtils();
 
 	const pageQuery = trpc().homePageRouter.home.createQuery(
 		{
@@ -166,10 +169,22 @@
 				onResize={(e) => Chart.getChart('')?.resize(10, 10)}
 			>
 				<Card.Root class=" m-2">
-					<Card.Header class="p-4">
+					<Card.Header class="p-4 relative">
 						<div class="grid gap-4">
 							<Card.Title class="text-lg font-semibold">Event Metrics</Card.Title>
 						</div>
+
+						<a
+							class="absolute top-0 right-0 p-3 text-sm flex items-center"
+							href={`/org/${$page.params.id}/events?view=graph`}
+							on:mouseenter={() =>
+								utils.eventRouter.getEvents.prefetch({
+									orgId: $page.params.id
+								})}
+						>
+							<p>See More</p>
+							<ChevronRight class="ml-2 h-4 w-4" />
+						</a>
 					</Card.Header>
 					<Card.Content class="grid gap-4 h-auto">
 						<Bar
@@ -234,15 +249,15 @@
 			</Resizable.Pane>
 		</Resizable.PaneGroup>
 	</div>
-
-	<Card.Root class={cn(' relative my-4')}>
-		<Card.Header class="p-4 absolute z-[20]">
-			<div class="grid gap-4">
-				<Card.Title class="text-lg font-semibold">Transaction History</Card.Title>
-			</div>
-		</Card.Header>
-		<Card.Content class="grid gap-4">
-			<div id="connectElement" class="my-5" />
-		</Card.Content>
-	</Card.Root>
 {/if}
+
+<Card.Root class={cn(' relative my-4')}>
+	<Card.Header class="p-4 absolute z-[20]">
+		<div class="grid gap-4">
+			<Card.Title class="text-lg font-semibold">Transaction History</Card.Title>
+		</div>
+	</Card.Header>
+	<Card.Content class="grid gap-4">
+		<div id="connectElement" class="my-5" />
+	</Card.Content>
+</Card.Root>

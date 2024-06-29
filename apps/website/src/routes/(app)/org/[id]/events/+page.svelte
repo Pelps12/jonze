@@ -117,7 +117,31 @@
 		? $eventQuery.data?.events?.reduce((o, { id }) => Object.assign(o, { [id]: false }), {})
 		: {};
 
-	let selectedView = writable({ label: 'List View', value: 'list' });
+	const selectableViews = [
+		{
+			label: 'List View',
+			value: 'list'
+		},
+		{
+			label: 'Calendar View',
+			value: 'calendar'
+		},
+		{
+			label: 'Graph View',
+			value: 'graph'
+		}
+	];
+
+	let selectedView = writable(
+		selectableViews.find((selectableView) => {
+			const view = $page.url.searchParams.get('view') ?? 'list';
+			if (selectableView.value === view) {
+				return true;
+			} else {
+				return false;
+			}
+		})
+	);
 
 	onMount(() => {});
 
@@ -209,161 +233,161 @@
 	};
 
 	selectedView.subscribe((view) => {
-		if (view.value === 'calendar') {
-			setTimeout(() => {
-				var calendarEl = document.getElementById('calendar');
-				console.log(calendarEl);
-				if (calendarEl) {
-					const calendar = new Calendar(calendarEl, {
-						initialView: 'dayGridMonth',
-						plugins: [dayGridPlugin, timeGridPlugin, listPlugin],
-						events: $eventQuery.data?.events.map((event) => ({
-							title: event.name,
-							...event,
-							url: `${PUBLIC_URL}/org/${$page.params.id}/events/${event.id}`
-						})),
-						headerToolbar: {
-							left: 'prev,next today',
-							center: 'title',
+		if (browser) {
+			const newURL = new URL($page.url);
+			newURL.searchParams.set('view', view.value);
+			goto(newURL);
+			if (view.value === 'calendar') {
+				setTimeout(() => {
+					var calendarEl = document.getElementById('calendar');
+					console.log(calendarEl);
+					if (calendarEl) {
+						const calendar = new Calendar(calendarEl, {
+							initialView: 'dayGridMonth',
+							plugins: [dayGridPlugin, timeGridPlugin, listPlugin],
+							events: $eventQuery.data?.events.map((event) => ({
+								title: event.name,
+								...event,
+								url: `${PUBLIC_URL}/org/${$page.params.id}/events/${event.id}`
+							})),
+							headerToolbar: {
+								left: 'prev,next today',
+								center: 'title',
 
-							right: 'dayGridMonth,timeGridWeek,listWeek'
-						},
-						eventInteractive: true
-					});
-					calendar.render();
-				}
-			}, 100);
+								right: 'dayGridMonth,timeGridWeek,listWeek'
+							},
+							eventInteractive: true
+						});
+						calendar.render();
+					}
+				}, 100);
+			}
 		}
 	});
 </script>
 
-{#if $eventQuery.data}
-	{#if !$eventQuery.data.events.find((event) => !!event.form)}
-		<Alert.Root class="mb-2">
-			<Alert.Title>Quick Tip!</Alert.Title>
-			<Alert.Description
-				>You can add <a
-					class="underline pointer-events-auto"
-					href={`/org/${$page.params.id}/forms/create`}>a feedback form</a
-				> and attach it on event creation 😉</Alert.Description
-			>
-		</Alert.Root>
-	{/if}
-
-	<div class="flex justify-between items-center mb-6">
-		<h2 class="text-xl font-semibold">Events</h2>
-		<div class="flex space-x-2">
-			{#await $eventQuery.data.forms}
-				<Button disabled>Add Event</Button>
-			{:then forms}
-				<Select.Root portal={null} bind:selected={$selectedView}>
-					<Select.Trigger class="w-[150px]">
-						<Select.Value placeholder="Select a fruit" />
-					</Select.Trigger>
-					<Select.Content>
-						<Select.Group>
-							<Select.Item value="list" label="List View">List View</Select.Item>
-							<Select.Item value="calendar" label="Calendar View">Calendar View</Select.Item>
-							<Select.Item value="graph" label="Graph View">Graph View</Select.Item>
-						</Select.Group>
-					</Select.Content>
-					<Select.Input name="favoriteFruit" />
-				</Select.Root>
-				<Button
-					variant="outline"
-					on:click={() => handleExport($eventQuery.data.events, 'events.csv')}
-					><FileDown class="h-4 w-4 mr-2" /><span class="hidden sm:block">Export</span></Button
-				>
-				{#if $isDesktop}
-					<Dialog.Root bind:open={newFormOpen}>
-						<Dialog.Trigger asChild let:builder>
-							<Button
-								builders={[builder]}
-								class=" justify-center lg:justify-start gap-2"
-								on:click={() => (selectedEvent = undefined)}
-							>
-								<PlusIcon class="h-4 w-4" />
-								<span class="hidden lg:block">Add Event</span>
-							</Button>
-						</Dialog.Trigger>
-						<Dialog.Content class="sm:max-w-[425px]">
-							<Dialog.Header>
-								<Dialog.Title>Create your Event</Dialog.Title>
-								<Dialog.Description>Allow members mark attendance on your events</Dialog.Description
-								>
-							</Dialog.Header>
-							<EventForm
-								data={$eventQuery.data.form}
-								event={selectedEvent}
-								{forms}
-								closeForm={() => (newFormOpen = false)}
-							/>
-						</Dialog.Content>
-					</Dialog.Root>
-				{:else}
-					<Drawer.Root bind:open={newFormOpen}>
-						<Drawer.Trigger asChild let:builder>
-							<Button
-								builders={[builder]}
-								class=" justify-center lg:justify-start gap-2"
-								on:click={() => (selectedEvent = undefined)}
-							>
-								<PlusIcon class="h-4 w-4" />
-								<span class="hidden lg:block">Add Event</span>
-							</Button>
-						</Drawer.Trigger>
-						<Drawer.Content class="p-4">
-							<Drawer.Header class="text-left">
-								<Drawer.Title>Create your Event</Drawer.Title>
-								<Drawer.Description>Allow members mark attendance on your events</Drawer.Description
-								>
-							</Drawer.Header>
-							<EventForm
-								data={$eventQuery.data.form}
-								event={selectedEvent}
-								{forms}
-								closeForm={() => (newFormOpen = false)}
-							/>
-							<Drawer.Footer class="pt-2">
-								<Drawer.Close asChild let:builder>
-									<Button variant="outline" builders={[builder]}>Cancel</Button>
-								</Drawer.Close>
-							</Drawer.Footer>
-						</Drawer.Content>
-					</Drawer.Root>
-				{/if}
-			{/await}
-		</div>
-	</div>
-
-	<form class="my-3 flex gap-2 flex-start">
-		<Select.Root
-			{selected}
-			onSelectedChange={(e) => {
-				selected = e;
-			}}
+{#if $eventQuery.data && !$eventQuery.data.events.find((event) => !!event.form)}
+	<Alert.Root class="mb-2">
+		<Alert.Title>Quick Tip!</Alert.Title>
+		<Alert.Description
+			>You can add <a
+				class="underline pointer-events-auto"
+				href={`/org/${$page.params.id}/forms/create`}>a feedback form</a
+			> and attach it on event creation 😉</Alert.Description
 		>
-			<Select.Trigger class="w-[100px]">
-				<Select.Value placeholder="Filter by" />
-			</Select.Trigger>
-			<Select.Content>
-				<Select.Item value="name">Name</Select.Item>
-				<Select.Item value="tag">Tag</Select.Item>
-			</Select.Content>
-		</Select.Root>
-		<Input
-			bind:value={$filterValue}
-			on:keydown={(e) => e.key === 'Enter' && handleFilterSubmit()}
-			placeholder={`Filter ${!!selected?.label ? `by ${selected?.label}` : ''}`}
-			class="max-w-md"
-		/>
-		<Button on:click={() => handleFilterSubmit()}>Apply</Button>
-		<Button on:click={() => handleReset()} variant="outline">
-			<XIcon class="w-4 h-4" />
-			Reset
-		</Button>
-	</form>
+	</Alert.Root>
+{/if}
 
+<div class="flex justify-between items-center mb-6">
+	<h2 class="text-xl font-semibold">Events</h2>
+	<div class="flex space-x-2">
+		{#if !$eventQuery.data}
+			<Button disabled>Add Event</Button>
+		{:else}
+			<Select.Root portal={null} bind:selected={$selectedView}>
+				<Select.Trigger class="w-[150px]">
+					<Select.Value placeholder="Select a fruit" />
+				</Select.Trigger>
+				<Select.Content>
+					<Select.Group>
+						<Select.Item value="list" label="List View">List View</Select.Item>
+						<Select.Item value="calendar" label="Calendar View">Calendar View</Select.Item>
+						<Select.Item value="graph" label="Graph View">Graph View</Select.Item>
+					</Select.Group>
+				</Select.Content>
+				<Select.Input name="favoriteFruit" />
+			</Select.Root>
+			<Button variant="outline" on:click={() => handleExport($eventQuery.data.events, 'events.csv')}
+				><FileDown class="h-4 w-4 mr-2" /><span class="hidden sm:block">Export</span></Button
+			>
+			{#if $isDesktop}
+				<Dialog.Root bind:open={newFormOpen}>
+					<Dialog.Trigger asChild let:builder>
+						<Button
+							builders={[builder]}
+							class=" justify-center lg:justify-start gap-2"
+							on:click={() => (selectedEvent = undefined)}
+						>
+							<PlusIcon class="h-4 w-4" />
+							<span class="hidden lg:block">Add Event</span>
+						</Button>
+					</Dialog.Trigger>
+					<Dialog.Content class="sm:max-w-[425px]">
+						<Dialog.Header>
+							<Dialog.Title>Create your Event</Dialog.Title>
+							<Dialog.Description>Allow members mark attendance on your events</Dialog.Description>
+						</Dialog.Header>
+						<EventForm
+							event={selectedEvent}
+							forms={$eventQuery.data.forms}
+							closeForm={() => (newFormOpen = false)}
+						/>
+					</Dialog.Content>
+				</Dialog.Root>
+			{:else}
+				<Drawer.Root bind:open={newFormOpen}>
+					<Drawer.Trigger asChild let:builder>
+						<Button
+							builders={[builder]}
+							class=" justify-center lg:justify-start gap-2"
+							on:click={() => (selectedEvent = undefined)}
+						>
+							<PlusIcon class="h-4 w-4" />
+							<span class="hidden lg:block">Add Event</span>
+						</Button>
+					</Drawer.Trigger>
+					<Drawer.Content class="p-4">
+						<Drawer.Header class="text-left">
+							<Drawer.Title>Create your Event</Drawer.Title>
+							<Drawer.Description>Allow members mark attendance on your events</Drawer.Description>
+						</Drawer.Header>
+						<EventForm
+							data={$eventQuery.data.form}
+							event={selectedEvent}
+							forms={$eventQuery.data.forms}
+							closeForm={() => (newFormOpen = false)}
+						/>
+						<Drawer.Footer class="pt-2">
+							<Drawer.Close asChild let:builder>
+								<Button variant="outline" builders={[builder]}>Cancel</Button>
+							</Drawer.Close>
+						</Drawer.Footer>
+					</Drawer.Content>
+				</Drawer.Root>
+			{/if}
+		{/if}
+	</div>
+</div>
+
+<form class="my-3 flex gap-2 flex-start">
+	<Select.Root
+		{selected}
+		onSelectedChange={(e) => {
+			selected = e;
+		}}
+	>
+		<Select.Trigger class="w-[100px]">
+			<Select.Value placeholder="Filter by" />
+		</Select.Trigger>
+		<Select.Content>
+			<Select.Item value="name">Name</Select.Item>
+			<Select.Item value="tag">Tag</Select.Item>
+		</Select.Content>
+	</Select.Root>
+	<Input
+		bind:value={$filterValue}
+		on:keydown={(e) => e.key === 'Enter' && handleFilterSubmit()}
+		placeholder={`Filter ${!!selected?.label ? `by ${selected?.label}` : ''}`}
+		class="max-w-md"
+	/>
+	<Button on:click={() => handleFilterSubmit()} disabled={$eventQuery.isFetching}>Apply</Button>
+	<Button on:click={() => handleReset()} variant="outline" disabled={$eventQuery.isFetching}>
+		<XIcon class="w-4 h-4" />
+		Reset
+	</Button>
+</form>
+
+{#if $eventQuery.data}
 	{#if $eventQuery.data.events.length == 0}
 		<div
 			class="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm h-[60vh]"
@@ -568,15 +592,10 @@
 										<AlertDialog.Action
 											type="button"
 											on:click={async () => {
-												await $deleteEventMutation.mutateAsync(
-													{
-														orgId: $page.params.id,
-														eventId: event.id
-													},
-													{
-														onSuccess: () => {}
-													}
-												);
+												await $deleteEventMutation.mutateAsync({
+													orgId: $page.params.id,
+													eventId: event.id
+												});
 												await trpc().createUtils().eventRouter.getEvents.invalidate();
 											}}
 											class={buttonVariants({ variant: 'destructive' })}

@@ -1,9 +1,10 @@
-import { eq } from '@repo/db';
+import { and, eq } from '@repo/db';
 import { adminProcedure, router } from '..';
 import schema from '@repo/db/schema';
 import db from '$lib/server/db';
 import { TRPCError } from '@trpc/server';
 import { stripe } from '$lib/server/stripe';
+import { z } from 'zod';
 
 export const homePageRouter = router({
 	home: adminProcedure.query(async ({ input, ctx }) => {
@@ -85,5 +86,54 @@ export const homePageRouter = router({
 			}
 		});
 		return clientSecret;
-	})
+	}),
+	upgradePlan: adminProcedure
+		.input(z.object({ period: z.enum(['monthly', 'yearly']), returnURL: z.string().url() }))
+		.mutation(async ({ input, ctx }) => {
+			if (!ctx.event.locals.user) throw new TRPCError({ code: 'UNAUTHORIZED' });
+			const member = await db.query.member.findFirst({
+				where: and(
+					eq(schema.member.orgId, input.orgId),
+					eq(schema.member.role, 'OWNER'),
+					eq(schema.member.userId, ctx.event.locals.user.id)
+				)
+			});
+			if (!member) {
+				throw new TRPCError({
+					code: 'UNAUTHORIZED',
+					message: 'Only the owner of this org has such privileges. \nSpeak with them about it'
+				});
+			}
+			const formdata = await ctx.event.request.formData();
+
+			const period = input.period;
+
+			const prices = await stripe.prices.list({
+				lookup_keys: [`plus_${period}`],
+				expand: ['data.product']
+			});
+			const session = await stripe.checkout.sessions.create({
+				billing_address_collection: 'auto',
+				line_items: [
+					{
+						price: prices.data[0].id,
+						// For metered billing, do not pass quantity
+						quantity: 1
+					}
+				],
+				mode: 'subscription',
+				success_url: input.returnURL,
+				cancel_url: input.returnURL
+			});
+
+			if (!session.url)
+				throw new TRPCError({
+					code: 'INTERNAL_SERVER_ERROR',
+					message: "I really don't know 😅"
+				});
+
+			return {
+				sessionUrl: session.url
+			};
+		})
 });

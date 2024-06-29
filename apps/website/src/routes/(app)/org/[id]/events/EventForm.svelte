@@ -28,8 +28,6 @@
 	import { cn } from '$lib/utils';
 	import { Check, ChevronsUpDown, LoaderCircle } from 'lucide-svelte';
 	import type { Writable } from 'svelte/store';
-
-	export let data: SuperValidated<Infer<EventCreationSchema>>;
 	export let forms: { id: string; name: string }[] = [];
 
 	const uploadMutation = trpc().eventRouter.createEvent.createMutation();

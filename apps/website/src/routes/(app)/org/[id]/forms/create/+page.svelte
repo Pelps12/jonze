@@ -1,9 +1,11 @@
 <script>
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
+	import { trpc } from '$lib/client/trpc';
 
 	import Editor from '$lib/components/custom/form/UI/Editor.svelte';
 	import { form, form_name } from '$lib/stores/forms';
+	import { TRPCError } from '@trpc/server';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 
@@ -12,24 +14,25 @@
 	onMount(() => {
 		console.log(initialFormName);
 	});
+
+	const uploadMutation = trpc().formRouter.createForm.createMutation();
 	const formUpload = async () => {
 		if (Object.keys($form).length > 0 && $form_name) {
-			const response = await fetch('/api/forms', {
-				method: 'POST',
-				body: JSON.stringify({
-					organizationId: $page.params.id,
+			try {
+				await $uploadMutation.mutateAsync({
+					orgId: $page.params.id,
 					form: $form,
 					formName: $form_name
-				})
-			});
-
-			if (response.ok) {
+				});
 				if (browser) {
 					window.history.back();
 				}
-			} else {
-				const { message } = await response.json();
-				toast.error(message);
+			} catch (err) {
+				if (err instanceof TRPCError) {
+					toast.error(err.message);
+				} else {
+					toast.error('Unknown Error Occured');
+				}
 			}
 		} else {
 			if (!$form_name) {

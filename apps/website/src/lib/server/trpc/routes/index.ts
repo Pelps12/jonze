@@ -4,12 +4,16 @@ import { memberRouter } from './members';
 import { planRouter } from './plans';
 import { eventRouter } from './events';
 import { homePageRouter } from './homepage';
+import { settingsRouter } from './settings';
+import { formRouter } from './forms';
 
 export const appRouter = router({
 	memberRouter,
 	planRouter,
 	eventRouter,
-	homePageRouter
+	homePageRouter,
+	settingsRouter,
+	formRouter
 });
 
 // export type definition of API
