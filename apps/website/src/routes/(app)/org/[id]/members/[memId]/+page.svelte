@@ -197,7 +197,8 @@
 							<Button
 								variant="link"
 								class="text-sm text-muted-foreground p-0 m-0"
-								href={`/org/${$page.params.id}/plans`}>{membership.plan.name}</Button
+								href={`/org/${$page.params.id}/plans?id=${membership.plan.id}`}
+								>{membership.plan.name}</Button
 							>
 						</div>
 					</div>

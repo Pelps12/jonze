@@ -31,7 +31,7 @@
 	}
 
 	onMount(() => {
-		if (isMonotonicallyIncreasing(members.map((member) => member.id))) {
+		if (isMonotonicallyIncreasing(members.map((member) => member.user.id))) {
 			toast.info('NOICEEEE');
 		} else {
 			toast.error('Not monotic');
