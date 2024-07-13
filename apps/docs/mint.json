@@ -34,13 +34,16 @@
 			"name": "API Reference",
 			"url": "/",
 			"openapi": "https://api.jonze.co/doc",
-			"isDefaultHidden": true
+			"isDefaultHidden": false
 		}
 	],
+	"primaryTab": {
+		"name": "API Reference"
+	},
 	"navigation": [
 		{
-			"group": "API Reference",
-			"pages": ["api-reference/introduction"]
+			"group": "Home",
+			"pages": ["introduction"]
 		}
 	],
 	"footerSocials": {
