@@ -13,7 +13,9 @@
 		orgId: $page.params.id,
 		formId: $page.params.formId
 	});
+
 	const uploadMutation = trpc().formRouter.updateForm.createMutation();
+	const utils = trpc().createUtils();
 
 	const formUpload = async () => {
 		if (Object.keys($form).length > 0 && $form_name) {
@@ -24,14 +26,15 @@
 					formName: $form_name,
 					formId: $page.params.formId
 				});
+				await utils.formRouter.getForms.invalidate();
 				if (browser) {
 					window.history.back();
 				}
-			} catch (err) {
+			} catch (err: any) {
 				if (err instanceof TRPCError) {
 					toast.error(err.message);
 				} else {
-					toast.error(err.message as any);
+					toast.error(err?.message as any);
 				}
 			}
 		} else {

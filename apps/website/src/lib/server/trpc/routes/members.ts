@@ -13,7 +13,9 @@ import {
 	type Member,
 	type FormResponse,
 	type User,
-	ilike
+	ilike,
+	gt,
+	lt
 } from '@repo/db';
 import schema from '@repo/db/schema';
 import { z } from 'zod';
@@ -37,7 +39,7 @@ export const memberRouter = router({
 		)
 		.query(async ({ input }) => {
 			const member = await db.query.member.findFirst({
-				where: eq(schema.member.id, input.memberId),
+				where: and(eq(schema.member.id, input.memberId), eq(schema.member.orgId, input.orgId)),
 				with: {
 					attendances: {
 						with: {
@@ -250,6 +252,24 @@ export const memberRouter = router({
 			const cursor = prevCursor ?? nextCursor;
 			const direction = prevCursor ? 'prev' : 'next';
 			const order: any = 'desc';
+			const conditions = and(
+				cursor
+					? direction === 'prev' //XOR comparison
+						? gt(schema.member.createdAt, new Date(parseInt(cursor)))
+						: lt(schema.member.createdAt, new Date(parseInt(cursor)))
+					: undefined,
+				eq(schema.member.orgId, input.orgId),
+				emailFilter ? like(schema.user.email, `%${emailFilter}%`) : undefined,
+				formattedName
+					? sql`CONCAT(${schema.user.firstName}, ' ', ${schema.user.lastName}) ILIKE ${formattedName}`
+					: undefined,
+				tag ? arrayContains(schema.memberTag.names, [tag]) : undefined,
+				customValue && customType
+					? arrayContains(schema.formResponse.response, [
+							{ label: customType, response: customValue }
+						])
+					: undefined
+			);
 
 			let query = db
 				.select()
@@ -257,31 +277,11 @@ export const memberRouter = router({
 				.innerJoin(schema.user, eq(schema.user.id, schema.member.userId))
 				.leftJoin(schema.formResponse, eq(schema.formResponse.id, schema.member.additionalInfoId))
 				.leftJoin(schema.memberTag, eq(schema.memberTag.id, schema.member.id))
-				.where(
-					and(
-						cursor
-							? direction === 'prev' //XOR comparison
-								? gte(schema.user.id, cursor)
-								: lte(schema.user.id, cursor)
-							: undefined,
-						eq(schema.member.orgId, input.orgId),
-						emailFilter ? like(schema.user.email, `%${emailFilter}%`) : undefined,
-						formattedName
-							? sql`CONCAT(${schema.user.firstName}, ' ', ${schema.user.lastName}) ILIKE ${formattedName}`
-							: undefined,
-						tag ? arrayContains(schema.memberTag.names, [tag]) : undefined,
-						customValue && customType
-							? arrayContains(schema.formResponse.response, [
-									{ label: customType, response: customValue }
-								])
-							: undefined
-					)
-				)
+				.where(conditions)
 				.orderBy(
 					direction === 'prev' ? asc(schema.member.createdAt) : desc(schema.member.createdAt)
 				)
 				.limit(limit + 1)
-				.offset(0)
 				.$dynamic();
 
 			if (formattedPlan) {
@@ -304,7 +304,7 @@ export const memberRouter = router({
 							eq(latestMembershipSQ.latest, schema.membership.createdAt)
 						)
 					)
-					.where(ilike(schema.plan.name, `%${formattedPlan}%`));
+					.where(and(ilike(schema.plan.name, `%${formattedPlan}%`), conditions));
 			}
 
 			const rows = await query;
@@ -336,14 +336,14 @@ export const memberRouter = router({
 					prevCursor:
 						direction === 'prev'
 							? result.length >= limit && result[0]
-								? result[0].user.id
+								? result[0].createdAt.getTime().toString()
 								: null
 							: cursor,
 					nextCursor:
 						direction === 'prev'
 							? cursor
 							: result.length >= limit && nextItem
-								? nextItem.user.id
+								? nextItem.createdAt.getTime().toString()
 								: null
 				}
 			};

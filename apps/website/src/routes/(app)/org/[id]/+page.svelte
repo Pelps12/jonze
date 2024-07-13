@@ -18,7 +18,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { twJoin } from 'tailwind-merge';
 	import { trpc } from '$lib/client/trpc';
-	import { ChevronRight } from 'lucide-svelte';
+	import { ChevronRight, RefreshCw } from 'lucide-svelte';
 
 	export let layout: number[] | undefined = undefined;
 
@@ -76,44 +76,64 @@
 			}
 		]
 	};
-	let transactionHistoryVisible = false;
-	//m
-	onMount(() => {
-		console.log('NFvioernivoervnioeri');
+	let transactionHistoryVisible: 'not_fetched' | 'fetched' | 'attached' = 'not_fetched';
 
-		const stripeConnectInstance = loadConnectAndInitialize({
-			// This is your test publishable API key.
-			publishableKey: PUBLIC_STRIPE_KEY,
-			fetchClientSecret: async () => {
-				return (await $transactionHistoryMutation.mutateAsync({ orgId: $page.params.id })) ?? '';
-			},
-			fonts: [
-				{
-					cssSrc: 'https://fonts.googleapis.com/css2?family=Onest'
-				}
-			],
-			appearance: {
-				variables: {
-					colorBackground: $mode === 'light' ? '#f3f2f1' : '#1B1918'
+	//m
+	page.subscribe(() => {
+		if (browser) {
+			const container = document.getElementById('connectElement');
+
+			console.log('NFvioernivoervnioeri');
+
+			while (container?.firstChild) {
+				if (container.lastChild) {
+					container.removeChild(container.lastChild);
 				}
 			}
-		});
-		console.log(stripeConnectInstance);
-		mode.subscribe((value) =>
-			stripeConnectInstance.update({
+
+			const stripeConnectInstance = loadConnectAndInitialize({
+				// This is your test publishable API key.
+				publishableKey: PUBLIC_STRIPE_KEY,
+				fetchClientSecret: async () => {
+					const clientSecret =
+						(await $transactionHistoryMutation.mutateAsync({ orgId: $page.params.id })) ?? '';
+					transactionHistoryVisible = 'fetched';
+					return clientSecret;
+				},
+				fonts: [
+					{
+						cssSrc: 'https://fonts.googleapis.com/css2?family=Onest'
+					}
+				],
 				appearance: {
 					variables: {
-						colorBackground: value === 'light' ? '#f3f2f1' : '#1B1918'
+						colorBackground: $mode === 'light' ? '#f3f2f1' : '#1B1918'
 					}
 				}
-			})
-		);
+			});
+			console.log(stripeConnectInstance);
+			mode.subscribe((value) =>
+				stripeConnectInstance.update({
+					appearance: {
+						variables: {
+							colorBackground: value === 'light' ? '#f3f2f1' : '#1B1918'
+						}
+					}
+				})
+			);
 
-		const paymentComponent = stripeConnectInstance.create('payments');
-		const container = document.getElementById('connectElement');
-		container?.appendChild(paymentComponent);
-		transactionHistoryVisible = true;
+			const paymentComponent = stripeConnectInstance.create('payments');
+			container?.appendChild(paymentComponent);
+
+			setTimeout(() => {
+				transactionHistoryVisible = 'attached';
+			}, 2000);
+		}
 	});
+
+	const handleReload = async () => {
+		await utils.homePageRouter.invalidate();
+	};
 
 	$: data = $pageQuery.data;
 </script>
@@ -207,11 +227,23 @@
 				collapsible={true}
 			>
 				<Card.Root class=" m-2 h-auto">
-					<Card.Header class="p-4">
+					<Card.Header class="p-4 relative">
 						<div class="grid gap-4">
 							<Card.Title class="text-lg font-semibold">Recent Members</Card.Title>
 							<Card.Description class="text-sm">Recent additions to your org</Card.Description>
 						</div>
+
+						<a
+							class="absolute top-0 right-0 p-3 text-sm flex items-center"
+							href={`/org/${$page.params.id}/members`}
+							on:mouseenter={() =>
+								utils.eventRouter.getEvents.prefetch({
+									orgId: $page.params.id
+								})}
+						>
+							<p>See More</p>
+							<ChevronRight class="ml-2 h-4 w-4" />
+						</a>
 					</Card.Header>
 					<Card.Content class="grid gap-4">
 						{#each data.organization.members as member}
@@ -251,7 +283,13 @@
 	</div>
 {/if}
 
-<Card.Root class={cn(' relative my-4')}>
+<Card.Root
+	class={cn(
+		' relative my-4 hidden',
+		transactionHistoryVisible === 'fetched' && 'block animate-pulse',
+		transactionHistoryVisible === 'attached' && 'animate-none block'
+	)}
+>
 	<Card.Header class="p-4 absolute z-[20]">
 		<div class="grid gap-4">
 			<Card.Title class="text-lg font-semibold">Transaction History</Card.Title>

@@ -14,7 +14,7 @@ export const load: LayoutLoad = async () => {
 		queryCache: new QueryCache({
 			onError: (error) => {
 				if (browser) {
-					toast.error(`Something went wrong: ${error.message}`);
+					toast.error(`${error.message}`);
 				}
 			}
 		})

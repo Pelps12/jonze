@@ -2,7 +2,15 @@
 	import type { PageData } from './$types';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
-	import { ChevronDown, CopyIcon, Pencil, PlusCircle, PlusIcon, TrashIcon } from 'lucide-svelte';
+	import {
+		ChevronDown,
+		CopyIcon,
+		FileDown,
+		Pencil,
+		PlusCircle,
+		PlusIcon,
+		TrashIcon
+	} from 'lucide-svelte';
 	import * as Drawer from '$lib/components/ui/drawer';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { mediaQuery } from 'svelte-legos';
@@ -13,7 +21,7 @@
 	import Link from './link.svelte';
 	import MembershipForm from './MembershipForm.svelte';
 	import { page } from '$app/stores';
-	import { cn, formatName, getInitials } from '$lib/utils';
+	import { cn, formatName, getInitials, handleExport } from '$lib/utils';
 	import { Badge, badgeVariants } from '$lib/components/ui/badge';
 	import MemberUpdateForm from './MemberUpdateForm.svelte';
 	import { trpc } from '$lib/client/trpc';
@@ -133,8 +141,7 @@
 						{data.member.createdAt.toLocaleString('en-US', {
 							month: 'short',
 							day: 'numeric',
-							hour: 'numeric',
-							minute: 'numeric'
+							year: 'numeric'
 						})}
 					</div>
 				</div>
@@ -232,6 +239,16 @@
 			</Card.Content>
 		{/each}
 	</Card.Root>
+	<div class="text-right my-2">
+		<Button
+			variant="outline"
+			on:click={() =>
+				handleExport(
+					data.member.attendances,
+					`${formatName(data.member.user.firstName, data.member.user.lastName)}_attendance.csv`
+				)}><FileDown class="h-4 w-4 mr-2" /><span class="hidden sm:block">Export</span></Button
+		>
+	</div>
 
 	<DataTable member={data.member} />
 {/if}

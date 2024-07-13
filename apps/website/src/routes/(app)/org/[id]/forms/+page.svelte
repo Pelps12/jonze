@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { mediaQuery } from 'svelte-legos';
 	import { page } from '$app/stores';
@@ -10,10 +10,14 @@
 	import * as QRCode from 'qrcode';
 	import { toast } from 'svelte-sonner';
 	import { trpc } from '$lib/client/trpc';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 
 	const formQuery = trpc().formRouter.getForms.createQuery({
 		orgId: $page.params.id
 	});
+
+	const deleteFormMutation = trpc().formRouter.deleteForm.createMutation();
+	const utils = trpc().createUtils();
 
 	const handleCopyAttendance = (formId: string) => {
 		if (browser) {
@@ -104,6 +108,36 @@
 							>Responses</Button
 						>
 					{/if}
+
+					<AlertDialog.Root>
+						<AlertDialog.Trigger asChild let:builder>
+							<Button variant="destructive" builders={[builder]}>Delete</Button>
+						</AlertDialog.Trigger>
+						<AlertDialog.Content>
+							<AlertDialog.Header>
+								<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
+								<AlertDialog.Description>
+									This action cannot be undone. This will permanently delete the form, and
+									associated responses.
+								</AlertDialog.Description>
+							</AlertDialog.Header>
+							<AlertDialog.Footer>
+								<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+
+								<AlertDialog.Action
+									type="button"
+									on:click={async () => {
+										await $deleteFormMutation.mutateAsync({
+											orgId: $page.params.id,
+											formId: form.id
+										});
+										await utils.formRouter.getForms.invalidate();
+									}}
+									class={buttonVariants({ variant: 'destructive' })}>Continue</AlertDialog.Action
+								>
+							</AlertDialog.Footer>
+						</AlertDialog.Content>
+					</AlertDialog.Root>
 				</Card.Footer>
 			</Card.Root>
 		{/each}

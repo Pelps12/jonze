@@ -16,6 +16,7 @@
 	});
 
 	const uploadMutation = trpc().formRouter.createForm.createMutation();
+	const utils = trpc().createUtils();
 	const formUpload = async () => {
 		if (Object.keys($form).length > 0 && $form_name) {
 			try {
@@ -24,6 +25,7 @@
 					form: $form,
 					formName: $form_name
 				});
+				await utils.formRouter.getForms.invalidate();
 				if (browser) {
 					window.history.back();
 				}
