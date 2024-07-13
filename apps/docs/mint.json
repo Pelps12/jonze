@@ -32,7 +32,7 @@
 	"tabs": [
 		{
 			"name": "API Reference",
-			"url": "/",
+			"url": "api-reference",
 			"openapi": "https://api.jonze.co/doc",
 			"isDefaultHidden": false
 		}

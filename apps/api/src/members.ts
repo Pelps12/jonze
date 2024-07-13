@@ -9,6 +9,7 @@ import { OpenAPIHono, createRoute, z } from '@hono/zod-openapi';
 import {
 	zodOpenAPIFormResponse,
 	zodOpenAPIMember,
+	zodOpenAPIMemberTag,
 	zodOpenAPIUnauthorized,
 	zodOpenAPIUser
 } from './utils/helper';
@@ -110,7 +111,8 @@ const getMemberRoute = createRoute({
 							email: true,
 							profilePictureUrl: true
 						}),
-						addtionalInfo: zodOpenAPIFormResponse.nullish()
+						addtionalInfo: zodOpenAPIFormResponse.nullish(),
+						tags: zodOpenAPIMemberTag.nullish()
 					})
 				}
 			},
@@ -152,6 +154,7 @@ app.openapi(getMemberRoute, async (c) => {
 					profilePictureUrl: true
 				}
 			},
+			tags: true,
 			additionalInfo: true
 		},
 		orderBy: (member, { desc }) => [desc(member.createdAt)]

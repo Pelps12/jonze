@@ -78,6 +78,24 @@ export const zodOpenAPIMember = createSelectSchema(schema.member, {
 		})
 });
 
+export const zodOpenAPIMemberTag = createSelectSchema(schema.memberTag, {
+	id: ({ id }) =>
+		id.openapi({
+			example: 'om_01HPCN296XBAKD6QYVKNMARD4N'
+		}),
+
+	names: ({ names }) =>
+		names.openapi({
+			example: ['#active', '#family-leader', '#inactive']
+		}),
+	createdAt: z.coerce.string().openapi({
+		example: new Date().toISOString()
+	}),
+	updatedAt: z.coerce.string().openapi({
+		example: new Date().toISOString()
+	})
+});
+
 export const zodOpenAPIUser = createSelectSchema(schema.user, {
 	id: ({ id }) =>
 		id.openapi({
