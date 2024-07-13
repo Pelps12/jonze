@@ -19,7 +19,6 @@
 	import { page } from '$app/stores';
 	import * as Alert from '$lib/components/ui/alert';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
-	import { enhance } from '$app/forms';
 	import { Image } from '@unpic/svelte';
 	import { json2csv } from 'json-2-csv';
 	import * as Select from '$lib/components/ui/select';
@@ -88,10 +87,13 @@
 		events: RouterOutput['eventRouter']['getEvents']['events'],
 		filename: string
 	) => {
-		const csv = json2csv(events, {
-			expandNestedObjects: true,
-			expandArrayObjects: true
-		});
+		const csv = json2csv(
+			events.map(({ tags, form, ...rest }) => ({ ...rest, tags: tags?.names })),
+			{
+				expandNestedObjects: true,
+				expandArrayObjects: true
+			}
+		);
 
 		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
 
@@ -245,11 +247,12 @@
 						const calendar = new Calendar(calendarEl, {
 							initialView: 'dayGridMonth',
 							plugins: [dayGridPlugin, timeGridPlugin, listPlugin],
-							events: $eventQuery.data?.events.map((event) => ({
-								title: event.name,
-								...event,
-								url: `${PUBLIC_URL}/org/${$page.params.id}/events/${event.id}`
-							})),
+							events:
+								$eventQuery.data?.events.map((event) => ({
+									title: event.name,
+									...event,
+									url: `${PUBLIC_URL}/org/${$page.params.id}/events/${event.id}`
+								})) ?? [],
 							headerToolbar: {
 								left: 'prev,next today',
 								center: 'title',
@@ -387,22 +390,22 @@
 	</Button>
 </form>
 
-{#if $eventQuery.data}
-	{#if $eventQuery.data.events.length == 0}
-		<div
-			class="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm h-[60vh]"
-		>
-			<div class="flex flex-col items-center gap-1 text-center">
-				<h3 class="text-2xl font-bold tracking-tight">You have no events</h3>
-				<p class="text-sm text-muted-foreground">
-					Members can start marking attendace when you create an event.
-				</p>
-				<Button on:click={() => (newFormOpen = true)} class="mt-4">Add Event</Button>
-			</div>
+{#if $eventQuery.data && $eventQuery.data.events.length == 0}
+	<div
+		class="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm h-[60vh]"
+	>
+		<div class="flex flex-col items-center gap-1 text-center">
+			<h3 class="text-2xl font-bold tracking-tight">You have no events</h3>
+			<p class="text-sm text-muted-foreground">
+				Members can start marking attendace when you create an event.
+			</p>
+			<Button on:click={() => (newFormOpen = true)} class="mt-4">Add Event</Button>
 		</div>
-	{:else if $selectedView.value === 'list'}
-		<div class={cn(' shadow rounded-lg p-6')}>
-			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+	</div>
+{:else if $selectedView.value === 'list'}
+	<div class={cn(' shadow rounded-lg p-6')}>
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+			{#if $eventQuery.data}
 				{#each $eventQuery.data.events as event}
 					<Card.Root class="w-full">
 						<Card.Header>
@@ -607,33 +610,37 @@
 						</Card.Footer>
 					</Card.Root>
 				{/each}
-			</div>
+			{:else}
+				{#each [1, 2, 3] as _}
+					<Card.Root class="h-[30rem] animate-pulse"></Card.Root>
+				{/each}
+			{/if}
 		</div>
-	{:else if $selectedView.value === 'calendar'}
-		<div class={cn('relative')}>
-			<div id="calendar" class="m-0 p-0 w-full h-[80vh]"></div>
-			<div class="absolute right-0">
-				{#if browser}
-					<div
-						class=" text-sm bg-secondary rounded-bl-md rounded-br-md font-semibold px-4 py-2 flex items-start w-20 gap-0.5"
-					>
-						<img src="/logo.svg" alt="Logo" class="h-4 w-4" />
-						Jonze
-					</div>
-				{/if}
-			</div>
+	</div>
+{:else if $selectedView.value === 'calendar'}
+	<div class={cn('relative')}>
+		<div id="calendar" class="m-0 p-0 w-full h-[80vh]"></div>
+		<div class="absolute right-0">
+			{#if browser}
+				<div
+					class=" text-sm bg-secondary rounded-bl-md rounded-br-md font-semibold px-4 py-2 flex items-start w-20 gap-0.5"
+				>
+					<img src="/logo.svg" alt="Logo" class="h-4 w-4" />
+					Jonze
+				</div>
+			{/if}
 		</div>
-	{:else}
-		<div>
-			<Bar
-				data={chartData}
-				on:click={(e) => console.log(e)}
-				options={{
-					maintainAspectRatio: false,
-					aspectRatio: 1,
-					scales: { x: { display: false }, y: { ticks: { stepSize: 1 } } }
-				}}
-			/>
-		</div>
-	{/if}
+	</div>
+{:else}
+	<div>
+		<Bar
+			data={chartData}
+			on:click={(e) => console.log(e)}
+			options={{
+				maintainAspectRatio: false,
+				aspectRatio: 1,
+				scales: { x: { display: false }, y: { ticks: { stepSize: 1 } } }
+			}}
+		/>
+	</div>
 {/if}

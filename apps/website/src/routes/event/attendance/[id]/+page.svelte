@@ -9,8 +9,11 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { PUBLIC_URL } from '$env/static/public';
+	import { applyAction, enhance } from '$app/forms';
+	import { LoaderCircle } from 'lucide-svelte';
 	export let data;
 	let filled = data.formFilled;
+	let formSubmitting = false;
 
 	const invalid = data.formFilled || new Date() > data.event.end || new Date() < data.event.start;
 
@@ -59,7 +62,21 @@
 
 		<p class="text-center font-bold text-xl">{data.event.organization.name}</p>
 	</div>
-	<form method="post">
+	<form
+		method="post"
+		use:enhance={({ formElement, formData, action, cancel }) => {
+			formSubmitting = true;
+			return async ({ result }) => {
+				// `result` is an `ActionResult` object
+				formSubmitting = false;
+				if (result.type === 'redirect') {
+					window.location.href = result.location;
+				} else {
+					await applyAction(result);
+				}
+			};
+		}}
+	>
 		<Card.Root class="w-[350px] relative">
 			<div
 				class=" text-sm bg-secondary rounded-tl-md rounded-br-md font-semibold px-4 py-2 flex items-start w-20 gap-0.5"
@@ -94,7 +111,12 @@
 				{/if}
 			</Card.Content>
 			<Card.Footer class="flex justify-center">
-				<Button disabled={invalid} type="submit">Mark Attendance</Button>
+				<Button disabled={invalid || formSubmitting} type="submit">
+					{#if formSubmitting}
+						<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+					{/if}
+					Mark Attendance</Button
+				>
 			</Card.Footer>
 		</Card.Root>
 	</form>

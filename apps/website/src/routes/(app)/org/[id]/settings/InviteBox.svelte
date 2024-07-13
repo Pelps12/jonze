@@ -23,22 +23,10 @@
 	const createAdminMut = trpc().settingsRouter.createAdmin.createMutation();
 	const utils = trpc().createUtils();
 
-	let open = false;
-
 	let userList: {
 		memId: string;
 		userEmail: string;
 	}[] = [];
-
-	// We want to refocus the trigger button when the user selects
-	// an item from the list so users can continue navigating the
-	// rest of the form with the keyboard.
-	function closeAndFocusTrigger(triggerId: string) {
-		open = false;
-		tick().then(() => {
-			document.getElementById(triggerId)?.focus();
-		});
-	}
 </script>
 
 <Label for="email">Email</Label>

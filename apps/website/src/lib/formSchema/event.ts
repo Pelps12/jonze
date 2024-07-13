@@ -9,8 +9,8 @@ const sizeInMB = (sizeInBytes: number, decimalsNum = 2) => {
 };
 
 export const eventCreationSchema = z.object({
-	start: z.date().min(new Date()),
-	end: z.date().min(new Date()),
+	start: z.date(),
+	end: z.date(),
 	image: z.string().nullable(),
 	description: z.string().nullable(),
 	name: z.string(),

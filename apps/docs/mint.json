@@ -34,19 +34,27 @@
 			"name": "API Reference",
 			"url": "/",
 			"openapi": "https://api.jonze.co/doc",
-			"isDefaultHidden": true
+			"isDefaultHidden": false
 		}
 	],
+	"primaryTab": {
+		"name": "API Reference"
+	},
 	"navigation": [
 		{
-			"group": "API Reference",
-			"pages": ["api-reference/introduction"]
+			"group": "Home",
+			"pages": ["introduction"]
 		}
 	],
 	"footerSocials": {
 		"twitter": "https://twitter.com/oluwapelps",
 		"github": "https://github.com/Pelps12/jonze",
 		"linkedin": "https://www.linkedin.com/in/oluwapelumi-adegoke-9634561b6/"
+	},
+	"analytics": {
+		"posthog": {
+			"apiKey": "phc_KVqqiUkpKb58fsJbB8SSkrdYtSjuzUqrEoSMUdmvD2U"
+		}
 	},
 	"openapi": "https://api.jonze.co/doc"
 }

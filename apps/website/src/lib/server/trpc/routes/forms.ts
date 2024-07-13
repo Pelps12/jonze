@@ -226,5 +226,24 @@ export const formRouter = router({
 
 			ctx.event.platform?.context.waitUntil(Promise.resolve(dummyClient.flushAsync()));
 			return orgForm;
+		}),
+
+	deleteForm: adminProcedure
+		.input(
+			z.object({
+				formId: z.string()
+			})
+		)
+		.mutation(async ({ input }) => {
+			await db
+				.delete(schema.organizationForm)
+				.where(
+					and(
+						eq(schema.organizationForm.id, input.formId),
+						eq(schema.organizationForm.orgId, input.orgId)
+					)
+				);
+
+			return {};
 		})
 });

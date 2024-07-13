@@ -2,6 +2,7 @@ import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { cubicOut } from 'svelte/easing';
 import type { TransitionConfig } from 'svelte/transition';
+import { json2csv } from 'json-2-csv';
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -88,4 +89,33 @@ export const getApplicationFee = (
 	transaction_type: 'standard' | 'plus' = 'standard'
 ): number => {
 	return Math.ceil(0.07 * amount + 80) - Math.ceil(0.029 * amount + 30);
+};
+
+export const handleExport = async (events: any[], filename: string) => {
+	if (document && window) {
+		const csv = json2csv(
+			events.map(({ tags, form, ...rest }) => ({ ...rest, tags: tags?.names })),
+			{
+				expandNestedObjects: true,
+				expandArrayObjects: true
+			}
+		);
+
+		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+
+		// Create a link element for the download
+		const link = document.createElement('a');
+		const url = URL.createObjectURL(blob);
+		link.setAttribute('href', url);
+		link.setAttribute('download', filename);
+		link.style.visibility = 'hidden';
+
+		// Append to the document and trigger the download
+		document.body.appendChild(link);
+		link.click();
+
+		// Clean up
+		document.body.removeChild(link);
+		window.URL.revokeObjectURL(url);
+	}
 };
