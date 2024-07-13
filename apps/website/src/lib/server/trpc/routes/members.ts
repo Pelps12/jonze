@@ -261,8 +261,8 @@ export const memberRouter = router({
 					and(
 						cursor
 							? direction === 'prev' //XOR comparison
-								? gte(schema.member.id, cursor)
-								: lte(schema.member.id, cursor)
+								? gte(schema.user.id, cursor)
+								: lte(schema.user.id, cursor)
 							: undefined,
 						eq(schema.member.orgId, input.orgId),
 						emailFilter ? like(schema.user.email, `%${emailFilter}%`) : undefined,
@@ -336,11 +336,15 @@ export const memberRouter = router({
 					prevCursor:
 						direction === 'prev'
 							? result.length >= limit && result[0]
-								? result[0].id
+								? result[0].user.id
 								: null
 							: cursor,
 					nextCursor:
-						direction === 'prev' ? cursor : result.length >= limit && nextItem ? nextItem.id : null
+						direction === 'prev'
+							? cursor
+							: result.length >= limit && nextItem
+								? nextItem.user.id
+								: null
 				}
 			};
 		})

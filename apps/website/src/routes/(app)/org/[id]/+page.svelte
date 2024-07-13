@@ -22,9 +22,7 @@
 
 	export let layout: number[] | undefined = undefined;
 
-	const utils = trpc().createUtils();
-
-	const pageQuery = trpc().homePageRouter.home.createQuery(
+	$: pageQuery = trpc().homePageRouter.home.createQuery(
 		{
 			orgId: $page.params.id
 		},
@@ -32,6 +30,8 @@
 			refetchInterval: false
 		}
 	);
+
+	const utils = trpc().createUtils();
 
 	const transactionHistoryMutation =
 		trpc().homePageRouter.stripeTransactionHistory.createMutation();
