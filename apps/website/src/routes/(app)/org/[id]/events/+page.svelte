@@ -7,7 +7,16 @@
 	import { mediaQuery } from 'svelte-legos';
 	import EventForm from './EventForm.svelte';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { Copy, CopyPlus, FileDown, MoreHorizontal, PlusIcon, QrCode, XIcon } from 'lucide-svelte';
+	import {
+		Copy,
+		CopyPlus,
+		ExternalLink,
+		FileDown,
+		MoreHorizontal,
+		PlusIcon,
+		QrCode,
+		XIcon
+	} from 'lucide-svelte';
 	import { browser } from '$app/environment';
 	import { PUBLIC_URL } from '$env/static/public';
 	import { toast } from 'svelte-sonner';
@@ -465,9 +474,10 @@
 													Form Responses
 												</DropdownMenu.Item>
 											{/if}
-											<DropdownMenu.Item href={`events/${event.id}`}
-												>View Attendance</DropdownMenu.Item
-											>
+											<DropdownMenu.Item class="justify-between" href={`events/${event.id}`}
+												>View Attendance
+												<ExternalLink class="ml-2 h-4 w-4" />
+											</DropdownMenu.Item>
 										</DropdownMenu.Content>
 
 										{#if event.form}

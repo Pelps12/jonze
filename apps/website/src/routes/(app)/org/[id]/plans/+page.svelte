@@ -12,13 +12,12 @@
 	import { PUBLIC_URL } from '$env/static/public';
 	import QRCode from 'qrcode';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { Copy, MoreHorizontal, QrCode } from 'lucide-svelte';
+	import { Copy, ExternalLink, MoreHorizontal, QrCode } from 'lucide-svelte';
 	import * as Alert from '$lib/components/ui/alert';
 	import { trpc } from '$lib/client/trpc';
 	let newFormOpen = writable($page.url.searchParams.has('newplan'));
 
 	const result = trpc().planRouter.getPlans.createQuery({ orgId: $page.params.id });
-
 	result.subscribe((val) => console.log(val.data));
 
 	const isDesktop = mediaQuery('(min-width: 768px)');
@@ -136,6 +135,10 @@
 									>
 										<span>Plan QRCode</span>
 										<QrCode class="ml-2 h-4 w-4" />
+									</DropdownMenu.Item>
+									<DropdownMenu.Item href={`members?plan=${plan.name}`} class="justify-between">
+										<span>View Members</span>
+										<ExternalLink class="ml-2 h-4 w-4" />
 									</DropdownMenu.Item>
 								</DropdownMenu.Content>
 							</DropdownMenu.Root>

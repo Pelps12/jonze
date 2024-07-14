@@ -20,6 +20,7 @@
 	import { writable } from 'svelte/store';
 	import { enhance } from '$app/forms';
 	import { Image } from '@unpic/svelte';
+	import { LoaderCircle } from 'lucide-svelte';
 
 	let loading = false;
 	let stripe: Stripe | null;
@@ -161,6 +162,7 @@
 					console.log(result);
 					if (stripe && result.data?.clientSecret) {
 						checkout = await stripe.initCustomCheckout({
+							//@ts-ignore
 							clientSecret: result.data?.clientSecret,
 							elementsOptions: {
 								fonts: [
@@ -257,7 +259,12 @@
 			<Button
 				type={submissionState === 'start' ? 'submit' : 'button'}
 				class={twJoin(['w-full', loading && 'animate-pulse'])}
-				on:click={(e) => handlePayment()}>{submissionState === 'start' ? 'SUBMIT' : 'PAY'}</Button
+				on:click={(e) => handlePayment()}
+			>
+				{#if loading}
+					<LoaderCircle class="mr-2 h-4 w-4" />
+				{/if}
+				{submissionState === 'start' ? 'SUBMIT' : 'PAY'}</Button
 			>
 		</div>
 	</form>

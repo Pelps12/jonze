@@ -98,8 +98,7 @@ export const planRouter = router({
 			console.log('HAVE DETAILS BEN SUBMITTED', details_submitted);
 			if (details_submitted) {
 				throw new TRPCError({
-					code: 'CONFLICT',
-					message: `${PUBLIC_URL}/org/${input.orgId}/plans`
+					code: 'CONFLICT'
 				});
 			}
 			subAccountId = orgSubAccount.subaccountId;
