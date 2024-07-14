@@ -12,6 +12,8 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { QueryClientProvider } from '@tanstack/svelte-query';
+	import { cn } from '$lib/utils';
+	import { FileText } from 'lucide-svelte';
 	export let data;
 
 	let commandBoxOpen = false;
@@ -33,7 +35,10 @@
 
 <QueryClientProvider client={data.queryClient}>
 	<div class="lg:grid lg:grid-cols-5">
-		<Sidebar class="" />
+		<aside class={cn('lg:h-[90vh] lg:sticky lg:top-0 lg:justify-between lg:flex lg:flex-col')}>
+			<Sidebar class="" />
+		</aside>
+
 		<div class="lg:col-span-4 border-t lg:border-l p-3">
 			<slot />
 		</div>
@@ -45,22 +50,34 @@
 	<Command.List>
 		<Command.Empty>No results found.</Command.Empty>
 		<Command.Group heading="Suggestions">
-			<a href={`/org/${$page.params.id}/events?newevent=true`}>
+			<a
+				href={`/org/${$page.params.id}/events?newevent=true`}
+				on:click={() => (commandBoxOpen = false)}
+			>
 				<Command.Item>
 					<Calendar class="mr-2 h-4 w-4" />
 					<span>Make Event</span>
 				</Command.Item>
 			</a>
-			<a href={`/org/${$page.params.id}/plans?newplan=true`}>
+			<a
+				href={`/org/${$page.params.id}/plans?newplan=true`}
+				on:click={() => (commandBoxOpen = false)}
+			>
 				<Command.Item>
 					<Smile class="mr-2 h-4 w-4" />
 					<span>Create Membership Plan</span>
 				</Command.Item>
 			</a>
+			<a href={`/org/${$page.params.id}/forms/create`} on:click={() => (commandBoxOpen = false)}>
+				<Command.Item>
+					<FileText class="mr-2 h-4 w-4" />
+					<span>Create Form</span>
+				</Command.Item>
+			</a>
 		</Command.Group>
 		<Command.Separator />
 		<Command.Group heading="Settings">
-			<a href={`/org/${$page.params.id}/settings`}>
+			<a href={`/org/${$page.params.id}/settings`} on:click={() => (commandBoxOpen = false)}>
 				<Command.Item>
 					<Settings class="mr-2 h-4 w-4" />
 					<span>Settings</span>

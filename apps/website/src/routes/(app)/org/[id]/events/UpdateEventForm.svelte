@@ -27,7 +27,6 @@
 
 	export let data: SuperValidated<Infer<EventUpdationSchema>>;
 	export let forms: { id: string; name: string }[] = [];
-	export let event: (dbEvent & { form: OrgForm | null }) | undefined;
 	export let actionType: 'create' | 'update' = 'create';
 	export let closeForm: () => void;
 
