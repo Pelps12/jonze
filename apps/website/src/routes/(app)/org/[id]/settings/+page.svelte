@@ -29,9 +29,7 @@
 	const settingsQuery = trpc().settingsRouter.getSettings.createQuery({
 		orgId: $page.params.id
 	});
-	const stripeDashboardMutation = trpc().settingsRouter.getStripeAccountDashboard.createMutation({
-		retry: 0
-	});
+	const stripeDashboardMutation = trpc().settingsRouter.getStripeAccountDashboard.createMutation();
 
 	const APIKeyCreation = trpc().settingsRouter.createAPIKey.createMutation();
 
@@ -40,47 +38,49 @@
 
 	settingsQuery.subscribe(() => {
 		console.log(12);
-		$stripeDashboardMutation
-			.mutateAsync({
-				orgId: $page.params.id
-			})
-			.then(({ clientSecret }) => {
-				const container = document.getElementById('accountManagementElement');
+		if (browser) {
+			$stripeDashboardMutation
+				.mutateAsync({
+					orgId: $page.params.id
+				})
+				.then(({ clientSecret }) => {
+					const container = document.getElementById('accountManagementElement');
 
-				while (container?.firstChild) {
-					if (container.lastChild) {
-						container.removeChild(container.lastChild);
-					}
-				}
-				const stripeConnectInstance = loadConnectAndInitialize({
-					// This is your test publishable API key.
-					publishableKey: PUBLIC_STRIPE_KEY,
-					fetchClientSecret: async () => {
-						return clientSecret;
-					},
-					fonts: [
-						{
-							cssSrc: 'https://fonts.googleapis.com/css2?family=Onest'
-						}
-					],
-					appearance: {
-						variables: {
-							colorBackground: $mode === 'light' ? '#f3f2f1' : '#1B1918'
+					while (container?.firstChild) {
+						if (container.lastChild) {
+							container.removeChild(container.lastChild);
 						}
 					}
-				});
-				mode.subscribe((value) =>
-					stripeConnectInstance.update({
+					const stripeConnectInstance = loadConnectAndInitialize({
+						// This is your test publishable API key.
+						publishableKey: PUBLIC_STRIPE_KEY,
+						fetchClientSecret: async () => {
+							return clientSecret;
+						},
+						fonts: [
+							{
+								cssSrc: 'https://fonts.googleapis.com/css2?family=Onest'
+							}
+						],
 						appearance: {
 							variables: {
-								colorBackground: value === 'light' ? '#f3f2f1' : '#1B1918'
+								colorBackground: $mode === 'light' ? '#f3f2f1' : '#1B1918'
 							}
 						}
-					})
-				);
-				const accountManagement = stripeConnectInstance.create('account-management');
-				container?.appendChild(accountManagement);
-			});
+					});
+					mode.subscribe((value) =>
+						stripeConnectInstance.update({
+							appearance: {
+								variables: {
+									colorBackground: value === 'light' ? '#f3f2f1' : '#1B1918'
+								}
+							}
+						})
+					);
+					const accountManagement = stripeConnectInstance.create('account-management');
+					container?.appendChild(accountManagement);
+				});
+		}
 	});
 
 	page.subscribe((info) => console.log(info.form));
