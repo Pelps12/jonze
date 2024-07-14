@@ -10,6 +10,7 @@ import {
 	zodOpenAPIFormResponse,
 	zodOpenAPIMember,
 	zodOpenAPIMemberTag,
+	zodOpenAPISuccess,
 	zodOpenAPIUnauthorized,
 	zodOpenAPIUser
 } from './utils/helper';
@@ -167,6 +168,101 @@ app.openapi(getMemberRoute, async (c) => {
 	}
 
 	return c.json(member);
+});
+
+const updateMemberTagsRoute = createRoute({
+	method: 'put',
+	path: '/{id}/tags',
+	summary: 'Update Member Tags',
+	security: [{ [security.name]: [] }],
+	request: {
+		params: z.object({
+			id: z.string().openapi({
+				param: {
+					name: 'id',
+					in: 'path'
+				},
+				example: 'om_01HPCN296XBAKD6QYVKNMARD4N',
+				description: 'ID of member'
+			})
+		}),
+		body: {
+			content: {
+				'application/json': {
+					schema: z.object({
+						tags: z.array(z.string())
+					})
+				}
+			}
+		}
+	},
+	responses: {
+		201: {
+			content: {
+				'application/json': {
+					schema: zodOpenAPISuccess
+				}
+			},
+			description: "Update a member's tags"
+		},
+		401: {
+			content: {
+				'application/json': {
+					schema: zodOpenAPIUnauthorized
+				}
+			},
+			description: 'Returns an error'
+		}
+	},
+	tags: ['Members']
+});
+
+app.openapi(updateMemberTagsRoute, async (c) => {
+	console.log(c.get('unkey'));
+	const metadata = c.get('unkey').meta as Record<string, string | undefined>;
+	if (!metadata.orgId) {
+		throw new HTTPException(400, {
+			message: 'Bad API Key'
+		});
+	}
+
+	const member = await c.get('db').query.member.findFirst({
+		where: and(
+			eq(schema.member.orgId, metadata.orgId),
+			eq(schema.member.id, c.req.valid('param').id)
+		),
+		with: {
+			tags: true
+		},
+		orderBy: (member, { desc }) => [desc(member.createdAt)]
+	});
+
+	if (!member) {
+		throw new HTTPException(404, {
+			message: 'Member or Member Tags not found'
+		});
+	}
+
+	await c
+		.get('db')
+		.insert(schema.memberTag)
+		.values({
+			id: member.id,
+			names: c.req.valid('json').tags
+		})
+		.onConflictDoUpdate({
+			target: schema.member.id,
+			set: {
+				names: member.tags
+					? Array.from(new Set([...member.tags.names, ...c.req.valid('json').tags]).values())
+					: c.req.valid('json').tags
+			}
+		});
+
+	return c.json({
+		code: 201,
+		message: 'Success'
+	});
 });
 
 export default app;

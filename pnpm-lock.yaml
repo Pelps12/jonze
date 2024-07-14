@@ -152,7 +152,7 @@ importers:
         version: 0.0.1
       drizzle-orm:
         specifier: ^0.29.3
-        version: 0.29.3(@neondatabase/serverless@0.9.0)(@planetscale/database@1.16.0)(mysql2@3.9.1)(pg@8.11.4)(postgres@3.4.3)
+        version: 0.29.3(@planetscale/database@1.16.0)(mysql2@3.9.1)
       formsnap:
         specifier: ^0.5.1
         version: 0.5.1(svelte@4.2.10)(sveltekit-superforms@2.6.2)
@@ -369,8 +369,8 @@ importers:
         specifier: ^0.20.14
         version: 0.20.14
       drizzle-orm:
-        specifier: ^0.29.3
-        version: 0.29.3(@neondatabase/serverless@0.9.0)(@planetscale/database@1.16.0)(mysql2@3.9.1)(pg@8.11.4)(postgres@3.4.3)
+        specifier: ^0.32.0
+        version: 0.32.0(@neondatabase/serverless@0.9.0)(@planetscale/database@1.16.0)(mysql2@3.9.1)(pg@8.11.4)(postgres@3.4.3)
       nanoid:
         specifier: ^5.0.5
         version: 5.0.5
@@ -4386,7 +4386,7 @@ packages:
       '@cloudflare/workers-types': 4.20240208.0
     dev: false
 
-  /drizzle-orm@0.29.3(@neondatabase/serverless@0.9.0)(@planetscale/database@1.16.0)(mysql2@3.9.1)(pg@8.11.4)(postgres@3.4.3):
+  /drizzle-orm@0.29.3(@planetscale/database@1.16.0)(mysql2@3.9.1):
     resolution: {integrity: sha512-uSE027csliGSGYD0pqtM+SAQATMREb3eSM/U8s6r+Y0RFwTKwftnwwSkqx3oS65UBgqDOM0gMTl5UGNpt6lW0A==}
     peerDependencies:
       '@aws-sdk/client-rds-data': '>=3'
@@ -4457,11 +4457,105 @@ packages:
       sqlite3:
         optional: true
     dependencies:
+      '@planetscale/database': 1.16.0
+      mysql2: 3.9.1
+    dev: false
+
+  /drizzle-orm@0.32.0(@neondatabase/serverless@0.9.0)(@planetscale/database@1.16.0)(mysql2@3.9.1)(pg@8.11.4)(postgres@3.4.3):
+    resolution: {integrity: sha512-99IlfVGPNHzOFEXo9Phyu5At5TALLsY2t6WxFFy68rYd9Ej4cHX/7WjdPOn7JNRW69MNeNtP8XrDQg43SppuAA==}
+    peerDependencies:
+      '@aws-sdk/client-rds-data': '>=3'
+      '@cloudflare/workers-types': '>=3'
+      '@electric-sql/pglite': '>=0.1.1'
+      '@libsql/client': '*'
+      '@neondatabase/serverless': '>=0.1'
+      '@op-engineering/op-sqlite': '>=2'
+      '@opentelemetry/api': ^1.4.1
+      '@planetscale/database': '>=1'
+      '@prisma/client': '*'
+      '@tidbcloud/serverless': '*'
+      '@types/better-sqlite3': '*'
+      '@types/pg': '*'
+      '@types/react': '>=18'
+      '@types/sql.js': '*'
+      '@vercel/postgres': '>=0.8.0'
+      '@xata.io/client': '*'
+      better-sqlite3: '>=7'
+      bun-types: '*'
+      expo-sqlite: '>=13.2.0'
+      knex: '*'
+      kysely: '*'
+      mysql2: '>=2'
+      pg: '>=8'
+      postgres: '>=3'
+      prisma: '*'
+      react: '>=18'
+      sql.js: '>=1'
+      sqlite3: '>=5'
+    peerDependenciesMeta:
+      '@aws-sdk/client-rds-data':
+        optional: true
+      '@cloudflare/workers-types':
+        optional: true
+      '@electric-sql/pglite':
+        optional: true
+      '@libsql/client':
+        optional: true
+      '@neondatabase/serverless':
+        optional: true
+      '@op-engineering/op-sqlite':
+        optional: true
+      '@opentelemetry/api':
+        optional: true
+      '@planetscale/database':
+        optional: true
+      '@prisma/client':
+        optional: true
+      '@tidbcloud/serverless':
+        optional: true
+      '@types/better-sqlite3':
+        optional: true
+      '@types/pg':
+        optional: true
+      '@types/react':
+        optional: true
+      '@types/sql.js':
+        optional: true
+      '@vercel/postgres':
+        optional: true
+      '@xata.io/client':
+        optional: true
+      better-sqlite3:
+        optional: true
+      bun-types:
+        optional: true
+      expo-sqlite:
+        optional: true
+      knex:
+        optional: true
+      kysely:
+        optional: true
+      mysql2:
+        optional: true
+      pg:
+        optional: true
+      postgres:
+        optional: true
+      prisma:
+        optional: true
+      react:
+        optional: true
+      sql.js:
+        optional: true
+      sqlite3:
+        optional: true
+    dependencies:
       '@neondatabase/serverless': 0.9.0
       '@planetscale/database': 1.16.0
       mysql2: 3.9.1
       pg: 8.11.4
       postgres: 3.4.3
+    dev: true
 
   /drizzle-zod@0.5.1(drizzle-orm@0.29.3)(zod@3.22.4):
     resolution: {integrity: sha512-C/8bvzUH/zSnVfwdSibOgFjLhtDtbKYmkbPbUCq46QZyZCH6kODIMSOgZ8R7rVjoI+tCj3k06MRJMDqsIeoS4A==}

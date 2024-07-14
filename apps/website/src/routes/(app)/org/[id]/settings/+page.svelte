@@ -24,66 +24,75 @@
 	import { mode } from 'mode-watcher';
 	import { trpc } from '$lib/client/trpc';
 	import KeyModal from './KeyModal.svelte';
+	import { writable } from 'svelte/store';
 
 	const settingsQuery = trpc().settingsRouter.getSettings.createQuery({
 		orgId: $page.params.id
 	});
-	const stripeDashboardMutation = trpc().settingsRouter.getStripeAccountDashboard.createMutation({
-		retry: 0
-	});
+	const stripeDashboardMutation = trpc().settingsRouter.getStripeAccountDashboard.createMutation();
 
 	const APIKeyCreation = trpc().settingsRouter.createAPIKey.createMutation();
 
 	const enableWebhookMutation = trpc().settingsRouter.enableWebhooks.createMutation();
 	const utils = trpc().createUtils();
 
-	onMount(() => {
-		$stripeDashboardMutation
-			.mutateAsync({
-				orgId: $page.params.id
-			})
-			.then(({ clientSecret }) => {
-				const stripeConnectInstance = loadConnectAndInitialize({
-					// This is your test publishable API key.
-					publishableKey: PUBLIC_STRIPE_KEY,
-					fetchClientSecret: async () => {
-						return clientSecret;
-					},
-					fonts: [
-						{
-							cssSrc: 'https://fonts.googleapis.com/css2?family=Onest'
-						}
-					],
-					appearance: {
-						variables: {
-							colorBackground: $mode === 'light' ? '#f3f2f1' : '#1B1918'
+	settingsQuery.subscribe(() => {
+		console.log(12);
+		if (browser) {
+			$stripeDashboardMutation
+				.mutateAsync({
+					orgId: $page.params.id
+				})
+				.then(({ clientSecret }) => {
+					const container = document.getElementById('accountManagementElement');
+
+					while (container?.firstChild) {
+						if (container.lastChild) {
+							container.removeChild(container.lastChild);
 						}
 					}
-				});
-				mode.subscribe((value) =>
-					stripeConnectInstance.update({
+					const stripeConnectInstance = loadConnectAndInitialize({
+						// This is your test publishable API key.
+						publishableKey: PUBLIC_STRIPE_KEY,
+						fetchClientSecret: async () => {
+							return clientSecret;
+						},
+						fonts: [
+							{
+								cssSrc: 'https://fonts.googleapis.com/css2?family=Onest'
+							}
+						],
 						appearance: {
 							variables: {
-								colorBackground: value === 'light' ? '#f3f2f1' : '#1B1918'
+								colorBackground: $mode === 'light' ? '#f3f2f1' : '#1B1918'
 							}
 						}
-					})
-				);
-				const accountManagement = stripeConnectInstance.create('account-management');
-				const container = document.getElementById('accountManagementElement');
-				container?.appendChild(accountManagement);
-			});
+					});
+					mode.subscribe((value) =>
+						stripeConnectInstance.update({
+							appearance: {
+								variables: {
+									colorBackground: value === 'light' ? '#f3f2f1' : '#1B1918'
+								}
+							}
+						})
+					);
+					const accountManagement = stripeConnectInstance.create('account-management');
+					container?.appendChild(accountManagement);
+				});
+		}
 	});
 
 	page.subscribe((info) => console.log(info.form));
 	let open = true;
 
-	const handleCopyKey = (key: string) => {
-		if (browser) {
-			navigator.clipboard.writeText(key).then(() => {
-				toast.success('API Key Copied to Clipboard');
-			});
+	const parseWebhookURL = (url: string, darkMode: boolean) => {
+		const parsedURL = new URL(url);
+		if (darkMode) {
+			parsedURL.searchParams.set('darkMode', 'true');
 		}
+		console.log(parsedURL.toString());
+		return parsedURL.toString();
 	};
 
 	const handleDeleteKey = async (keyId: string) => {
@@ -118,7 +127,7 @@
 		}
 	}
 
-	let techieMode = browser ? document.cookie === 'true' : false;
+	let techieMode = writable<boolean>(browser ? document.cookie === 'true' : false);
 
 	$: data = $settingsQuery.data;
 
@@ -132,7 +141,7 @@
 		<div class="flex items-center space-x-2">
 			<Tooltip.Root>
 				<Tooltip.Trigger class="flex items-center space-x-2"
-					><Switch id="airplane-mode" bind:checked={techieMode} />
+					><Switch id="airplane-mode" bind:checked={$techieMode} />
 					<Label for="airplane-mode">Techie Mode</Label></Tooltip.Trigger
 				>
 				<Tooltip.Content>
@@ -245,7 +254,7 @@
 			</Dialog.Root>
 		</div>
 
-		<Card.Root class={cn(!techieMode && 'col-span-2', 'h-full')}>
+		<Card.Root class={cn(!$techieMode && 'col-span-2', 'h-full')}>
 			<Card.Header>
 				<Card.Title class="text-lg font-semibold">Stripe Account</Card.Title>
 			</Card.Header>
@@ -254,7 +263,7 @@
 			</Card.Content>
 		</Card.Root>
 
-		{#if techieMode}
+		{#if $techieMode}
 			<form
 				method="post"
 				action="?/create"
@@ -339,7 +348,7 @@
 							{#if data.webhookUrl}
 								<iframe
 									title="SVIX Webhook Portal"
-									src={data.webhookUrl}
+									src={parseWebhookURL(data.webhookUrl, $mode === 'dark')}
 									style="width: 100%; border: none;"
 									allow="clipboard-write"
 									loading="lazy"

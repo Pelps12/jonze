@@ -104,7 +104,6 @@ export const homePageRouter = router({
 					message: 'Only the owner of this org has such privileges. \nSpeak with them about it'
 				});
 			}
-			const formdata = await ctx.event.request.formData();
 
 			const period = input.period;
 

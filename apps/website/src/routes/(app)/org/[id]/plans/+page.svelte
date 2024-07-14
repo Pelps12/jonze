@@ -155,7 +155,7 @@
 							${plan.amount}
 						</h1>
 						<p class="text-sm">
-							{plan.interval.years} year(s)
+							{plan.interval.years}
 						</p>
 					</Card.Content>
 				</Card.Root>

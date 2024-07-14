@@ -12,6 +12,15 @@ export const zodOpenAPIUnauthorized = z.object({
 	})
 });
 
+export const zodOpenAPISuccess = z.object({
+	code: z.number().openapi({
+		example: 201
+	}),
+	message: z.string().openapi({
+		example: 'Success'
+	})
+});
+
 export const zodOpenAPIEvent = createSelectSchema(schema.event, {
 	id: ({ id }) =>
 		id.openapi({
@@ -84,10 +93,9 @@ export const zodOpenAPIMemberTag = createSelectSchema(schema.memberTag, {
 			example: 'om_01HPCN296XBAKD6QYVKNMARD4N'
 		}),
 
-	names: ({ names }) =>
-		names.openapi({
-			example: ['#active', '#family-leader', '#inactive']
-		}),
+	names: z.array(z.string()).openapi({
+		example: ['#active', '#family-leader', '#inactive']
+	}),
 	createdAt: z.coerce.string().openapi({
 		example: new Date().toISOString()
 	}),

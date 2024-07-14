@@ -47,6 +47,7 @@ export const settingsRouter = router({
 		try {
 			const dashboard = await svix.authentication.appPortalAccess(organization.id, {});
 			webhookUrl = dashboard.url;
+			console.log(webhookUrl);
 		} catch (err) {
 			console.log(err);
 		}
@@ -63,6 +64,7 @@ export const settingsRouter = router({
 			stripeClientSecret
 		};
 	}),
+
 	getStripeAccountDashboard: adminProcedure.mutation(async ({ input, ctx }) => {
 		const subAccount = await db.query.organizationSubaccount.findFirst({
 			where: eq(schema.organizationSubaccount.orgId, input.orgId),

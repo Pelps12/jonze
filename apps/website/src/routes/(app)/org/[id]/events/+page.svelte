@@ -345,7 +345,6 @@
 							<Drawer.Description>Allow members mark attendance on your events</Drawer.Description>
 						</Drawer.Header>
 						<EventForm
-							data={$eventQuery.data.form}
 							event={selectedEvent}
 							forms={$eventQuery.data.forms}
 							closeForm={() => (newFormOpen = false)}

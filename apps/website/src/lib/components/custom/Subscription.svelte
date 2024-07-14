@@ -8,6 +8,8 @@
 	import { browser } from '$app/environment';
 	import { TRPCError } from '@trpc/server';
 	import { toast } from 'svelte-sonner';
+	import * as Tooltip from '../ui/tooltip';
+	import { Info } from 'lucide-svelte';
 
 	let isYearly = false;
 
@@ -48,32 +50,30 @@
 						>
 					{/if}
 				</p>
-				<form method="post" action={`${PUBLIC_URL}/org/${$page.params.id}?/upgrade`}>
-					<input class="hidden" name="period" value={isYearly ? 'yearly' : 'monthly'} />
-					<Button
-						type="button"
-						on:click={async () =>
-							$upgradeMutation
-								.mutateAsync({
-									orgId: $page.params.id,
-									period: isYearly ? 'yearly' : 'monthly',
-									returnURL: $page.url.toString()
-								})
-								.then(({ sessionUrl }) => {
-									if (browser) {
-										window.location.href = sessionUrl;
-									}
-								})
-								.catch((err) => {
-									if (err instanceof TRPCError) {
-										toast.error(err.message);
-									}
-								})}
-						aria-describedby="tier-extended"
-						class="w-full shadow-sm  mt-6 block rounded-md py-2 px-3 text-center text-base font-medium leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-						>Subscribe</Button
-					>
-				</form>
+
+				<Button
+					type="button"
+					on:click={async () =>
+						$upgradeMutation
+							.mutateAsync({
+								orgId: $page.params.id,
+								period: isYearly ? 'yearly' : 'monthly',
+								returnURL: $page.url.toString()
+							})
+							.then(({ sessionUrl }) => {
+								if (browser) {
+									window.location.href = sessionUrl;
+								}
+							})
+							.catch((err) => {
+								if (err instanceof TRPCError) {
+									toast.error(err.message);
+								}
+							})}
+					aria-describedby="tier-extended"
+					class="w-full shadow-sm  mt-6 block rounded-md py-2 px-3 text-center text-base font-medium leading-6 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+					>Subscribe</Button
+				>
 
 				<ul role="list" class="mt-8 space-y-3 text-sm leading-6 text-neutral xl:mt-10">
 					<li class="flex gap-x-3 text-base">
@@ -108,7 +108,20 @@
 								stroke-linejoin="round"
 								d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
 							></path>
-						</svg>Unlimited Integrations
+						</svg>
+						<div class="flex items-center gap-2">
+							<span>Unlimited Integrations</span>
+							<Tooltip.Root>
+								<Tooltip.Trigger class="underline"><Info class="h-4 w-4" /></Tooltip.Trigger>
+								<Tooltip.Content class="max-w-xs text-center text-balance">
+									<p>
+										A feature that allows syncing info in Jonze with email clients (SendGrid,
+										MailChimp, Resend), social media services (LinkedIn, Instagram, Discord) and
+										more.
+									</p>
+								</Tooltip.Content>
+							</Tooltip.Root>
+						</div>
 					</li>
 
 					<li class="flex gap-x-3 text-base">
@@ -127,6 +140,71 @@
 								d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
 							></path>
 						</svg>5% + 50¢ per membership
+					</li>
+
+					<li class="flex gap-x-3 text-base">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke-width="1.5"
+							stroke="currentColor"
+							aria-hidden="true"
+							class="h-6 w-5 flex-none text-primary"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+							></path>
+						</svg>Remove Jonze branding
+					</li>
+
+					<li class="flex gap-x-3 text-base">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke-width="1.5"
+							stroke="currentColor"
+							aria-hidden="true"
+							class="h-6 w-5 flex-none text-primary"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+							></path>
+						</svg>
+						<div class="flex items-center gap-2">
+							BYO Domain
+							<Tooltip.Root>
+								<Tooltip.Trigger class="underline"><Info class="h-4 w-4" /></Tooltip.Trigger>
+								<Tooltip.Content class="max-w-xs text-center text-balance">
+									<p>
+										You can have attendance, forms and registration directly on your own subdomain
+										e.g. members.example.com
+									</p>
+								</Tooltip.Content>
+							</Tooltip.Root>
+						</div>
+					</li>
+					<li class="flex gap-x-3 text-base">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke-width="1.5"
+							stroke="currentColor"
+							aria-hidden="true"
+							class="h-6 w-5 flex-none text-primary"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+							></path>
+						</svg>Direct customer support
 					</li>
 				</ul>
 			</div>

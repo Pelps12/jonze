@@ -35,7 +35,7 @@ export const planRouter = router({
 		const transformedPlans = plans.map((plan) => ({
 			...plan,
 			//@ts-ignore
-			interval: { years: plan.interval?.years }
+			interval: { years: plan.interval }
 		}));
 
 		return {
