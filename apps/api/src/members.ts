@@ -270,7 +270,7 @@ app.openapi(updateMemberTagsRoute, async (c) => {
 			}
 		})
 		.returning();
-	console.log(c.env.SVIX_TOKEN);
+	console.log(c.env.SVIX_TOKEN, 'SVIX_TOKEN');
 
 	c.executionCtx.waitUntil(
 		Promise.all([
