@@ -18,13 +18,15 @@ interface MessageOut {
 
 class Message {
 	private token: string;
+	private serverUrl: string;
 
-	constructor(token: string) {
+	constructor(token: string, serverUrl: string) {
 		this.token = token;
+		this.serverUrl = serverUrl;
 	}
 
 	create(appId: string, messageIn: MessageCreateParams): Promise<Response> {
-		return fetch(`https://api.svix.com/api/v1/app/${appId}/msg/`, {
+		return fetch(`${this.serverUrl}/api/v1/app/${appId}/msg/`, {
 			headers: {
 				Accept: 'application/json',
 				'Content-Type': 'application/json',
@@ -38,13 +40,15 @@ class Message {
 
 class Authentication {
 	private token: string;
+	private serverUrl: string;
 
-	constructor(token: string) {
+	constructor(token: string, serverUrl: string) {
 		this.token = token;
+		this.serverUrl = serverUrl;
 	}
 
 	async appPortalAccess(appId: string, addtional: {}): Promise<any> {
-		const response = await fetch(`https://api.svix.com/api/v1/auth/app-portal-access/${appId}/`, {
+		const response = await fetch(`${this.serverUrl}/api/v1/auth/app-portal-access/${appId}/`, {
 			headers: {
 				Accept: 'application/json',
 				'Content-Type': 'application/json',
@@ -60,15 +64,15 @@ class Authentication {
 
 class Application {
 	private token: string;
+	private serverUrl: string;
 
-	constructor(token: string) {
+	constructor(token: string, serverUrl: string) {
 		this.token = token;
+		this.serverUrl = serverUrl;
 	}
 
 	create(input: { name: string; uid: string }): Promise<Response> {
-		const eu = this.token.includes('.eu');
-
-		return fetch(`https://api${eu ? '' : '.us'}.svix.com/api/v1/app/`, {
+		return fetch(`${this.serverUrl}/api/v1/app/`, {
 			headers: {
 				Accept: 'application/json',
 				'Content-Type': 'application/json',
@@ -84,10 +88,13 @@ export class WrapperSvix {
 	public message: Message;
 	public authentication: Authentication;
 	public application: Application;
+	private serverUrl: string;
 
 	constructor(token: string) {
-		this.message = new Message(token);
-		this.authentication = new Authentication(token);
-		this.application = new Application(token);
+		this.serverUrl = `https://api${token.includes('.eu') ? '' : '.us'}.svix.com`;
+
+		this.message = new Message(token, this.serverUrl);
+		this.authentication = new Authentication(token, this.serverUrl);
+		this.application = new Application(token, this.serverUrl);
 	}
 }
