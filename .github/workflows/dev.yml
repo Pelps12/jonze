@@ -37,6 +37,7 @@ jobs:
             DATABASE_USERNAME
             DATABASE_URL
             TEST_SECRET
+            SVIX_TOKEN
           command: deploy --minify src/index.ts
           workingDirectory: 'apps/api'
           packageManager: 'pnpm'
