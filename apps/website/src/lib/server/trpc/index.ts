@@ -2,8 +2,11 @@ import type { Context } from '$lib/server/trpc/context';
 import { TRPCError, initTRPC } from '@trpc/server';
 import superjson from 'superjson';
 import { ZodError, z } from 'zod';
-import { verifyJwtToken } from '../workos';
+import workos, { verifyAccessToken, verifyJwtToken } from '../workos';
 import type { Organization, User } from '@workos-inc/node';
+import { JWT_SECRET_KEY, WORKOS_CLIENT_ID } from '$env/static/private';
+import { sealData, unsealData } from 'iron-session';
+import type { SessionType } from '$lib/types/misc';
 
 const t = initTRPC.context<Context>().create({
 	transformer: superjson
@@ -11,19 +14,53 @@ const t = initTRPC.context<Context>().create({
 export const adminProcedure = t.procedure
 	.input(z.object({ orgId: z.string() }))
 	.use(async ({ ctx, next, input }) => {
-		const token = ctx.event.cookies.get('token');
-		console.log('Token', token);
-		const verifiedToken = token && (await verifyJwtToken(token));
-		console.log('Verified', verifiedToken);
+		const sessionToken = ctx.event.cookies.get('workos-session');
 
-		// @ts-expect-error: Already valid
-		const user = verifiedToken as User & {
-			orgs: {
-				id: string;
-				name: string;
-				memberId: string;
-			}[];
-		};
+		if (!sessionToken) {
+			throw new TRPCError({
+				code: 'UNAUTHORIZED',
+				message: 'Make this request logged in'
+			});
+		}
+
+		const { accessToken, refreshToken, ...verifiedSessionUser } = await unsealData<SessionType>(
+			sessionToken,
+			{
+				password: JWT_SECRET_KEY
+			}
+		);
+
+		const valid = await verifyAccessToken(accessToken);
+
+		if (valid) {
+			console.log('VALID ACCESS TOKEN');
+			ctx.event.locals.user = verifiedSessionUser;
+		} else {
+			console.log('REFRESHING TOKEN');
+			const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+				await workos.userManagement.authenticateWithRefreshToken({
+					clientId: WORKOS_CLIENT_ID,
+					refreshToken: refreshToken
+				});
+
+			const newSessionToken = await sealData(
+				{ ...verifiedSessionUser, newAccessToken, newRefreshToken },
+				{
+					password: JWT_SECRET_KEY
+				}
+			);
+
+			ctx.event.cookies.set('workos-session', newSessionToken, {
+				path: '/',
+				httpOnly: true,
+				secure: true,
+				sameSite: 'lax'
+			});
+
+			ctx.event.locals.user = verifiedSessionUser;
+		}
+
+		const user = ctx.event.locals.user;
 
 		if (!user) {
 			throw new TRPCError({
@@ -31,8 +68,6 @@ export const adminProcedure = t.procedure
 				message: 'Make this request logged in'
 			});
 		}
-
-		console.log('BUOCWNCIONWONEWIOEWFC');
 
 		// Find the part that starts with 'org_'
 		const orgId = input.orgId;

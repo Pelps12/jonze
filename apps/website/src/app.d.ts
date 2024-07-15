@@ -1,5 +1,6 @@
 // See https://kit.svelte.dev/docs/types#app
 
+import type { SessionType } from '$lib/types/misc';
 import type { Member } from '@repo/db/types';
 import type { Organization, User } from '@workos-inc/node';
 
@@ -8,7 +9,7 @@ declare global {
 	namespace App {
 		// interface Error {}
 		interface Locals {
-			user?: User & { orgs: { memberId: string; id: string; name: string }[] }; // Your type here
+			user?: Omit<SessionType, 'accessToken' | 'refreshToken'>;
 			member?: Member;
 		}
 		// interface PageData {}

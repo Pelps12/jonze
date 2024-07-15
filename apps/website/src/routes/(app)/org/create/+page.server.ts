@@ -5,7 +5,9 @@ import workos, { clientId } from '$lib/server/workos';
 import { redirect, type Actions, error } from '@sveltejs/kit';
 import posthog, { dummyClient } from '$lib/server/posthog';
 import type { PageServerLoad } from './$types';
-import { WORKOS_REDIRECT_URI } from '$env/static/private';
+import { JWT_SECRET_KEY, WORKOS_REDIRECT_URI } from '$env/static/private';
+import { unsealData, sealData } from 'iron-session';
+import type { SessionType } from '$lib/types/misc';
 
 export const load: PageServerLoad = async ({ url, locals }) => {
 	if (!locals.user) {
@@ -26,6 +28,11 @@ export const actions: Actions = {
 	create: async ({ locals, request, cookies, getClientAddress, platform }) => {
 		// TODO register the user
 		if (!locals.user) {
+			error(401, 'Not Logged In');
+		}
+
+		const sessionToken = cookies.get('workos-session');
+		if (!sessionToken) {
 			error(401, 'Not Logged In');
 		}
 		const name = (await request.formData()).get('name');
@@ -64,11 +71,24 @@ export const actions: Actions = {
 			role: 'OWNER'
 		});
 
-		const newUser = {
-			...locals.user,
-			orgs: [...locals.user.orgs, { id: organization.id, name: organization.name, memberId: om.id }]
+		const originalSession = await unsealData<SessionType>(sessionToken, {
+			password: JWT_SECRET_KEY
+		});
+
+		const newUser: SessionType = {
+			...originalSession,
+			orgs: [
+				...originalSession.orgs,
+				{ id: organization.id, name: organization.name, memberId: om.id }
+			],
+			accessToken: originalSession.accessToken,
+			refreshToken: originalSession.refreshToken
 		};
 		const token = await signJWT(newUser);
+
+		const newSessionToken = await sealData(newUser, {
+			password: JWT_SECRET_KEY
+		});
 
 		const useragent = request.headers.get('user-agent');
 		dummyClient.capture({
@@ -90,9 +110,11 @@ export const actions: Actions = {
 		// Redirect to the requested path and store the session
 		url.pathname = '/';
 
-		cookies.set('token', token, {
+		cookies.set('workos-session', newSessionToken, {
 			path: '/',
-			httpOnly: true
+			httpOnly: true,
+			secure: true,
+			sameSite: 'lax'
 		});
 
 		platform?.context.waitUntil(dummyClient.flushAsync());
