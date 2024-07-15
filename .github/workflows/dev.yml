@@ -47,4 +47,5 @@ jobs:
           DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SVIX_TOKEN: ${{ secrets.SVIX_TOKEN }}
           TEST_SECRET: abc
