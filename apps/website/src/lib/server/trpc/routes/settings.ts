@@ -144,7 +144,8 @@ export const settingsRouter = router({
 			});
 		}
 
-		await svix.application.create({ name: org.name, uid: org.id });
+		const response = await svix.application.create({ name: org.name, uid: org.id });
+		console.log(await response.text());
 		const { url } = await svix.authentication.appPortalAccess(org.id, {});
 
 		return { webhookUrl: url };
