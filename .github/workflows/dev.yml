@@ -37,6 +37,7 @@ jobs:
             DATABASE_USERNAME
             DATABASE_URL
             TEST_SECRET
+            SVIX_TOKEN
           command: deploy --minify src/index.ts
           workingDirectory: 'apps/api'
           packageManager: 'pnpm'
@@ -47,4 +48,5 @@ jobs:
           DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SVIX_TOKEN: ${{ secrets.SVIX_TOKEN }}
           TEST_SECRET: abc

@@ -1,12 +1,17 @@
+import { JWT_SECRET_KEY } from '$env/static/private';
+import { PUBLIC_URL } from '$env/static/public';
 import { signJWT } from '$lib/server/helpers';
 import posthog, { dummyClient } from '$lib/server/posthog';
 import workos, { clientId } from '$lib/server/workos';
+import type { SessionType } from '$lib/types/misc';
 import { error, redirect, type RequestHandler } from '@sveltejs/kit';
+import { sealData, unsealData } from 'iron-session';
 
 export const GET: RequestHandler = async ({ request, cookies, platform, getClientAddress }) => {
 	const url = new URL(request.url);
 	const code = url.searchParams.get('code');
 	const callbackUrl = url.searchParams.get('state');
+
 	console.log(callbackUrl);
 	if (code) {
 		const { user, accessToken, refreshToken } = await workos.userManagement.authenticateWithCode({
@@ -33,6 +38,12 @@ export const GET: RequestHandler = async ({ request, cookies, platform, getClien
 		);
 		console.log(user);
 		const token = await signJWT({ ...user, orgs: orgs });
+		const sessionToken = await sealData(
+			{ ...user, orgs: orgs, accessToken, refreshToken },
+			{
+				password: JWT_SECRET_KEY
+			}
+		);
 
 		const url = new URL(callbackUrl ? callbackUrl : request.url);
 
@@ -47,9 +58,11 @@ export const GET: RequestHandler = async ({ request, cookies, platform, getClien
 			url.pathname = '/';
 		}
 
-		cookies.set('token', token, {
+		cookies.set('workos-session', sessionToken, {
 			path: '/',
-			httpOnly: true
+			httpOnly: true,
+			secure: true,
+			sameSite: 'lax'
 		});
 
 		const useragent = request.headers.get('user-agent');

@@ -1,6 +1,6 @@
 import { fail, type Actions, redirect, error } from '@sveltejs/kit';
 import db from '$lib/server/db';
-import { and, eq } from 'drizzle-orm';
+import { and, eq } from '@repo/db';
 import schema from '@repo/db/schema';
 import workos, { clientId } from '$lib/server/workos';
 import { WORKOS_REDIRECT_URI } from '$env/static/private';
@@ -66,7 +66,9 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 		defaultFields: {
 			firstName: locals.user.firstName,
 			lastName: locals.user.lastName
-		}
+		},
+		orgLogo: org.logo,
+		orgName: org.name
 	};
 };
 

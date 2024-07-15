@@ -14,10 +14,11 @@ import {
 	zodOpenAPIUnauthorized,
 	zodOpenAPIUser
 } from './utils/helper';
+import { WrapperSvix } from '@repo/webhooks';
 
 const app = new OpenAPIHono<{
 	Bindings: Bindings;
-	Variables: { unkey: UnkeyContext; db: DbType };
+	Variables: { unkey: UnkeyContext; db: DbType; svix: WrapperSvix };
 }>();
 
 const security = app.openAPIRegistry.registerComponent('securitySchemes', 'API Key', {
@@ -232,7 +233,17 @@ app.openapi(updateMemberTagsRoute, async (c) => {
 			eq(schema.member.id, c.req.valid('param').id)
 		),
 		with: {
-			tags: true
+			user: {
+				columns: {
+					id: true,
+					firstName: true,
+					lastName: true,
+					email: true,
+					profilePictureUrl: true
+				}
+			},
+			tags: true,
+			additionalInfo: true
 		},
 		orderBy: (member, { desc }) => [desc(member.createdAt)]
 	});
@@ -243,7 +254,7 @@ app.openapi(updateMemberTagsRoute, async (c) => {
 		});
 	}
 
-	await c
+	const [memberTags] = await c
 		.get('db')
 		.insert(schema.memberTag)
 		.values({
@@ -257,7 +268,21 @@ app.openapi(updateMemberTagsRoute, async (c) => {
 					? Array.from(new Set([...member.tags.names, ...c.req.valid('json').tags]).values())
 					: c.req.valid('json').tags
 			}
-		});
+		})
+		.returning();
+	console.log(c.env.SVIX_TOKEN, 'SVIX_TOKEN');
+
+	c.executionCtx.waitUntil(
+		Promise.all([
+			c.get('svix').message.create(metadata.orgId, {
+				eventType: 'member.updated',
+				payload: {
+					type: 'member.updated',
+					data: { ...member, tags: memberTags }
+				}
+			})
+		])
+	);
 
 	return c.json({
 		code: 201,

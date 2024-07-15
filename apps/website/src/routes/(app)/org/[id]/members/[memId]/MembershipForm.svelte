@@ -86,7 +86,7 @@
 					role="combobox"
 					{...attrs}
 				>
-					{plans.find((f) => f.id === $formData.planId)?.name ?? 'Select form'}
+					{plans.find((f) => f.id === $formData.planId)?.name ?? 'Select plan'}
 					<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
 				</Popover.Trigger>
 				<input hidden value={$formData.planId} name={attrs.name} />

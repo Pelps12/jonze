@@ -64,7 +64,7 @@
 	</div>
 	<form
 		method="post"
-		use:enhance={({ formElement, formData, action, cancel }) => {
+		use:enhance={() => {
 			formSubmitting = true;
 			return async ({ result }) => {
 				// `result` is an `ActionResult` object

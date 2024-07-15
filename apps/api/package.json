@@ -17,6 +17,7 @@
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20240208.0",
 		"@repo/db": "^0.0.0",
+		"@repo/webhooks": "^0.0.0",
 		"wrangler": "^3.25.0"
 	}
 }

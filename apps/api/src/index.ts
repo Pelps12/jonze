@@ -12,6 +12,7 @@ import attendance from './attendance';
 import forms from './forms';
 import responses from './responses';
 import { swaggerUI } from '@hono/swagger-ui';
+import { WrapperSvix } from '@repo/webhooks';
 
 export type Bindings = {
 	DATABASE_HOST: string;
@@ -20,11 +21,12 @@ export type Bindings = {
 	DATABASE_URL: string;
 	TEST_SECRET: string;
 	ENVIRONMENT: string;
+	SVIX_TOKEN: string;
 };
 
 const app = new OpenAPIHono<{
 	Bindings: Bindings;
-	Variables: { unkey: UnkeyContext; db: DbType };
+	Variables: { unkey: UnkeyContext; db: DbType; svix: WrapperSvix };
 }>();
 
 app.use('*', async (c, next) =>
@@ -51,7 +53,9 @@ app.use('*', async (c, next) => {
 	console.log('abc', c.env.TEST_SECRET);
 	const connection = neon(c.env.DATABASE_URL);
 	const db = drizzle(connection, { schema });
+	const svix = new WrapperSvix(c.env.SVIX_TOKEN);
 	c.set('db', db);
+	c.set('svix', svix);
 	return await next();
 });
 
