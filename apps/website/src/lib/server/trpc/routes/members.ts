@@ -174,7 +174,20 @@ export const memberRouter = router({
 		.input(memberUpdationSchema.extend({ memberId: z.string() }))
 		.mutation(async ({ input, ctx }) => {
 			const member = await db.query.member.findFirst({
-				where: eq(schema.member.id, input.memberId)
+				where: eq(schema.member.id, input.memberId),
+				with: {
+					user: {
+						columns: {
+							id: true,
+							firstName: true,
+							lastName: true,
+							email: true,
+							profilePictureUrl: true
+						}
+					},
+					tags: true,
+					additionalInfo: true
+				}
 			});
 
 			if (!member) {
@@ -183,15 +196,17 @@ export const memberRouter = router({
 					message: 'Member not found'
 				});
 			}
-
+			let optimisticMember: typeof member = member;
 			if (input.tags.length > 0) {
-				await db
+				const [memberTags] = await db
 					.insert(schema.memberTag)
 					.values({ id: member.id, names: input.tags })
 					.onConflictDoUpdate({
 						target: schema.memberTag.id,
 						set: { names: input.tags }
-					});
+					})
+					.returning();
+				optimisticMember = { ...optimisticMember, tags: memberTags };
 			}
 
 			const useragent = ctx.event.request.headers.get('user-agent');
@@ -207,7 +222,20 @@ export const memberRouter = router({
 					}
 				});
 
-			ctx.event.platform?.context.waitUntil(Promise.all([dummyClient.flushAsync()]));
+			ctx.event.platform?.context.waitUntil(
+				Promise.all([
+					dummyClient.flushAsync(),
+					svix.message.create(input.orgId, {
+						eventType: 'member.updated',
+						payload: {
+							type: 'member.updated',
+							data: {
+								...optimisticMember
+							}
+						}
+					})
+				])
+			);
 
 			return;
 		}),

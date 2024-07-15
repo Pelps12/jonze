@@ -1,0 +1,8 @@
+{
+	"name": "@repo/webhooks",
+	"main": "./index.ts",
+	"types": "./index.ts",
+	"author": "retconned <retcnned@gmail.com>",
+	"version": "0.0.0",
+	"private": true
+}
