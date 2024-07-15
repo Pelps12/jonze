@@ -66,7 +66,9 @@ class Application {
 	}
 
 	create(input: { name: string; uid: string }): Promise<Response> {
-		return fetch(`https://api.svix.com/api/v1/app/`, {
+		const eu = this.token.includes('.eu');
+
+		return fetch(`https://api${eu ? '' : '.us'}.svix.com/api/v1/app/`, {
 			headers: {
 				Accept: 'application/json',
 				'Content-Type': 'application/json',
