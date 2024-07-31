@@ -5,8 +5,9 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Loader2Icon } from 'lucide-svelte';
 
-	import { enhance } from '$app/forms';
+	import { applyAction, enhance } from '$app/forms';
 	import type { ActionData } from './$types';
+	import { goto } from '$app/navigation';
 	export let form: ActionData;
 
 	let formStatus: 'idle' | 'submitting' | 'submitted' = 'idle';
@@ -21,17 +22,23 @@
 		<form
 			method="post"
 			action="?/create"
-			use:enhance={({ formElement, formData, action, cancel, submitter }) => {
+			use:enhance={() => {
 				// `formElement` is this `<form>` element
 				// `formData` is its `FormData` object that's about to be submitted
 				// `action` is the URL to which the form is posted
 				// calling `cancel()` will prevent the submission
 				// `submitter` is the `HTMLElement` that caused the form to be submitted
+				formStatus = 'submitting';
 
 				return async ({ result, update }) => {
 					// `result` is an `ActionResult` object
 					// `update` is a function which triggers the default logic that would be triggered if this callback wasn't set
 					formStatus = 'submitted';
+					if (result.type === 'redirect') {
+						goto(result.location);
+					} else {
+						await applyAction(result);
+					}
 				};
 			}}
 		>
@@ -44,13 +51,7 @@
 				</div>
 			</Card.Content>
 			<Card.Footer class="flex justify-end">
-				<Button
-					type="submit"
-					on:click={() => {
-						formStatus = 'submitting';
-					}}
-					disabled={formStatus === 'submitting'}
-				>
+				<Button type="submit" disabled={formStatus === 'submitting'}>
 					{#if formStatus !== 'submitting'}
 						Create
 					{:else}
