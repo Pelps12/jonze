@@ -167,7 +167,7 @@ export const actions: Actions = {
 		platform?.context.waitUntil(
 			Promise.all([
 				dummyClient.flushAsync(),
-				svix.message.create(params.id, {
+				svix.message.create(event.orgId, {
 					eventType: 'attendance.marked',
 					payload: {
 						type: 'attendance.marked',
