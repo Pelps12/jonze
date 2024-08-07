@@ -114,7 +114,8 @@ export const actions: Actions = {
 			path: '/',
 			httpOnly: true,
 			secure: true,
-			sameSite: 'lax'
+			sameSite: 'lax',
+			maxAge: 30 * 24 * 60 * 60 // 30 days in seconds
 		});
 
 		platform?.context.waitUntil(dummyClient.flushAsync());

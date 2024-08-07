@@ -54,7 +54,8 @@ export const adminProcedure = t.procedure
 				path: '/',
 				httpOnly: true,
 				secure: true,
-				sameSite: 'lax'
+				sameSite: 'lax',
+				maxAge: 30 * 24 * 60 * 60 // 30 days in seconds
 			});
 
 			ctx.event.locals.user = verifiedSessionUser;
