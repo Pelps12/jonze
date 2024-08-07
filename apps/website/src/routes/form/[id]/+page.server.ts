@@ -7,6 +7,7 @@ import { newId } from '@repo/db/utils/createId';
 import { objectsHaveSameKeys } from '$lib/server/helpers';
 import { dummyClient } from '$lib/server/posthog';
 import svix from '$lib/server/svix';
+import { PUBLIC_URL } from '$env/static/public';
 
 export const load: PageServerLoad = async ({ parent, url, locals, params }) => {
 	const form = await db.query.organizationForm.findFirst({
@@ -49,6 +50,13 @@ export const actions: Actions = {
 			where: and(eq(schema.member.userId, locals.user.id), eq(schema.member.orgId, form.orgId)),
 			columns: {
 				id: true
+			},
+			with: {
+				organization: {
+					columns: {
+						website: true
+					}
+				}
 			}
 		});
 		if (!member) {
@@ -133,6 +141,8 @@ export const actions: Actions = {
 				})
 			])
 		);
-		redirect(302, callbackUrl ?? '/');
+		const orgHomePage = member.organization.website;
+		const returnUrl = new URL(callbackUrl ?? orgHomePage ?? PUBLIC_URL);
+		redirect(302, returnUrl);
 	}
 };

@@ -13,7 +13,7 @@
 	import { toast } from 'svelte-sonner';
 	import * as Avatar from '$lib/components/ui/avatar';
 	import { invalidate } from '$app/navigation';
-	import { PUBLIC_APIKEY_PREFIX, PUBLIC_STRIPE_KEY } from '$env/static/public';
+	import { PUBLIC_APIKEY_PREFIX, PUBLIC_STRIPE_KEY, PUBLIC_URL } from '$env/static/public';
 	import { Label } from '$lib/components/ui/label';
 	import InviteBox from './InviteBox.svelte';
 	import { Switch } from '$lib/components/ui/switch';
@@ -29,12 +29,24 @@
 	const settingsQuery = trpc().settingsRouter.getSettings.createQuery({
 		orgId: $page.params.id
 	});
-	const stripeDashboardMutation = trpc().settingsRouter.getStripeAccountDashboard.createMutation();
 
+	const stripeDashboardMutation = trpc().settingsRouter.getStripeAccountDashboard.createMutation();
+	const homePageUrlMutation = trpc().settingsRouter.changeHomePage.createMutation();
 	const APIKeyCreation = trpc().settingsRouter.createAPIKey.createMutation();
 
 	const enableWebhookMutation = trpc().settingsRouter.enableWebhooks.createMutation();
 	const utils = trpc().createUtils();
+
+	$: orgHomePage = $settingsQuery.data?.homePage;
+
+	const handleHomePageUpdate = () => {
+		if (orgHomePage) {
+			$homePageUrlMutation.mutateAsync({
+				orgId: $page.params.id,
+				websiteUrl: orgHomePage
+			});
+		}
+	};
 
 	settingsQuery.subscribe(() => {
 		console.log(12);
@@ -151,31 +163,54 @@
 		</div>
 	</div>
 	<div class="p-6 lg:grid lg:grid-cols-2 items-start gap-4">
-		<form class="p-2" method="post" action="?/updateLogo" enctype="multipart/form-data">
-			<Card.Root class="sm:max-w-[425px]">
+		<div>
+			<form class="" method="post" action="?/updateLogo" enctype="multipart/form-data">
+				<Card.Root class="sm:max-w-[425px] p-2 my-2">
+					<Card.Header>
+						<Card.Title>Your Org Logo</Card.Title>
+						<Card.Description>A little bit of branding</Card.Description>
+					</Card.Header>
+					<Card.Content>
+						<div class="grid w-full max-w-sm items-center gap-1.5">
+							{#if data.logo || imageUrl}
+								<img
+									src={imageUrl ?? data.logo}
+									alt="Organization"
+									width="100"
+									height="100"
+									class="mx-auto"
+								/>
+							{/if}
+							<Input name="logo" id="logo" type="file" on:change={handleFileChange} />
+						</div>
+					</Card.Content>
+					<Card.Footer>
+						<Button type="submit">Update</Button>
+					</Card.Footer>
+				</Card.Root>
+			</form>
+
+			<Card.Root class="sm:max-w-[425px] my-2">
 				<Card.Header>
-					<Card.Title>Your Org Logo</Card.Title>
-					<Card.Description>A little bit of branding</Card.Description>
+					<Card.Title>Your Org Home Page</Card.Title>
+					<Card.Description>All forms, attendances, and payments redirect here</Card.Description>
 				</Card.Header>
 				<Card.Content>
 					<div class="grid w-full max-w-sm items-center gap-1.5">
-						{#if data.logo || imageUrl}
-							<img
-								src={imageUrl ?? data.logo}
-								alt="Organization"
-								width="100"
-								height="100"
-								class="mx-auto"
-							/>
-						{/if}
-						<Input name="logo" id="logo" type="file" on:change={handleFileChange} />
+						<Input name="logo" bind:value={orgHomePage} id="logo" placeholder={PUBLIC_URL} />
 					</div>
 				</Card.Content>
 				<Card.Footer>
-					<Button type="submit">Update</Button>
+					<Button
+						disabled={!orgHomePage || $homePageUrlMutation.isPending}
+						on:click={() => handleHomePageUpdate()}
+						>{#if $homePageUrlMutation.isPending}
+							<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+						{/if}Update</Button
+					>
 				</Card.Footer>
 			</Card.Root>
-		</form>
+		</div>
 
 		<div class="p-2">
 			<Dialog.Root bind:open={inviteBoxOpen}>

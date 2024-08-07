@@ -20,8 +20,9 @@
 	onMount(() => {
 		setTimeout(() => {
 			const callbackUrl = $page.url.searchParams.get('callbackUrl');
-			const returnURL = new URL(callbackUrl ?? PUBLIC_URL);
-			if (invalid && callbackUrl) {
+			const orgHomePage = data.event.organization.website;
+			const returnURL = new URL(callbackUrl ?? orgHomePage ?? PUBLIC_URL);
+			if (invalid && (callbackUrl || orgHomePage)) {
 				window.location.href = returnURL.toString();
 			}
 		}, 7000);

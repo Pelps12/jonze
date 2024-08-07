@@ -17,7 +17,8 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
 			organization: {
 				columns: {
 					name: true,
-					logo: true
+					logo: true,
+					website: true
 				}
 			}
 		}
@@ -61,8 +62,6 @@ export const actions: Actions = {
 	default: async ({ request, locals, params, url, getClientAddress, platform }) => {
 		const callbackUrl = url.searchParams.get('callbackUrl');
 
-		const returnUrl = new URL(callbackUrl ?? PUBLIC_URL);
-
 		if (!params.id) error(400, 'Event ID Required');
 		const event = await db.query.event.findFirst({
 			where: eq(schema.event.id, params.id),
@@ -83,6 +82,11 @@ export const actions: Actions = {
 			with: {
 				attendances: {
 					where: eq(schema.attendance.eventId, event.id)
+				},
+				organization: {
+					columns: {
+						website: true
+					}
 				}
 			}
 		});
@@ -178,6 +182,11 @@ export const actions: Actions = {
 				})
 			])
 		);
+
+		const orgHomePage = member.organization.website;
+
+		const returnUrl = new URL(callbackUrl ?? orgHomePage ?? PUBLIC_URL);
+
 		returnUrl.searchParams.set('attendance_success', 'true');
 		redirect(302, returnUrl);
 	}

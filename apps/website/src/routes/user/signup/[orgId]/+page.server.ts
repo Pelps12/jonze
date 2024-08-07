@@ -9,6 +9,7 @@ import { objectsHaveSameKeys } from '$lib/server/helpers';
 import type { PageServerLoad } from './$types';
 import posthog, { dummyClient } from '$lib/server/posthog';
 import svix from '$lib/server/svix';
+import { PUBLIC_URL } from '$env/static/public';
 
 export const load: PageServerLoad = async ({ params, locals, url }) => {
 	const orgId = params.orgId;
@@ -44,16 +45,21 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 						forms: {
 							where: eq(schema.organizationForm.name, 'User Info')
 						}
+					},
+					columns: {
+						website: true
 					}
 				}
 			}
 		});
 		const signupForm = member?.organization.forms[0];
+		const returnURL = callbackUrl ?? member?.organization.website ?? PUBLIC_URL;
+
 		if (
 			(signupForm && member.additionalInfoId) ||
 			(member && member.organization.forms.length == 0)
 		) {
-			redirect(302, callbackUrl ?? `/org/${orgId}`);
+			redirect(302, returnURL);
 		}
 	}
 	if (!org) {
@@ -86,7 +92,14 @@ export const actions: Actions = {
 			where: and(
 				eq(schema.organizationForm.orgId, orgId),
 				eq(schema.organizationForm.name, 'User Info')
-			)
+			),
+			with: {
+				organization: {
+					columns: {
+						website: true
+					}
+				}
+			}
 		});
 		const formData = await request.formData();
 		for (const pair of formData.entries()) {
@@ -224,6 +237,10 @@ export const actions: Actions = {
 			])
 		);
 
-		redirect(302, callbackUrl ?? '/');
+		const orgHomePageUrl = orgForm?.organization.website;
+
+		const returnURL = callbackUrl ?? orgHomePageUrl ?? PUBLIC_URL;
+
+		redirect(302, returnURL);
 	}
 };

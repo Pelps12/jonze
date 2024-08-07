@@ -1,10 +1,13 @@
 import { migrate } from 'drizzle-orm/neon-http/migrator';
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
-import 'dotenv/config';
+import * as dotenv from 'dotenv';
+dotenv.config({ path: '../../.env' });
 
 async function migrateHelper() {
-	const connection = neon(process.env.DATABASE_URL!);
+	const DATABASE_URL = process.env.DATABASE_URL;
+	if (!DATABASE_URL) throw Error('Missing DATABASE_URL');
+	const connection = neon(DATABASE_URL);
 	const db = drizzle(connection);
 	console.log('⏳ Running Migrations...');
 	const start = Date.now();

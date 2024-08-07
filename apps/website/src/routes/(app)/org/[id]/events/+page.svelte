@@ -412,7 +412,7 @@
 	</div>
 {:else if $selectedView.value === 'list'}
 	<div class={cn(' shadow rounded-lg p-6')}>
-		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+		<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
 			{#if $eventQuery.data}
 				{#each $eventQuery.data.events as event}
 					<Card.Root class="w-full">
@@ -509,6 +509,7 @@
 									height={350}
 									priority={false}
 									alt={event.name}
+									placeholder={'/placeholder.svg'}
 									class="aspect-square object-cover m-5 w-auto rounded-lg"
 								/>
 							{:else}
