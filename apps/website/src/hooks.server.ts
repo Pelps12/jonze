@@ -48,7 +48,8 @@ const handleAuth: Handle = async ({ event, resolve }) => {
 					path: '/',
 					httpOnly: true,
 					secure: true,
-					sameSite: 'lax'
+					sameSite: 'lax',
+					maxAge: 30 * 24 * 60 * 60 // 30 days in seconds
 				});
 
 				event.locals.user = verifiedSessionUser;
