@@ -37,7 +37,7 @@
 	const enableWebhookMutation = trpc().settingsRouter.enableWebhooks.createMutation();
 	const utils = trpc().createUtils();
 
-	$: orgHomePage = $settingsQuery.data?.homePage;
+	let orgHomePage = $settingsQuery.data?.homePage;
 
 	const handleHomePageUpdate = () => {
 		if (orgHomePage) {
@@ -48,8 +48,9 @@
 		}
 	};
 
-	settingsQuery.subscribe(() => {
+	settingsQuery.subscribe(({ data }) => {
 		console.log(12);
+		orgHomePage = data?.homePage;
 		if (browser) {
 			$stripeDashboardMutation
 				.mutateAsync({
