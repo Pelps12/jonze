@@ -38,6 +38,8 @@
 					orgId: $page.params.id
 				});
 				closeForm();
+			} else {
+				console.log(form.errors);
 			}
 		}
 	});
@@ -69,8 +71,8 @@
 		</Form.Control>
 	</Form.Field>
 
-	<Form.Button disabled={$updateMutation.isPending}>
-		{#if $updateMutation.isPending}
+	<Form.Button disabled={$submitting}>
+		{#if $submitting}
 			<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
 		{/if}
 

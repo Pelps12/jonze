@@ -60,6 +60,7 @@ export const settingsRouter = router({
 			keys,
 			members: organization.members,
 			logo: organization.logo,
+			homePage: organization.website,
 			webhookUrl,
 			stripeClientSecret
 		};
@@ -199,5 +200,19 @@ export const settingsRouter = router({
 			console.log('bufornfoeifnoer');
 
 			return { members };
+		}),
+	changeHomePage: adminProcedure
+		.input(
+			z.object({
+				websiteUrl: z.string()
+			})
+		)
+		.mutation(async ({ input }) => {
+			await db
+				.update(schema.organization)
+				.set({
+					website: input.websiteUrl
+				})
+				.where(eq(schema.organization.id, input.orgId));
 		})
 });

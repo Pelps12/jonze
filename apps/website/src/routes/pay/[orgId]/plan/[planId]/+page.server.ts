@@ -52,7 +52,8 @@ export const load: PageServerLoad = async ({ url, locals, params }) => {
 				columns: {
 					id: true,
 					name: true,
-					logo: true
+					logo: true,
+					website: true
 				},
 				with: {
 					subaccount: {
@@ -133,6 +134,8 @@ export const load: PageServerLoad = async ({ url, locals, params }) => {
 		});
 	}
 
+	const returnURL = callbackUrl ?? plan.organization.website ?? PUBLIC_URL;
+
 	const session = await stripe.checkout.sessions.create(
 		{
 			customer: stripeCustomerId,
@@ -155,7 +158,7 @@ export const load: PageServerLoad = async ({ url, locals, params }) => {
 			mode: 'payment',
 			ui_mode: 'custom' as any,
 			// The URL of your payment completion page
-			return_url: callbackUrl ?? PUBLIC_URL,
+			return_url: returnURL,
 			metadata: {
 				planId: plan.id,
 				memId: member.id
@@ -218,7 +221,9 @@ export const actions: Actions = {
 			},
 			with: {
 				organization: {
-					columns: {},
+					columns: {
+						website: true
+					},
 					with: {
 						forms: {
 							where: eq(schema.organizationForm.name, 'User Info')
@@ -244,7 +249,8 @@ export const actions: Actions = {
 			console.log(`${WORKOS_REDIRECT_URI}`);
 			redirect(302, loginUrl);
 		}
-		const returnURL = event.url.searchParams.get('callbackUrl') ?? PUBLIC_URL;
+		const returnURL =
+			event.url.searchParams.get('callbackUrl') ?? member.organization.website ?? PUBLIC_URL;
 		const plan = await db.query.plan.findFirst({
 			where: eq(schema.plan.id, event.params.planId),
 			with: {

@@ -1,0 +1,1 @@
+ALTER TABLE "Organization" ADD COLUMN "website" varchar(191);
