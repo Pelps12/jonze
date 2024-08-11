@@ -25,6 +25,7 @@
 	import { trpc } from '$lib/client/trpc';
 	import KeyModal from './KeyModal.svelte';
 	import { writable } from 'svelte/store';
+	import { client } from '$lib/client/uploadcare';
 
 	const settingsQuery = trpc().settingsRouter.getSettings.createQuery({
 		orgId: $page.params.id
@@ -32,6 +33,8 @@
 
 	const stripeDashboardMutation = trpc().settingsRouter.getStripeAccountDashboard.createMutation();
 	const homePageUrlMutation = trpc().settingsRouter.changeHomePage.createMutation();
+	const orgLogoMutation = trpc().settingsRouter.changeOrgLogo.createMutation();
+
 	const APIKeyCreation = trpc().settingsRouter.createAPIKey.createMutation();
 
 	const enableWebhookMutation = trpc().settingsRouter.enableWebhooks.createMutation();
@@ -39,12 +42,46 @@
 
 	let orgHomePage = $settingsQuery.data?.homePage;
 
+	let orgLogo: File | undefined = undefined;
+	let orgLogoFormLoading = false;
+
 	const handleHomePageUpdate = () => {
 		if (orgHomePage) {
 			$homePageUrlMutation.mutateAsync({
 				orgId: $page.params.id,
 				websiteUrl: orgHomePage
 			});
+		}
+	};
+
+	const uploadNewLogo = () => {
+		if (orgLogo) {
+			orgLogoFormLoading = true;
+			client
+				.uploadFile(orgLogo, {
+					metadata: {
+						orgId: $page.params.id,
+						type: 'logo'
+					}
+				})
+				.then(async (file) => {
+					console.log(file);
+					if (file.cdnUrl) {
+						$orgLogoMutation
+							.mutateAsync({
+								orgId: $page.params.id,
+								cdnUrl: file.cdnUrl
+							})
+							.then(() => {
+								orgLogoFormLoading = false;
+							})
+							.catch((err) => {
+								toast.error(err.message);
+							});
+					}
+				});
+		} else {
+			toast.error('No Logo Selected');
 		}
 	};
 
@@ -136,6 +173,7 @@
 			if (fileSize > 5) {
 				toast.error('File Size must be less than 5MB');
 			}
+			orgLogo = file;
 			imageUrl = URL.createObjectURL(file);
 		}
 	}
@@ -165,31 +203,33 @@
 	</div>
 	<div class="p-6 lg:grid lg:grid-cols-2 items-start gap-4">
 		<div>
-			<form class="" method="post" action="?/updateLogo" enctype="multipart/form-data">
-				<Card.Root class="sm:max-w-[425px] p-2 my-2">
-					<Card.Header>
-						<Card.Title>Your Org Logo</Card.Title>
-						<Card.Description>A little bit of branding</Card.Description>
-					</Card.Header>
-					<Card.Content>
-						<div class="grid w-full max-w-sm items-center gap-1.5">
-							{#if data.logo || imageUrl}
-								<img
-									src={imageUrl ?? data.logo}
-									alt="Organization"
-									width="100"
-									height="100"
-									class="mx-auto"
-								/>
-							{/if}
-							<Input name="logo" id="logo" type="file" on:change={handleFileChange} />
-						</div>
-					</Card.Content>
-					<Card.Footer>
-						<Button type="submit">Update</Button>
-					</Card.Footer>
-				</Card.Root>
-			</form>
+			<Card.Root class="sm:max-w-[425px] p-2 my-2">
+				<Card.Header>
+					<Card.Title>Your Org Logo</Card.Title>
+					<Card.Description>A little bit of branding</Card.Description>
+				</Card.Header>
+				<Card.Content>
+					<div class="grid w-full max-w-sm items-center gap-1.5">
+						{#if data.logo || imageUrl}
+							<img
+								src={imageUrl ?? data.logo}
+								alt="Organization"
+								width="100"
+								height="100"
+								class="mx-auto"
+							/>
+						{/if}
+						<Input name="logo" id="logo" type="file" on:change={handleFileChange} />
+					</div>
+				</Card.Content>
+				<Card.Footer>
+					<Button on:click={() => uploadNewLogo()} disabled={orgLogoFormLoading || !orgLogo}
+						>{#if orgLogoFormLoading}
+							<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+						{/if}Update</Button
+					>
+				</Card.Footer>
+			</Card.Root>
 
 			<Card.Root class="sm:max-w-[425px] my-2">
 				<Card.Header>
