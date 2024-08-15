@@ -27,7 +27,9 @@ export const load: PageServerLoad = async ({ url, locals, params }) => {
 		where: and(eq(schema.member.userId, locals.user.id), eq(schema.member.orgId, params.orgId)),
 		columns: {
 			id: true,
-			additionalInfoId: true
+			additionalInfoId: true,
+			userId: true,
+			orgId: true
 		},
 		with: {
 			organization: {
@@ -161,7 +163,9 @@ export const load: PageServerLoad = async ({ url, locals, params }) => {
 			return_url: returnURL,
 			metadata: {
 				planId: plan.id,
-				memId: member.id
+				memId: member.id,
+				userId: member.userId,
+				orgId: member.orgId
 			}
 		},
 		{
@@ -217,7 +221,9 @@ export const actions: Actions = {
 			),
 			columns: {
 				id: true,
-				additionalInfoId: true
+				additionalInfoId: true,
+				userId: true,
+				orgId: true
 			},
 			with: {
 				organization: {
@@ -375,7 +381,9 @@ export const actions: Actions = {
 				metadata: {
 					planId: plan.id,
 					memId: member.id,
-					responseId: result[0].insertedId
+					responseId: result[0].insertedId,
+					userId: member.userId,
+					orgId: member.orgId
 				}
 			},
 			{
