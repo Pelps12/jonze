@@ -29,7 +29,9 @@
 	let submissionState: 'start' | 'form_submitted' | 'stripe_submitted' = 'start';
 
 	const form = writable();
-	const returnURL = new URL($page.url.searchParams.get('callbackUrl') ?? PUBLIC_URL);
+	const returnURL = new URL(
+		$page.url.searchParams.get('callbackUrl') ?? data.org.website ?? PUBLIC_URL
+	);
 
 	onMount(async () => {
 		if (!data.form) {
