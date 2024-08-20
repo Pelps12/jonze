@@ -88,6 +88,13 @@ app.openapi(listEventsRoute, async (c) => {
 	const events = await c.get('db').query.event.findMany({
 		where: eq(schema.event.orgId, metadata.orgId),
 		orderBy: (event, { desc }) => [desc(event.start)],
+		with: {
+			tags: {
+				columns: {
+					names: true
+				}
+			}
+		},
 		limit: limit ? parseInt(limit) : 100
 	});
 

@@ -55,6 +55,13 @@ export const zodOpenAPIEvent = createSelectSchema(schema.event, {
 	end: z.coerce.string().openapi({
 		example: new Date().toISOString()
 	}),
+	tags: z
+		.object({
+			names: z.array(z.string())
+		})
+		.openapi({
+			example: { names: ['#social', '#gbm', '#collab'] }
+		}),
 	image: ({ image }) =>
 		image.openapi({
 			example: 'https://ucarecdn.com/7b2c6de8-a255-4cf6-aee3-1c788fd59135/'

@@ -53,12 +53,14 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 			}
 		});
 		const signupForm = member?.organization.forms[0];
-		const returnURL = callbackUrl ?? member?.organization.website ?? PUBLIC_URL;
+		const returnURL = new URL(callbackUrl ?? member?.organization.website ?? PUBLIC_URL);
 
 		if (
 			(signupForm && member.additionalInfoId) ||
 			(member && member.organization.forms.length == 0)
 		) {
+			returnURL.searchParams.set('already_member', 'true');
+
 			redirect(302, returnURL);
 		}
 	}
@@ -152,7 +154,9 @@ export const actions: Actions = {
 		//WASTED API CALLS
 		if (userResponse.defaultFields.firstName || userResponse.defaultFields.lastName) {
 			await workos.userManagement.updateUser({
-				userId: locals.user.id
+				userId: locals.user.id,
+				firstName: userResponse.defaultFields.firstName ?? undefined,
+				lastName: userResponse.defaultFields.lastName ?? undefined
 			});
 		}
 

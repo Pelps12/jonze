@@ -3,7 +3,7 @@ import db from '$lib/server/db';
 import schema from '@repo/db/schema';
 import workos from '$lib/server/workos';
 import { error, type RequestHandler } from '@sveltejs/kit';
-import { eq } from 'drizzle-orm';
+import { eq } from '@repo/db';
 import { Webhooks } from './helper';
 import posthog, { dummyClient } from '$lib/server/posthog';
 import { roleEnum } from '@repo/db/schema/member';

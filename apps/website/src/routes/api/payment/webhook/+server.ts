@@ -4,7 +4,10 @@ import Stripe from 'stripe';
 import { STRIPE_WEBHOOK_SECRET } from '$env/static/private';
 import schema from '@repo/db/schema';
 import db from '$lib/server/db';
-export const POST: RequestHandler = async ({ request }) => {
+import { dummyClient } from '$lib/server/posthog';
+import svix from '$lib/server/svix';
+import { eq } from '@repo/db';
+export const POST: RequestHandler = async ({ request, platform }) => {
 	const sig = request.headers.get('stripe-signature');
 	const buf = await request.text();
 	if (!sig) error(400, 'Invalid request');
@@ -22,16 +25,49 @@ export const POST: RequestHandler = async ({ request }) => {
 			case 'checkout.session.completed':
 				const data = event.data.object;
 				const memId = data.metadata?.memId;
+				const userId = data.metadata?.userId;
+				const orgId = data.metadata?.orgId;
 				const planId = data.metadata?.planId;
 				const responseId = data.metadata?.responseId;
-				if (!memId || !planId) error(400, 'Invalid Metadata');
+				if (!memId || !planId || !userId || !orgId) error(400, 'Invalid Metadata');
 
-				await db.insert(schema.membership).values({
-					planId,
-					memId,
-					provider: 'Jonze',
-					responseId
+				const [newMembership] = await db
+					.insert(schema.membership)
+					.values({
+						planId,
+						memId,
+						provider: 'Jonze',
+						responseId
+					})
+					.returning();
+				const member = await db.query.member.findFirst({
+					where: eq(schema.member.id, memId)
 				});
+
+				dummyClient.capture({
+					distinctId: userId,
+					event: 'new user membership',
+					properties: {
+						memId,
+						orgId,
+						method: 'managed',
+						id: newMembership.id
+					}
+				});
+				platform?.context.waitUntil(
+					Promise.all([
+						dummyClient.flushAsync(),
+						svix.message.create(orgId, {
+							eventType: 'membership.updated',
+							payload: {
+								type: 'membership.updated',
+								data: {
+									...{ ...newMembership, member }
+								}
+							}
+						})
+					])
+				);
 
 				break;
 			default:

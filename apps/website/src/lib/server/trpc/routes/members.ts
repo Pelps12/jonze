@@ -145,6 +145,7 @@ export const memberRouter = router({
 						planId: input.planId,
 						orgId: input.orgId,
 						memId: input.memberId,
+						method: 'manual',
 						id: newMembership.id,
 						...(useragent && { $useragent: useragent })
 					}

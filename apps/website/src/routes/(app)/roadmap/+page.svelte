@@ -1,5 +1,6 @@
 <script>
 	import { Button } from '$lib/components/ui/button';
+	import { Check, CircleCheckBig } from 'lucide-svelte';
 </script>
 
 <section class="w-full py-3 md:py-6 lg:py-9">
@@ -26,7 +27,9 @@
 							<div class="aspect-square w-5 rounded-full bg-gray-900 dark:bg-gray-50"></div>
 						</div>
 						<div>
-							<h3 class="text-xl font-bold">Event Tagging</h3>
+							<h3 class="text-xl font-bold flex items-center">
+								Event Tagging <CircleCheckBig class="ml-2 w-4 h-4" />
+							</h3>
 							<p class="">
 								Enable event tags (e.g. #social, #gbm, #collab) for events so as to filter them by
 								those tags.
