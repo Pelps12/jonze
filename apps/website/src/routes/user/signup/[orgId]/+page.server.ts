@@ -154,7 +154,9 @@ export const actions: Actions = {
 		//WASTED API CALLS
 		if (userResponse.defaultFields.firstName || userResponse.defaultFields.lastName) {
 			await workos.userManagement.updateUser({
-				userId: locals.user.id
+				userId: locals.user.id,
+				firstName: userResponse.defaultFields.firstName ?? undefined,
+				lastName: userResponse.defaultFields.lastName ?? undefined
 			});
 		}
 

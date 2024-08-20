@@ -58,7 +58,7 @@
 							name="firstName"
 							placeholder="First Name"
 							required={true}
-							value={null}
+							value={data.defaultFields.firstName}
 						/>
 					</div>
 
