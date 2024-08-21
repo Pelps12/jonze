@@ -52,7 +52,8 @@ export const planRouter = router({
 			amount: input.amount.toFixed(2),
 			orgId: input.orgId,
 			name: input.name,
-			interval: input.interval
+			interval: input.interval,
+			formId: input.formId
 		});
 		const useragent = ctx.event.request.headers.get('user-agent');
 		ctx.event.locals.user &&

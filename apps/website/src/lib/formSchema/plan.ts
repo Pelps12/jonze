@@ -11,7 +11,8 @@ export const planCreationSchema = z.object({
 	start: z.date(),
 	amount: z.number(),
 	interval: z.enum(Object.keys(intervals) as [Interval, ...Interval[]]),
-	name: z.string()
+	name: z.string(),
+	formId: z.string().nullable()
 });
 
 export type PlanCreationSchema = typeof planCreationSchema;
