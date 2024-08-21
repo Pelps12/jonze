@@ -18,7 +18,7 @@
 		XIcon
 	} from 'lucide-svelte';
 	import { browser } from '$app/environment';
-	import { PUBLIC_URL } from '$env/static/public';
+	import { PUBLIC_ENVIRONMENT, PUBLIC_URL } from '$env/static/public';
 	import { toast } from 'svelte-sonner';
 	import Preview from '$lib/components/custom/form/UI/Preview.svelte';
 	import QRCode from 'qrcode';
@@ -32,6 +32,17 @@
 	import { json2csv } from 'json-2-csv';
 	import * as Select from '$lib/components/ui/select';
 	import { Chart, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
+	import {
+		Area,
+		Axis,
+		Chart as NewChart,
+		Highlight,
+		Svg,
+		Tooltip as NewTooltip,
+		TooltipItem,
+		Bars,
+		RectClipPath
+	} from 'layerchart';
 	import { Bar } from 'svelte-chartjs';
 	import { Calendar } from '@fullcalendar/core';
 	import dayGridPlugin from '@fullcalendar/daygrid';
@@ -44,6 +55,17 @@
 	import { trpc } from '$lib/client/trpc';
 	import type { RouterOutput } from '$lib/server/trpc/routes';
 	import { goto } from '$app/navigation';
+	import posthog from 'posthog-js';
+	import { scaleBand } from 'd3-scale';
+
+	let newGraphFlagEnabled = PUBLIC_ENVIRONMENT === 'dev';
+	onMount(() => {
+		posthog.onFeatureFlags(() => {
+			if (posthog.isFeatureEnabled('new-chart-component')) {
+				newGraphFlagEnabled = true;
+			}
+		});
+	});
 
 	const queryParams = derived(page, ($page) => ({
 		orgId: $page.params.id,
@@ -204,6 +226,17 @@
 	const handleReset = () => {
 		const url = removeAllFilters(new URL($page.url));
 		goto(url.toString());
+	};
+
+	const mergeArrays = (ar1: any[], ar2: any[], ar3: any[]) => {
+		console.log(
+			ar1.map(function (x, i) {
+				return { value: x, label: ar2[i] };
+			})
+		);
+		return ar1.map(function (x, i) {
+			return { value: x, label: ar2[i], id: ar3[i], hiddenId: i };
+		});
 	};
 
 	Chart.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
@@ -502,24 +535,15 @@
 							>
 						</Card.Header>
 						<div class="flex justify-center rounded-lg m-3">
-							{#if event.image}
-								<Image
-									src={event.image}
-									layout="fullWidth"
-									height={350}
-									priority={false}
-									alt={event.name}
-									placeholder={'/placeholder.svg'}
-									class="aspect-square object-cover m-5 w-auto rounded-lg"
-								/>
-							{:else}
-								<img
-									src={'/placeholder.svg'}
-									height={350}
-									alt={event.name}
-									class="aspect-square object-cover m-5 w-auto rounded-lg"
-								/>
-							{/if}
+							<Image
+								src={event.image ?? '/placeholder.svg'}
+								height={350}
+								width={350}
+								priority={false}
+								alt={event.name}
+								placeholder={'/placeholder.svg'}
+								class="aspect-square object-cover m-5 w-auto rounded-lg"
+							/>
 						</div>
 						<Card.Content>
 							<p class="text-sm text-gray-600">
@@ -641,16 +665,58 @@
 			{/if}
 		</div>
 	</div>
-{:else}
-	<div>
-		<Bar
-			data={chartData}
-			on:click={(e) => console.log(e)}
-			options={{
-				maintainAspectRatio: false,
-				aspectRatio: 1,
-				scales: { x: { display: false }, y: { ticks: { stepSize: 1 } } }
-			}}
-		/>
+{:else if $eventQuery.data}
+	<div class="h-[50vh]">
+		{#if newGraphFlagEnabled}
+			<NewChart
+				data={mergeArrays(
+					$eventQuery.data.chartData.data,
+					$eventQuery.data.chartData.labels,
+					$eventQuery.data.chartData.ids
+				)}
+				x="hiddenId"
+				xScale={scaleBand().padding(0.4)}
+				y="value"
+				yDomain={[0, null]}
+				yNice={4}
+				padding={{ left: 16, bottom: 24 }}
+				tooltip={{
+					mode: 'band',
+					onClick: ({ data }) => {
+						goto(`/org/${$page.params.id}/events/${data.id}`);
+						//alert('You clicked on:' + JSON.stringify(data, null, 2));
+					}
+				}}
+			>
+				<Svg>
+					<Axis placement="left" grid rule />
+					<Bars
+						radius={4}
+						strokeWidth={1}
+						class="fill-foreground stroke-none group-hover:fill-foreground transition-colors"
+					/>
+					<Highlight area>
+						<svelte:fragment slot="area" let:area>
+							<RectClipPath x={area.x} y={area.y} width={area.width} height={area.height} spring>
+								<Bars radius={4} strokeWidth={1} class="fill-primary" />
+							</RectClipPath>
+						</svelte:fragment>
+					</Highlight>
+				</Svg>
+				<NewTooltip header={(data) => data.label} let:data>
+					<TooltipItem label="Attendance Count" value={data.value} />
+				</NewTooltip>
+			</NewChart>
+		{:else}
+			<Bar
+				data={chartData}
+				on:click={(e) => console.log(e)}
+				options={{
+					maintainAspectRatio: false,
+					aspectRatio: 1,
+					scales: { x: { display: false }, y: { ticks: { stepSize: 1 } } }
+				}}
+			/>
+		{/if}
 	</div>
 {/if}
