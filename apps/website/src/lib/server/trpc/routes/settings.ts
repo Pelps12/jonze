@@ -214,5 +214,19 @@ export const settingsRouter = router({
 					website: input.websiteUrl
 				})
 				.where(eq(schema.organization.id, input.orgId));
+		}),
+	changeOrgLogo: adminProcedure
+		.input(
+			z.object({
+				cdnUrl: z.string()
+			})
+		)
+		.mutation(async ({ input }) => {
+			await db
+				.update(schema.organization)
+				.set({
+					logo: input.cdnUrl
+				})
+				.where(eq(schema.organization.id, input.orgId));
 		})
 });
