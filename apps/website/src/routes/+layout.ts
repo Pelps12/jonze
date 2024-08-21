@@ -5,13 +5,15 @@ export const load = async ({ parent, data }) => {
 	if (browser) {
 		posthog.init(PUBLIC_POSTHOG_KEY, {
 			api_host: PUBLIC_POSTHOG_HOST,
+			person_profiles: 'identified_only',
 			capture_pageview: false,
-			capture_pageleave: false
+			capture_pageleave: false,
+			opt_out_capturing_by_default: true
 		});
-		if (PUBLIC_URL.includes('localhost') || PUBLIC_URL.includes('dev')) {
+		posthog.opt_out_capturing();
+		if (!(PUBLIC_URL.includes('localhost') || PUBLIC_URL.includes('dev'))) {
 			console.log('IGNORED');
-			//@ts-ignore
-			posthog.opt_out_capturing();
+			posthog.opt_in_capturing();
 		}
 	}
 	return { user: data.user };
