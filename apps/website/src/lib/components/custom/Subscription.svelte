@@ -76,7 +76,7 @@
 				>
 
 				<ul role="list" class="mt-8 space-y-3 text-sm leading-6 text-neutral xl:mt-10">
-					<li class="flex gap-x-3 text-base">
+					<!-- 					<li class="flex gap-x-3 text-base">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							fill="none"
@@ -92,8 +92,8 @@
 								d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
 							></path>
 						</svg>Unlimited users
-					</li>
-					<li class="flex gap-x-3 text-base">
+					</li> -->
+					<!-- 					<li class="flex gap-x-3 text-base">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							fill="none"
@@ -122,7 +122,7 @@
 								</Tooltip.Content>
 							</Tooltip.Root>
 						</div>
-					</li>
+					</li> -->
 
 					<li class="flex gap-x-3 text-base">
 						<svg
@@ -158,6 +158,23 @@
 								d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
 							></path>
 						</svg>Remove Jonze branding
+					</li>
+					<li class="flex gap-x-3 text-base">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke-width="1.5"
+							stroke="currentColor"
+							aria-hidden="true"
+							class="h-6 w-5 flex-none text-primary"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+							></path>
+						</svg>Custom org themes
 					</li>
 
 					<li class="flex gap-x-3 text-base">
