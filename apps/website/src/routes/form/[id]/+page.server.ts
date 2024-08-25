@@ -5,9 +5,12 @@ import { and, eq, not } from '@repo/db';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { newId } from '@repo/db/utils/createId';
 import { objectsHaveSameKeys } from '$lib/server/helpers';
-import { dummyClient } from '$lib/server/posthog';
+import client, { dummyClient } from '$lib/server/posthog';
 import svix from '$lib/server/svix';
-import { PUBLIC_URL } from '$env/static/public';
+import { PUBLIC_ENVIRONMENT, PUBLIC_URL } from '$env/static/public';
+import { superValidate } from 'sveltekit-superforms';
+import { createDynamicSchema, type CustomForm } from '@repo/form-validation';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load: PageServerLoad = async ({ parent, url, locals, params }) => {
 	const form = await db.query.organizationForm.findFirst({
@@ -30,7 +33,30 @@ export const load: PageServerLoad = async ({ parent, url, locals, params }) => {
 		redirect(302, `/user/signup/${form.orgId}?callbackUrl=${url.toString()}`);
 	}
 
-	return { user: locals.user, form };
+	const isFeatureFlagEnabled = await client.isFeatureEnabled(
+		'flag-key',
+		'distinct_id_of_your_user'
+	);
+	const modifiedForm: CustomForm = form.form.map((element) => {
+		if (element.type === 'textarea' || element.type === 'text') {
+			return {
+				...element,
+				validator: {
+					required: true,
+					minLength: 2
+				}
+			};
+		}
+
+		return { ...element };
+	});
+
+	return {
+		user: locals.user,
+		form,
+		modifiedForm,
+		zodForm: await superValidate(zod(createDynamicSchema(modifiedForm)))
+	};
 };
 
 export const actions: Actions = {
@@ -45,6 +71,10 @@ export const actions: Actions = {
 		if (!locals.user) {
 			redirect(302, `/user/signup/${form?.orgId}?callbackUrl=${url.toString()}`);
 		}
+
+		const isFeatureFlagEnabled =
+			PUBLIC_ENVIRONMENT === 'dev' ||
+			(await client.isFeatureEnabled('new-form-validation', locals.user.id));
 
 		const member = await db.query.member.findFirst({
 			where: and(eq(schema.member.userId, locals.user.id), eq(schema.member.orgId, form.orgId)),
@@ -63,55 +93,79 @@ export const actions: Actions = {
 			redirect(302, `/user/signup/${form?.orgId}?callbackUrl=${url.toString()}`);
 		}
 
-		const formData = await request.formData();
-		for (const pair of formData.entries()) {
-			console.log(pair[0] + ', ' + pair[1]);
-		}
+		let response: {
+			label: string;
+			id: number;
+			response: string;
+		}[];
 
 		let responseId = newId('response');
 
-		const userResponseArray = Array.from(formData.entries()).filter(
-			(val) => typeof val[1] === 'string'
-		) as [string, string][];
-
-		type response = {
-			additionalFields: Record<string, string>;
-		};
-
-		console.log(userResponseArray);
-
-		const userResponse = userResponseArray.reduce<response>(
-			(acc, [key, value]) => {
-				if (key !== 'firstName' && key !== 'lastName') {
-					acc['additionalFields'][key] = value;
-				}
-				return acc;
-			},
-			{
-				additionalFields: {}
+		if (isFeatureFlagEnabled) {
+			const dynamicSchema = createDynamicSchema(form.form);
+			const zodForm = await superValidate(
+				{
+					request
+				},
+				zod(dynamicSchema)
+			);
+			if (!zodForm.valid) {
+				return fail(400, {
+					form
+				});
 			}
-		);
-		console.log(userResponse);
 
-		if (
-			!objectsHaveSameKeys(
-				userResponse.additionalFields,
-				form.form.reduce((o, key) => ({ ...o, [key.label]: 'OOP' }), {})
-			)
-		) {
-			return fail(400);
+			response = form.form.map((field) => ({
+				id: field.id,
+				label: field.label,
+				response: zodForm.data[field.id]
+			}));
+		} else {
+			const formData = await request.formData();
+			const userResponseArray = Array.from(formData.entries()).filter(
+				(val) => typeof val[1] === 'string'
+			) as [string, string][];
+
+			type response = {
+				additionalFields: Record<string, string>;
+			};
+
+			console.log(userResponseArray);
+
+			const userResponse = userResponseArray.reduce<response>(
+				(acc, [key, value]) => {
+					if (key !== 'firstName' && key !== 'lastName') {
+						acc['additionalFields'][key] = value;
+					}
+					return acc;
+				},
+				{
+					additionalFields: {}
+				}
+			);
+			console.log(userResponse);
+
+			if (
+				!objectsHaveSameKeys(
+					userResponse.additionalFields,
+					form.form.reduce((o, key) => ({ ...o, [key.label]: 'OOP' }), {})
+				)
+			) {
+				return fail(400);
+			}
+
+			response = Object.keys(userResponse.additionalFields).map((key, idx) => ({
+				id: idx,
+				label: key,
+				response: userResponse.additionalFields[key]
+			})) as any;
 		}
-
-		console.log(userResponse.additionalFields);
 
 		const [formResponse] = await db
 			.insert(schema.formResponse)
 			.values({
 				id: responseId,
-				response: Object.keys(userResponse.additionalFields).map((key) => ({
-					label: key,
-					response: userResponse.additionalFields[key]
-				})) as any,
+				response,
 				formId: form.id,
 				memId: member.id
 			})

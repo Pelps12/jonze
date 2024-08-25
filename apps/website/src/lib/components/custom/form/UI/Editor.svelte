@@ -9,7 +9,7 @@
 	import DropDownView from '$lib/components/custom/form/UI/DropDownView.svelte';
 	import TextAreaView from '$lib/components/custom/form/UI/TextAreaView.svelte';
 	import { page } from '$app/stores';
-	import type { CustomField, CustomForm } from '$lib/types/forms';
+	import type { CustomField, CustomForm } from '@repo/form-validation';
 	import { toast } from 'svelte-sonner';
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
@@ -21,6 +21,7 @@
 	import Preview from './Preview.svelte';
 	import { flip } from 'svelte/animate';
 	import { dndzone } from 'svelte-dnd-action';
+	import RadioView from './RadioView.svelte';
 	let open = $page.url.searchParams.has('preview');
 	const isDesktop = mediaQuery('(min-width: 768px)');
 	export let onSave: () => Promise<void>;
@@ -127,12 +128,7 @@
 					</Sheet.Close>
 
 					<Sheet.Close asChild let:builder>
-						<Button
-							builders={[builder]}
-							variant="secondary"
-							on:click={() => addHelper('radio')}
-							disabled
-						>
+						<Button builders={[builder]} variant="secondary" on:click={() => addHelper('radio')}>
 							<PlusCircle class="h-4 w-4 mr-2" />
 							<span>Options Field</span>
 						</Button>
@@ -214,7 +210,7 @@
 							{:else if element.type === 'textarea'}
 								<TextAreaView data={element} {id} />
 							{:else if element.type === 'radio'}
-								<div>COMING SOON</div>
+								<RadioView data={element} {id} />
 							{:else}
 								<DropDownView data={element} {id} />
 							{/if}

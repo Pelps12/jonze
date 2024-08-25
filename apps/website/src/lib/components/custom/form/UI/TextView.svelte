@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 	import { edit, deleteElement, form } from '$lib/stores/forms';
 	import FieldWrapper from './FieldWrapper.svelte';
-	import type { CustomTextField } from '$lib/types/forms';
+	import type { CustomTextField } from '@repo/form-validation';
 	export let id: number;
 	export let data: CustomTextField;
 	$: temporaryEdit = structuredClone(data);
