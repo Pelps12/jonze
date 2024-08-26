@@ -84,7 +84,7 @@ export const load: PageServerLoad = async () => {
 	});
 	const dynamicSchema = createDynamicSchema(customFields);
 	return {
-		modifiedForm: customFields,
+		modifiedForm,
 		form: await superValidate(zod(dynamicSchema))
 	};
 };

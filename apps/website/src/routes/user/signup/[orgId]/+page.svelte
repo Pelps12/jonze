@@ -45,6 +45,9 @@
 			<img src="/logo.svg" alt="Logo" class="h-4 w-4" />
 			Jonze
 		</div>
+		<Card.Header>
+			<Card.Title class="text-center">Member Onboarding</Card.Title>
+		</Card.Header>
 		{#if newFormFlagEnabled}
 			<div class="p-5">
 				<NewForm
@@ -71,9 +74,6 @@
 					};
 				}}
 			>
-				<Card.Header>
-					<Card.Title class="text-center">Member Onboarding</Card.Title>
-				</Card.Header>
 				<Card.Content>
 					<div class="grid w-full items-center gap-4 pb-4">
 						<div class="flex flex-col space-y-1.5">
