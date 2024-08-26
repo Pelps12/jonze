@@ -65,7 +65,7 @@
 	};
 </script>
 
-<FieldWrapper {handleDelete} {handleSave}>
+<FieldWrapper {handleDelete} {handleSave} {id}>
 	<div class="flex flex-col gap-2 relative">
 		<div class="flex flex-col space-y-1.5">
 			<Input

@@ -26,9 +26,13 @@
 	const handleDelete = () => {
 		deleteElement(id);
 	};
+
+	export let handleOpenSettings = (id: number) => {
+		console.log('UNIMPLEMENTED');
+	};
 </script>
 
-<FieldWrapper {handleDelete} {handleSave}>
+<FieldWrapper {handleDelete} {handleSave} {handleOpenSettings} {id}>
 	<div class="flex flex-col gap-2">
 		<div class="flex flex-col space-y-1.5">
 			<Input

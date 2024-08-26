@@ -5,7 +5,7 @@ import type {
 	CustomRadioGroupField,
 	CustomTextAreaField,
 	CustomTextField
-} from '$lib/types/forms';
+} from '@repo/form-validation';
 import { writable } from 'svelte/store';
 
 export const form = writable<CustomForm>([]);

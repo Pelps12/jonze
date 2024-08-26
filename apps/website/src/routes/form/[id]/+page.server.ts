@@ -38,7 +38,7 @@ export const load: PageServerLoad = async ({ parent, url, locals, params }) => {
 		'distinct_id_of_your_user'
 	);
 	const modifiedForm: CustomForm = form.form.map((element) => {
-		if (element.type === 'textarea' || element.type === 'text') {
+		if ((element.type === 'textarea' || element.type === 'text') && !element.validator) {
 			return {
 				...element,
 				validator: {
