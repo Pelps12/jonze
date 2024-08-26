@@ -1,4 +1,4 @@
-import { fail, type Actions, redirect, error } from '@sveltejs/kit';
+import { fail, type Actions, redirect, error, json } from '@sveltejs/kit';
 import db from '$lib/server/db';
 import { and, eq } from '@repo/db';
 import schema from '@repo/db/schema';
@@ -10,6 +10,9 @@ import type { PageServerLoad } from './$types';
 import posthog, { dummyClient } from '$lib/server/posthog';
 import svix from '$lib/server/svix';
 import { PUBLIC_URL } from '$env/static/public';
+import { createDynamicSchema, type CustomForm } from '@repo/form-validation';
+import { superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
 
 export const load: PageServerLoad = async ({ params, locals, url }) => {
 	const orgId = params.orgId;
@@ -68,20 +71,51 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 		error(404, 'Org Not Found');
 	}
 
+	const userInfoForm = org.forms[0];
+
+	const mergedForm: CustomForm = [
+		{
+			label: 'First Name',
+			id: 100001,
+			type: 'text',
+			placeholder: 'First Name',
+			validator: {
+				required: true
+			}
+		},
+		{
+			label: 'Last Name',
+			id: 100002,
+			type: 'text',
+			placeholder: 'Last Name',
+			validator: {
+				required: true
+			}
+		},
+		...(!!userInfoForm ? userInfoForm.form : [])
+	];
+
+	const dynamicSchema = createDynamicSchema(mergedForm);
+
 	return {
 		form: org.forms[0],
-		formName: org.forms[0]?.name,
 		defaultFields: {
 			firstName: locals.user.firstName,
 			lastName: locals.user.lastName
 		},
 		orgLogo: org.logo,
-		orgName: org.name
+		orgName: org.name,
+
+		mergedForm,
+		zodForm: await superValidate(
+			{ 100001: locals.user.firstName, 100002: locals.user.lastName },
+			zod(dynamicSchema)
+		)
 	};
 };
 
 export const actions: Actions = {
-	default: async ({ request, locals, url, params, getClientAddress, platform }) => {
+	formUpload: async ({ request, locals, url, params, getClientAddress, platform }) => {
 		const callbackUrl = url.searchParams.get('callbackUrl');
 		if (!locals.user) {
 			redirect(302, '/');
@@ -246,5 +280,161 @@ export const actions: Actions = {
 		const returnURL = callbackUrl ?? orgHomePageUrl ?? PUBLIC_URL;
 
 		redirect(302, returnURL);
+	},
+	newForm: async ({ request, locals, url, params, getClientAddress, platform }) => {
+		const callbackUrl = url.searchParams.get('callbackUrl');
+
+		if (!locals.user) {
+			redirect(302, '/');
+		}
+		const orgId = params.orgId;
+		if (!orgId) {
+			error(404, 'Org Not Found');
+		}
+		const orgForm = await db.query.organizationForm.findFirst({
+			where: and(
+				eq(schema.organizationForm.orgId, orgId),
+				eq(schema.organizationForm.name, 'User Info')
+			),
+			with: {
+				organization: {
+					columns: {
+						website: true
+					}
+				}
+			}
+		});
+
+		console.log('ORGFORM', orgForm);
+		const userInfoForm = orgForm;
+
+		const mergedForm: CustomForm = [
+			{
+				label: 'First Name',
+				id: 100001,
+				type: 'text',
+				placeholder: 'First Name',
+				validator: {
+					required: true
+				}
+			},
+			{
+				label: 'Last Name',
+				id: 100002,
+				type: 'text',
+				placeholder: 'Last Name',
+				validator: {
+					required: true
+				}
+			},
+			...(!!userInfoForm ? userInfoForm.form : [])
+		];
+		const dynamicSchema = createDynamicSchema(mergedForm);
+		const form = await superValidate({ request }, zod(dynamicSchema));
+		if (!form.valid) {
+			return fail(400, {
+				form
+			});
+		}
+
+		if (form.data[100001] || form.data[100002]) {
+			await workos.userManagement.updateUser({
+				userId: locals.user.id,
+				firstName: form.data[100001] ?? undefined,
+				lastName: form.data[100002] ?? undefined
+			});
+		}
+
+		//Create membership in WorkOS
+		const om = await workos.userManagement.createOrganizationMembership({
+			organizationId: orgId,
+			userId: locals.user.id
+		});
+
+		let responseId = null;
+		if (orgForm) {
+			responseId = newId('response');
+			const insertResult = await db.insert(schema.formResponse).values({
+				id: responseId,
+				formId: orgForm.id,
+				response: orgForm.form.map((field) => ({
+					id: field.id,
+					label: field.label,
+					response: form.data[field.id]
+				})),
+				memId: om.id
+			});
+			console.log(insertResult);
+		}
+
+		const defaultPlan = await db.query.plan.findFirst({
+			where: and(eq(schema.plan.orgId, orgId), eq(schema.plan.name, 'Default Plan')),
+			columns: {
+				id: true
+			}
+		});
+
+		//Add user to our database
+		const [result] = await db
+			.insert(schema.member)
+			.values({
+				id: om.id,
+				orgId: om.organizationId,
+				userId: om.userId,
+				role: 'MEMBER',
+				additionalInfoId: responseId
+			})
+			.returning()
+			.onConflictDoUpdate({
+				target: schema.member.id,
+				set: {
+					orgId: om.organizationId,
+					userId: om.userId,
+					additionalInfoId: responseId,
+					updatedAt: new Date()
+				}
+			});
+		if (defaultPlan) {
+			await db.insert(schema.membership).values({
+				planId: defaultPlan.id,
+				memId: result.id
+			});
+		}
+
+		const useragent = request.headers.get('user-agent');
+		dummyClient.capture({
+			distinctId: locals.user.id,
+			event: 'member added',
+			properties: {
+				$ip: getClientAddress(),
+				orgId: om.organizationId,
+				...(useragent && { $useragent: useragent })
+			}
+		});
+
+		platform?.context.waitUntil(
+			Promise.all([
+				dummyClient.flushAsync(),
+				svix.message.create(orgId, {
+					eventType: 'member.added',
+					payload: {
+						type: 'member.added',
+						data: {
+							...result
+						}
+					}
+				})
+			])
+		);
+
+		const orgHomePageUrl = orgForm?.organization.website;
+
+		const returnURL = callbackUrl ?? orgHomePageUrl ?? PUBLIC_URL;
+
+		redirect(302, returnURL);
+
+		return json({
+			name: 'HEYYYY'
+		});
 	}
 };

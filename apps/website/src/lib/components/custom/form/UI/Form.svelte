@@ -9,9 +9,12 @@
 	import * as Select from '$lib/components/ui/select';
 	import { onMount } from 'svelte';
 	import SelectItem from '$lib/components/ui/select/select-item.svelte';
-	import { derived } from 'svelte/store';
+	import { derived, get } from 'svelte/store';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
 	import type { OrgForm } from '@repo/db';
+	import { LoaderCircle } from 'lucide-svelte';
+
+	export let action = '';
 
 	export let dataForm: CustomForm;
 	export let schema: SuperValidated<
@@ -59,7 +62,7 @@
 	);
 </script>
 
-<form method="POST" use:enhance class="">
+<form method="POST" use:enhance class="" {action}>
 	{#each data.form as element}
 		{#if element.type === 'text'}
 			<Form.Field {form} name={element.id.toString()}>
@@ -137,6 +140,11 @@
 		{/if}
 	{/each}
 	<div class="flex justify-center p-5">
-		<Form.Button class="">{actionName}</Form.Button>
+		<Form.Button class="" disabled={get(form.submitting)}>
+			{#if get(form.submitting)}
+				<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+			{/if}
+			{actionName}</Form.Button
+		>
 	</div>
 </form>

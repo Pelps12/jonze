@@ -4,12 +4,26 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Form from '$lib/components/ui/form';
+
+	import NewForm from '$lib/components/custom/form/UI/Form.svelte';
 	import { formSchema, type FormSchema } from '../schema';
 	import type { ActionData } from './$types';
 	import Preview from '$lib/components/custom/form/UI/Preview.svelte';
 	import { applyAction, enhance } from '$app/forms';
 	import { LoaderCircle } from 'lucide-svelte';
+	import { onMount } from 'svelte';
+	import { PUBLIC_ENVIRONMENT } from '$env/static/public';
+	import posthog from 'posthog-js';
 	let formSubmitting = false;
+
+	let newFormFlagEnabled = PUBLIC_ENVIRONMENT === 'dev';
+	onMount(() => {
+		posthog.onFeatureFlags(() => {
+			if (posthog.isFeatureEnabled('new-form-validation')) {
+				newFormFlagEnabled = true;
+			}
+		});
+	});
 
 	export let data;
 	console.log(data.form);
@@ -31,59 +45,71 @@
 			<img src="/logo.svg" alt="Logo" class="h-4 w-4" />
 			Jonze
 		</div>
-		<form
-			method="post"
-			use:enhance={() => {
-				formSubmitting = true;
-				return async ({ result }) => {
-					// `result` is an `ActionResult` object
-					formSubmitting = false;
-					if (result.type === 'redirect') {
-						window.location.href = result.location;
-					} else {
-						await applyAction(result);
-					}
-				};
-			}}
-		>
-			<Card.Header>
-				<Card.Title class="text-center">Member Onboarding</Card.Title>
-			</Card.Header>
-			<Card.Content>
-				<div class="grid w-full items-center gap-4 pb-4">
-					<div class="flex flex-col space-y-1.5">
-						<Label for="firstName">First Name</Label>
-						<Input
-							id="firstName"
-							name="firstName"
-							placeholder="First Name"
-							required={true}
-							value={data.defaultFields.firstName}
-						/>
-					</div>
+		{#if newFormFlagEnabled}
+			<div class="p-5">
+				<NewForm
+					dataForm={data.mergedForm}
+					schema={data.zodForm}
+					action={'?/newForm'}
+					actionName="Sign Up"
+				/>
+			</div>
+		{:else}
+			<form
+				method="post"
+				action="?/formUpload"
+				use:enhance={() => {
+					formSubmitting = true;
+					return async ({ result }) => {
+						// `result` is an `ActionResult` object
+						formSubmitting = false;
+						if (result.type === 'redirect') {
+							window.location.href = result.location;
+						} else {
+							await applyAction(result);
+						}
+					};
+				}}
+			>
+				<Card.Header>
+					<Card.Title class="text-center">Member Onboarding</Card.Title>
+				</Card.Header>
+				<Card.Content>
+					<div class="grid w-full items-center gap-4 pb-4">
+						<div class="flex flex-col space-y-1.5">
+							<Label for="firstName">First Name</Label>
+							<Input
+								id="firstName"
+								name="firstName"
+								placeholder="First Name"
+								required={true}
+								value={data.defaultFields.firstName}
+							/>
+						</div>
 
-					<div class="flex flex-col space-y-1.5">
-						<Label for="lastName">Last Name</Label>
-						<Input
-							id="lastName"
-							name="lastName"
-							placeholder="Last Name"
-							required={true}
-							value={data.defaultFields.lastName}
-						/>
+						<div class="flex flex-col space-y-1.5">
+							<Label for="lastName">Last Name</Label>
+							<Input
+								id="lastName"
+								name="lastName"
+								placeholder="Last Name"
+								required={true}
+								value={data.defaultFields.lastName}
+							/>
+						</div>
 					</div>
-				</div>
-				{#if data.form}
-					<Preview form={data.form.form} userResponse={undefined} />
-				{/if}
-			</Card.Content>
-			<Card.Footer class="flex justify-end">
-				<Button type="submit" disabled={formSubmitting}>
-					{#if formSubmitting}
-						<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
-					{/if}Submit</Button
-				>
-			</Card.Footer>
-		</form>
+					{#if data.form}
+						<Preview form={data.form.form} userResponse={undefined} />
+					{/if}
+				</Card.Content>
+				<Card.Footer class="flex justify-end">
+					<Button type="submit" disabled={formSubmitting}>
+						{#if formSubmitting}
+							<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+						{/if}Submit</Button
+					>
+				</Card.Footer>
+			</form>
+		{/if}
 	</Card.Root>
 </div>
