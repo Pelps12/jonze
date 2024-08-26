@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
 	import * as Avatar from '$lib/components/ui/avatar';
-	import { PUBLIC_STRIPE_KEY } from '$env/static/public';
+	import { PUBLIC_ENVIRONMENT, PUBLIC_STRIPE_KEY } from '$env/static/public';
 	import type { PageData } from './$types';
 	import * as Resizable from '$lib/components/ui/resizable';
 	import { browser } from '$app/environment';
@@ -10,6 +10,17 @@
 	import { mode } from 'mode-watcher';
 
 	import { Chart, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
+	import {
+		Area,
+		Axis,
+		Chart as NewChart,
+		Highlight,
+		Svg,
+		Tooltip as NewTooltip,
+		TooltipItem,
+		Bars,
+		RectClipPath
+	} from 'layerchart';
 	import { Bar } from 'svelte-chartjs';
 	import { derived } from 'svelte/store';
 
@@ -19,6 +30,19 @@
 	import { twJoin } from 'tailwind-merge';
 	import { trpc } from '$lib/client/trpc';
 	import { ChevronRight, RefreshCw } from 'lucide-svelte';
+	import posthog from 'posthog-js';
+	import { scaleBand, scalePoint } from 'd3-scale';
+	import { format } from 'date-fns';
+	import { goto } from '$app/navigation';
+
+	let newGraphFlagEnabled = PUBLIC_ENVIRONMENT === 'dev';
+	onMount(() => {
+		posthog.onFeatureFlags(() => {
+			if (posthog.isFeatureEnabled('new-chart-component')) {
+				newGraphFlagEnabled = true;
+			}
+		});
+	});
 
 	export let layout: number[] | undefined = undefined;
 
@@ -76,6 +100,18 @@
 			}
 		]
 	};
+
+	const mergeArrays = (ar1: any[], ar2: any[], ar3: any[]) => {
+		console.log(
+			ar1.map(function (x, i) {
+				return { value: x, label: ar2[i] };
+			})
+		);
+		return ar1.map(function (x, i) {
+			return { value: x, label: ar2[i], id: ar3[i], hiddenId: i };
+		});
+	};
+
 	let transactionHistoryVisible: 'not_fetched' | 'fetched' | 'attached' = 'not_fetched';
 
 	//m
@@ -171,42 +207,69 @@
 	</div> -->
 		{/if}
 
-		<Resizable.PaneGroup
-			direction="horizontal"
-			class={twJoin(
-				[' rounded-lg border max-h-[30rem]'],
-				data.organization.events.length == 0 &&
-					data.organization.members.length == 1 &&
-					'opacity-25 grayscale-[40%]'
-			)}
-			{onLayoutChange}
-		>
-			<Resizable.Pane
-				defaultSize={layout ? layout[0] : 60}
-				collapsedSize={0}
-				collapsible={true}
-				minSize={50}
-				onResize={(e) => Chart.getChart('')?.resize(10, 10)}
-			>
-				<Card.Root class=" m-2">
-					<Card.Header class="p-4 relative">
-						<div class="grid gap-4">
-							<Card.Title class="text-lg font-semibold">Event Metrics</Card.Title>
-						</div>
+		<div class="grid md:grid-cols-2 xl:grid-cols-3">
+			<Card.Root class=" m-2 xl:col-span-2 h-[40vh] md:h-auto">
+				<Card.Header class="p-4 relative">
+					<div class="grid gap-4">
+						<Card.Title class="text-lg font-semibold">Event Metrics</Card.Title>
+					</div>
 
-						<a
-							class="absolute top-0 right-0 p-3 text-sm flex items-center"
-							href={`/org/${$page.params.id}/events?view=graph`}
-							on:mouseenter={() =>
-								utils.eventRouter.getEvents.prefetch({
-									orgId: $page.params.id
-								})}
+					<a
+						class="absolute top-0 right-0 p-3 text-sm flex items-center"
+						href={`/org/${$page.params.id}/events?view=graph`}
+						on:mouseenter={() =>
+							utils.eventRouter.getEvents.prefetch({
+								orgId: $page.params.id
+							})}
+					>
+						<p>See More</p>
+						<ChevronRight class="ml-2 h-4 w-4" />
+					</a>
+				</Card.Header>
+				<Card.Content class="grid gap-4 h-[90%]">
+					{#if newGraphFlagEnabled}
+						<NewChart
+							data={mergeArrays(data.chartData.data, data.chartData.labels, data.chartData.ids)}
+							x="hiddenId"
+							xScale={scaleBand().padding(0.4)}
+							y="value"
+							yDomain={[0, null]}
+							yNice={4}
+							padding={{ left: 16, bottom: 24 }}
+							tooltip={{
+								mode: 'band',
+								onClick: ({ data }) => {
+									goto(`/org/${$page.params.id}/events/${data.id}`);
+									//alert('You clicked on:' + JSON.stringify(data, null, 2));
+								}
+							}}
 						>
-							<p>See More</p>
-							<ChevronRight class="ml-2 h-4 w-4" />
-						</a>
-					</Card.Header>
-					<Card.Content class="grid gap-4 h-auto">
+							<Svg>
+								<Axis placement="left" grid rule />
+								<Bars
+									radius={4}
+									strokeWidth={1}
+									class="fill-foreground stroke-none group-hover:fill-foreground transition-colors"
+								/>
+								<Highlight area>
+									<svelte:fragment slot="area" let:area>
+										<RectClipPath
+											x={area.x}
+											y={area.y}
+											width={area.width}
+											height={area.height}
+											spring
+										>
+											<Bars radius={4} strokeWidth={1} class="fill-primary" />
+										</RectClipPath>
+									</svelte:fragment>
+								</Highlight>
+							</Svg>
+							<NewTooltip header={(data) => data.label} let:data>
+								<TooltipItem label="Attendance Count" value={data.value} />
+							</NewTooltip>
+						</NewChart>
+					{:else}
 						<Bar
 							data={chartData}
 							on:click={(e) => console.log(e)}
@@ -216,70 +279,63 @@
 								scales: { x: { display: false }, y: { ticks: { stepSize: 1 } } }
 							}}
 						/>
-					</Card.Content>
-				</Card.Root>
-			</Resizable.Pane>
-			<Resizable.Handle withHandle />
-			<Resizable.Pane
-				defaultSize={layout ? layout[0] : 40}
-				minSize={30}
-				collapsedSize={0}
-				collapsible={true}
-			>
-				<Card.Root class=" m-2 h-auto">
-					<Card.Header class="p-4 relative">
-						<div class="grid gap-4">
-							<Card.Title class="text-lg font-semibold">Recent Members</Card.Title>
-							<Card.Description class="text-sm">Recent additions to your org</Card.Description>
-						</div>
+					{/if}
+				</Card.Content>
+			</Card.Root>
 
+			<Card.Root class=" m-2 h-auto">
+				<Card.Header class="p-4 relative">
+					<div class="grid gap-4">
+						<Card.Title class="text-lg font-semibold">Recent Members</Card.Title>
+						<Card.Description class="text-sm">Recent additions to your org</Card.Description>
+					</div>
+
+					<a
+						class="absolute top-0 right-0 p-3 text-sm flex items-center"
+						href={`/org/${$page.params.id}/members`}
+						on:mouseenter={() =>
+							utils.eventRouter.getEvents.prefetch({
+								orgId: $page.params.id
+							})}
+					>
+						<p>See More</p>
+						<ChevronRight class="ml-2 h-4 w-4" />
+					</a>
+				</Card.Header>
+				<Card.Content class="grid gap-4">
+					{#each data.organization.members as member}
 						<a
-							class="absolute top-0 right-0 p-3 text-sm flex items-center"
-							href={`/org/${$page.params.id}/members`}
-							on:mouseenter={() =>
-								utils.eventRouter.getEvents.prefetch({
-									orgId: $page.params.id
-								})}
+							class="relative flex items-start space-x-4"
+							href={`/org/${$page.params.id}/members/${member.id}`}
 						>
-							<p>See More</p>
-							<ChevronRight class="ml-2 h-4 w-4" />
-						</a>
-					</Card.Header>
-					<Card.Content class="grid gap-4">
-						{#each data.organization.members as member}
-							<a
-								class="relative flex items-start space-x-4"
-								href={`/org/${$page.params.id}/members/${member.id}`}
-							>
-								<Avatar.Root class="w-10 h-10 border">
-									<Avatar.Image src={member.user.profilePictureUrl} />
-									<Avatar.Fallback
-										>{getInitials(
-											formatName(member.user.firstName, member.user.lastName)
-										)}</Avatar.Fallback
-									>
-								</Avatar.Root>
-								<div class="text-sm grid gap-1">
-									<Card.Title class="text-base font-semibold">
-										{formatName(member.user.firstName, member.user.lastName)}
-									</Card.Title>
-									<Card.Description class="text-sm">
-										{member.user.email}
-									</Card.Description>
-								</div>
+							<Avatar.Root class="w-10 h-10 border">
+								<Avatar.Image src={member.user.profilePictureUrl} />
+								<Avatar.Fallback
+									>{getInitials(
+										formatName(member.user.firstName, member.user.lastName)
+									)}</Avatar.Fallback
+								>
+							</Avatar.Root>
+							<div class="text-sm grid gap-1">
+								<Card.Title class="text-base font-semibold">
+									{formatName(member.user.firstName, member.user.lastName)}
+								</Card.Title>
+								<Card.Description class="text-sm">
+									{member.user.email}
+								</Card.Description>
+							</div>
 
-								<div class="ml-auto absolute right-0 text-sm self-center">
-									{member.createdAt.toLocaleString('en-US', {
-										month: 'short',
-										day: 'numeric'
-									})}
-								</div>
-							</a>
-						{/each}
-					</Card.Content>
-				</Card.Root>
-			</Resizable.Pane>
-		</Resizable.PaneGroup>
+							<div class="ml-auto absolute right-0 text-sm self-center">
+								{member.createdAt.toLocaleString('en-US', {
+									month: 'short',
+									day: 'numeric'
+								})}
+							</div>
+						</a>
+					{/each}
+				</Card.Content>
+			</Card.Root>
+		</div>
 	</div>
 {/if}
 

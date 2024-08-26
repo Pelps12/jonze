@@ -3,7 +3,7 @@ import { fontFamily } from 'tailwindcss/defaultTheme';
 /** @type {import('tailwindcss').Config} */
 const config = {
 	darkMode: ['class'],
-	content: ['./src/**/*.{html,js,svelte,ts}'],
+	content: ['./src/**/*.{html,js,svelte,ts}', './node_modules/layerchart/**/*.{svelte,js}'],
 	safelist: ['dark'],
 
 	theme: {
@@ -48,6 +48,13 @@ const config = {
 				card: {
 					DEFAULT: 'hsl(var(--card) / <alpha-value>)',
 					foreground: 'hsl(var(--card-foreground) / <alpha-value>)'
+				},
+				surface: {
+					content: 'hsl(var(--card-foreground) / <alpha-value>)',
+					100: 'hsl(var(--background) / <alpha-value>)',
+					200: 'hsl(var(---muted) / <alpha-value>)',
+					// not sure what color maps here (should be darker than 200).  Could add a new color to `app.css`
+					300: 'hsl(var(--background) / <alpha-value>)'
 				}
 			},
 			borderRadius: {

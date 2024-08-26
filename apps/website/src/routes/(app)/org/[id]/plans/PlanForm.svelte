@@ -9,40 +9,42 @@
 		numberProxy
 	} from 'sveltekit-superforms';
 	import { Input } from '$lib/components/ui/input';
-	import { client } from '$lib/client/uploadcare';
-	import { parseISO, format } from 'date-fns';
-	import enUS from 'date-fns/locale/en-US';
-	import { formatInTimeZone } from 'date-fns-tz';
-	import type { OrgForm, Event as dbEvent } from '@repo/db/types';
-	import { onMount, tick } from 'svelte';
-	import { browser } from '$app/environment';
+
+	import { tick } from 'svelte';
 	import { zodClient } from 'sveltekit-superforms/adapters';
-	import { Textarea } from '$lib/components/ui/textarea';
 	import * as Select from '$lib/components/ui/select';
 
-	import { getAttrs } from 'bits-ui';
-	import { cn } from '$lib/utils';
 	import { CalendarIcon, Check, ChevronsUpDown, LoaderCircle } from 'lucide-svelte';
-	import type { Writable } from 'svelte/store';
 	import {
 		CalendarDate,
 		DateFormatter,
 		getLocalTimeZone,
-		parseDate,
-		toCalendarDate,
 		today,
 		type DateValue
 	} from '@internationalized/date';
 	import * as Popover from '$lib/components/ui/popover';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import { Calendar } from '$lib/components/ui/calendar';
-	import Error from '../+error.svelte';
 	import { trpc } from '$lib/client/trpc';
 	import { page } from '$app/stores';
+	import posthog from 'posthog-js';
+	import { cn } from '$lib/utils';
+	import * as Command from '$lib/components/ui/command';
+	import type { RouterOutput } from '$lib/server/trpc/routes';
 
 	export let data: SuperValidated<Infer<PlanCreationSchema>>;
+	export let forms: RouterOutput['planRouter']['getPlans']['availableForms'];
 	export let actionType: 'create' | 'update' = 'create';
 	export let closeForm: () => void;
+
+	let membershipFormFlagEnabled = false;
+
+	posthog.onFeatureFlags(() => {
+		if (posthog.isFeatureEnabled('membership-forms')) {
+			membershipFormFlagEnabled = true;
+		}
+	});
+
 	const planCreationMutation = trpc().planRouter.createPlan.createMutation();
 	const utils = trpc().createUtils();
 
@@ -64,7 +66,7 @@
 		}
 	});
 
-	const { form: formData, enhance, constraints } = form;
+	const { form: formData, enhance } = form;
 
 	let open = false;
 
@@ -74,7 +76,6 @@
 			document.getElementById(triggerId)?.focus();
 		});
 	}
-	const startProxy = dateProxy(form, 'start', { format: 'date' });
 	const amountProxy = numberProxy(form, 'amount', { delimiter: '.' });
 
 	$: selectedInterval = {
@@ -176,7 +177,7 @@
 		</Form.Control>
 	</Form.Field>
 
-	<Form.Field {form} name="interval">
+	<Form.Field {form} name="interval" class="mb-2">
 		<Form.Control let:attrs>
 			<Form.Label>Duration</Form.Label>
 			<Select.Root
@@ -199,6 +200,54 @@
 
 		<Form.FieldErrors />
 	</Form.Field>
+
+	{#if membershipFormFlagEnabled}
+		<Form.Field {form} name="formId" class="flex flex-col mb-2">
+			<Popover.Root bind:open let:ids>
+				<Form.Control let:attrs>
+					<Form.Label>Membership Form (Optional)</Form.Label>
+					<Popover.Trigger
+						class={cn(
+							buttonVariants({ variant: 'outline' }),
+							'w-[200px] justify-between',
+							!$formData.formId && 'text-muted-foreground'
+						)}
+						role="combobox"
+						{...attrs}
+					>
+						{forms?.find((f) => f.id === $formData.formId)?.name ?? 'Select form'}
+						<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+					</Popover.Trigger>
+					<input hidden value={$formData.formId} name={attrs.name} />
+				</Form.Control>
+				<Popover.Content class="w-[200px] p-0">
+					<Command.Root>
+						<Command.Input autofocus placeholder="Search form..." class="h-9" />
+						<Command.Empty>No form found.</Command.Empty>
+						<Command.Group>
+							{#each forms as userForm}
+								<Command.Item
+									value={userForm.id}
+									onSelect={() => {
+										$formData.formId = userForm.id;
+										closeAndFocusTrigger(ids.trigger);
+									}}
+								>
+									{userForm.name}
+									<Check
+										class={cn(
+											'ml-auto h-4 w-4',
+											userForm.id !== $formData.formId && 'text-transparent'
+										)}
+									/>
+								</Command.Item>
+							{/each}
+						</Command.Group>
+					</Command.Root>
+				</Popover.Content>
+			</Popover.Root>
+		</Form.Field>
+	{/if}
 
 	<Form.Button class="w-full" disabled={$planCreationMutation.isPending}
 		>{#if $planCreationMutation.isPending}

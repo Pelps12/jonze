@@ -72,7 +72,11 @@
 							<Dialog.Title>Create your Plan</Dialog.Title>
 							<Dialog.Description>Enables tiers for memberships</Dialog.Description>
 						</Dialog.Header>
-						<PlanForm data={$result.data.form} closeForm={() => ($newFormOpen = false)} />
+						<PlanForm
+							data={$result.data.form}
+							closeForm={() => ($newFormOpen = false)}
+							forms={$result.data.availableForms}
+						/>
 					</Dialog.Content>
 				</Dialog.Root>
 			{:else}
@@ -85,7 +89,11 @@
 							<Drawer.Title>Create your Plan</Drawer.Title>
 							<Drawer.Description>Enables tiers for memberships</Drawer.Description>
 						</Drawer.Header>
-						<PlanForm data={$result.data.form} closeForm={() => ($newFormOpen = false)} />
+						<PlanForm
+							data={$result.data.form}
+							closeForm={() => ($newFormOpen = false)}
+							forms={$result.data.availableForms}
+						/>
 						<Drawer.Footer class="pt-2">
 							<Drawer.Close asChild let:builder>
 								<Button variant="outline" builders={[builder]}>Cancel</Button>

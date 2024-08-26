@@ -54,7 +54,8 @@ export const homePageRouter = router({
 
 		const chartData = {
 			labels: organization.events.map((event) => event.name).reverse(),
-			data: organization.events.map((event) => event.attendances.length).reverse()
+			data: organization.events.map((event) => event.attendances.length).reverse(),
+			ids: organization.events.map((event) => event.id).reverse()
 		};
 
 		return { organization, chartData, clientSecret: undefined };

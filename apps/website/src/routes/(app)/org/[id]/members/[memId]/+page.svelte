@@ -69,7 +69,7 @@
 							</Dialog.Trigger>
 							<Dialog.Content class="sm:max-w-[425px]">
 								<Dialog.Header>
-									<Dialog.Title>Change user's plan</Dialog.Title>
+									<Dialog.Title>Change user's tags</Dialog.Title>
 									<Dialog.Description>Update users membership</Dialog.Description>
 								</Dialog.Header>
 
@@ -93,7 +93,7 @@
 							</Drawer.Trigger>
 							<Drawer.Content class="p-4">
 								<Dialog.Header>
-									<Dialog.Title>Change user's plan</Dialog.Title>
+									<Dialog.Title>Change user's tags</Dialog.Title>
 									<Dialog.Description>Update users membership</Dialog.Description>
 								</Dialog.Header>
 
