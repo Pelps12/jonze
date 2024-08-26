@@ -247,7 +247,7 @@
 							{#if element?.type === 'text'}
 								<TextView data={element} {id} {handleOpenSettings} />
 							{:else if element.type === 'textarea'}
-								<TextAreaView data={element} {id} />
+								<TextAreaView data={element} {id} {handleOpenSettings} />
 							{:else if element.type === 'radio'}
 								<RadioView data={element} {id} />
 							{:else}

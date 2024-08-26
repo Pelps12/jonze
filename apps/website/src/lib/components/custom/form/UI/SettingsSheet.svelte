@@ -8,7 +8,7 @@
 	import { edit } from '$lib/stores/forms';
 	import type { ArrayElement } from '$lib/types/misc';
 	import type { CustomField, CustomForm } from '@repo/form-validation';
-	import { Checkbox } from 'bits-ui';
+	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { onMount } from 'svelte';
 
 	export let element: CustomField;
@@ -52,14 +52,20 @@
 					class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 					>Required
 				</Label>
-				<Checkbox.Root>
-					<Checkbox.Indicator />
-					<Checkbox.Input />
-				</Checkbox.Root>
+				<Checkbox
+					id="terms"
+					checked={temporaryEdit.validator.required}
+					onCheckedChange={(e) =>
+						temporaryEdit.validator &&
+						typeof e === 'boolean' &&
+						handleChange({
+							validator: { ...temporaryEdit.validator, required: e }
+						})}
+				/>
 			</div>
 		{/if}
 
-		{#if temporaryEdit.type === 'text' && temporaryEdit.validator?.minLength}
+		{#if temporaryEdit.validator?.minLength}
 			<div class="flex w-full max-w-sm flex-col gap-1.5">
 				<Label for="minLength">Min Length</Label>
 				<Input
