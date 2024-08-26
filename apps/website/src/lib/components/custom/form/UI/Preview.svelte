@@ -2,9 +2,10 @@
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
+	import * as RadioGroup from '$lib/components/ui/radio-group';
 	import * as Select from '$lib/components/ui/select';
 	import { Textarea } from '$lib/components/ui/textarea';
-	import type { CustomForm } from '$lib/types/forms';
+	import type { CustomForm } from '@repo/form-validation';
 	export let form: CustomForm;
 	export let userResponse: Record<string, string> | undefined;
 	$: userResponse, console.log(userResponse);
@@ -38,6 +39,16 @@
 					name={element.label}
 					required
 				/>
+			{:else if element.type === 'radio'}
+				<Label for="framework">{element.label}</Label>
+				<RadioGroup.Root required={true}>
+					{#each element.options as option}
+						<div class="flex items-center space-x-2">
+							<RadioGroup.Item value={option.label} id={option.label} />
+							<Label for={option.label}>{option.label}</Label>
+						</div>
+					{/each}
+				</RadioGroup.Root>
 			{:else if element.type === 'dropdown'}
 				<Label for="framework">{element.label}</Label>
 				{#if !!userResponse}

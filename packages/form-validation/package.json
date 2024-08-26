@@ -1,0 +1,16 @@
+{
+	"name": "@repo/form-validation",
+	"version": "0.0.0",
+	"description": "",
+	"main": "./index.ts",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"libphonenumber-js": "^1.11.7",
+		"zod": "^3.22.4"
+	}
+}

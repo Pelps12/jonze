@@ -35,30 +35,6 @@ export const adminProcedure = t.procedure
 		if (valid) {
 			console.log('VALID ACCESS TOKEN');
 			ctx.event.locals.user = verifiedSessionUser;
-		} else {
-			console.log('REFRESHING TOKEN');
-			const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-				await workos.userManagement.authenticateWithRefreshToken({
-					clientId: WORKOS_CLIENT_ID,
-					refreshToken: refreshToken
-				});
-
-			const newSessionToken = await sealData(
-				{ ...verifiedSessionUser, newAccessToken, newRefreshToken },
-				{
-					password: JWT_SECRET_KEY
-				}
-			);
-
-			ctx.event.cookies.set('workos-session', newSessionToken, {
-				path: '/',
-				httpOnly: true,
-				secure: true,
-				sameSite: 'lax',
-				maxAge: 30 * 24 * 60 * 60 // 30 days in seconds
-			});
-
-			ctx.event.locals.user = verifiedSessionUser;
 		}
 
 		const user = ctx.event.locals.user;

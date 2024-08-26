@@ -8,12 +8,23 @@
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { PUBLIC_URL } from '$env/static/public';
+	import { PUBLIC_ENVIRONMENT, PUBLIC_URL } from '$env/static/public';
 	import { applyAction, enhance } from '$app/forms';
 	import { LoaderCircle } from 'lucide-svelte';
+	import posthog from 'posthog-js';
+	import Form from '$lib/components/custom/form/UI/Form.svelte';
 	export let data;
 	let filled = data.formFilled;
 	let formSubmitting = false;
+
+	let newFormFlagEnabled = PUBLIC_ENVIRONMENT === 'dev';
+	onMount(() => {
+		posthog.onFeatureFlags(() => {
+			if (posthog.isFeatureEnabled('new-form-validation')) {
+				newFormFlagEnabled = true;
+			}
+		});
+	});
 
 	const invalid = data.formFilled || new Date() > data.event.end || new Date() < data.event.start;
 
@@ -65,6 +76,7 @@
 	</div>
 	<form
 		method="post"
+		action="?/attendance"
 		use:enhance={() => {
 			formSubmitting = true;
 			return async ({ result }) => {
@@ -107,18 +119,30 @@
 				<Card.Title>Attendance for "{data.event.name}"</Card.Title>
 			</Card.Header>
 			<Card.Content>
-				{#if data.event.form}
-					<Preview form={data.event.form.form} userResponse={undefined} />
+				{#if newFormFlagEnabled}
+					{#if data.zodForm}
+						<Form
+							schema={data.zodForm}
+							dataForm={data.event.form?.form ?? []}
+							actionName="Mark Attendance"
+							action="?/newAttendance"
+						/>
+					{/if}
+				{:else}
+					{#if data.event.form}
+						<Preview form={data.event.form.form} userResponse={undefined} />
+					{/if}
+
+					<Card.Footer class="flex justify-center">
+						<Button disabled={invalid || formSubmitting} type="submit">
+							{#if formSubmitting}
+								<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
+							{/if}
+							Mark Attendance</Button
+						>
+					</Card.Footer>
 				{/if}
 			</Card.Content>
-			<Card.Footer class="flex justify-center">
-				<Button disabled={invalid || formSubmitting} type="submit">
-					{#if formSubmitting}
-						<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
-					{/if}
-					Mark Attendance</Button
-				>
-			</Card.Footer>
 		</Card.Root>
 	</form>
 </div>

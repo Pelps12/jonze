@@ -4,10 +4,14 @@
 	import { onMount } from 'svelte';
 	import { edit, deleteElement, form } from '$lib/stores/forms';
 	import FieldWrapper from './FieldWrapper.svelte';
-	import type { CustomTextAreaField } from '$lib/types/forms';
+	import type { CustomTextAreaField } from '@repo/form-validation';
 	import { Textarea } from '$lib/components/ui/textarea';
 	export let id: number;
 	export let data: CustomTextAreaField;
+	export let handleOpenSettings = (id: number) => {
+		console.log('UNIMPLEMENTED');
+	};
+
 	$: temporaryEdit = structuredClone(data);
 
 	onMount(() => {
@@ -28,7 +32,7 @@
 	};
 </script>
 
-<FieldWrapper {handleDelete} {handleSave}>
+<FieldWrapper {handleDelete} {handleSave} {handleOpenSettings} {id}>
 	<div class="flex flex-col gap-2">
 		<div class="flex flex-col space-y-1.5">
 			<Input

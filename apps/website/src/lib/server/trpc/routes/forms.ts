@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { adminProcedure, router } from '..';
-import { ZodCustomForm, type CustomForm } from '$lib/types/forms';
+import { ZodCustomForm, type CustomForm } from '@repo/form-validation';
 import schema from '@repo/db/schema';
 import { dummyClient } from '$lib/server/posthog';
 import { TRPCError } from '@trpc/server';

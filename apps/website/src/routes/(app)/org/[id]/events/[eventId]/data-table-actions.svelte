@@ -5,8 +5,7 @@
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Label } from '$lib/components/ui/label';
 	import { Input } from '$lib/components/ui/input';
-	import Preview from '$lib/components/custom/form/UI/Preview.svelte';
-	import type { CustomForm } from '$lib/types/forms';
+
 	import { page } from '$app/stores';
 	export let memId: string | null;
 </script>
