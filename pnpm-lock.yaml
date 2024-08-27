@@ -91,6 +91,9 @@ importers:
       '@planetscale/database':
         specifier: ^1.16.0
         version: 1.18.0
+      '@repo/form-validation':
+        specifier: workspace:^0.0.0
+        version: link:../../packages/form-validation
       '@stripe/connect-js':
         specifier: ^3.3.6
         version: 3.3.12
@@ -384,6 +387,9 @@ importers:
       '@repo/eslint-config':
         specifier: ^0.0.0
         version: link:../config-eslint
+      '@repo/form-validation':
+        specifier: ^0.0.0
+        version: link:../form-validation
       '@types/node':
         specifier: ^18.19.17
         version: 18.19.43
@@ -396,6 +402,15 @@ importers:
       typescript:
         specifier: ^5.0.2
         version: 5.5.4
+
+  packages/form-validation:
+    dependencies:
+      libphonenumber-js:
+        specifier: ^1.11.7
+        version: 1.11.7
+      zod:
+        specifier: ^3.22.4
+        version: 3.23.8
 
   packages/webhooks: {}
 
@@ -4171,6 +4186,9 @@ packages:
   levn@0.4.1:
     resolution: {integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ==}
     engines: {node: '>= 0.8.0'}
+
+  libphonenumber-js@1.11.7:
+    resolution: {integrity: sha512-x2xON4/Qg2bRIS11KIN9yCNYUjhtiEjNyptjX0mX+pyKHecxuJVLIpfX1lq9ZD6CrC/rB+y4GBi18c6CEcUR+A==}
 
   lilconfig@2.1.0:
     resolution: {integrity: sha512-utWOt/GHzuUxnLKxB6dk81RoOeoNeHgbrXiuGk4yyF5qlRz+iIVWu56E2fqGHFrXz0QNUhLB/8nKqvRH66JKGQ==}
@@ -10132,6 +10150,8 @@ snapshots:
     dependencies:
       prelude-ls: 1.2.1
       type-check: 0.4.0
+
+  libphonenumber-js@1.11.7: {}
 
   lilconfig@2.1.0: {}
 

@@ -1,7 +1,7 @@
 import { timestamp, json, pgTable, varchar } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm/sql';
 import { newId } from '../utils/createId';
-import type { CustomForm } from '$lib/types/forms';
+import type { CustomForm } from '@repo/form-validation';
 import { relations } from 'drizzle-orm';
 import { organization } from './organization';
 import { formResponse } from './formResponse';

@@ -48,6 +48,7 @@
 		"@fullcalendar/timegrid": "^6.1.14",
 		"@internationalized/date": "^3.5.2",
 		"@planetscale/database": "^1.16.0",
+		"@repo/form-validation": "workspace:^0.0.0",
 		"@stripe/connect-js": "^3.3.6",
 		"@stripe/stripe-js": "^3.1.0",
 		"@sveltejs/adapter-cloudflare": "^4.1.0",

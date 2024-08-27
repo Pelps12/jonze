@@ -8,8 +8,9 @@
 	import TextView from '$lib/components/custom/form/UI/TextView.svelte';
 	import DropDownView from '$lib/components/custom/form/UI/DropDownView.svelte';
 	import TextAreaView from '$lib/components/custom/form/UI/TextAreaView.svelte';
+	import SettingsSheet from './SettingsSheet.svelte';
 	import { page } from '$app/stores';
-	import type { CustomField, CustomForm } from '$lib/types/forms';
+	import type { CustomField, CustomForm } from '@repo/form-validation';
 	import { toast } from 'svelte-sonner';
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
@@ -17,16 +18,22 @@
 	import { Input } from '$lib/components/ui/input';
 	import * as Drawer from '$lib/components/ui/drawer';
 	import * as Dialog from '$lib/components/ui/dialog';
+
 	import { mediaQuery } from 'svelte-legos';
 	import Preview from './Preview.svelte';
 	import { flip } from 'svelte/animate';
 	import { dndzone } from 'svelte-dnd-action';
+	import RadioView from './RadioView.svelte';
+	import { writable } from 'svelte/store';
+	import type { ArrayElement } from '$lib/types/misc';
 	let open = $page.url.searchParams.has('preview');
 	const isDesktop = mediaQuery('(min-width: 768px)');
 	export let onSave: () => Promise<void>;
 
 	export let initialForm: CustomForm | undefined;
 	export let initialFormName: string | undefined;
+
+	let settingsSheetOpen = false;
 
 	onMount(() => {
 		if (initialForm) {
@@ -58,7 +65,12 @@
 					id: $form.length,
 					label: 'Label',
 					type: 'text',
-					placeholder: 'Placeholder'
+					placeholder: 'Placeholder',
+					validator: {
+						minLength: 2,
+						maxLength: 50,
+						required: true
+					}
 				});
 				break;
 			case 'textarea':
@@ -66,7 +78,11 @@
 					id: $form.length,
 					label: 'Label',
 					type: 'textarea',
-					placeholder: 'Placeholder'
+					placeholder: 'Placeholder',
+					validator: {
+						minLength: 5,
+						required: true
+					}
 				});
 				break;
 			case 'radio':
@@ -94,6 +110,15 @@
 				});
 				break;
 		}
+	};
+
+	let selectedElement: ArrayElement<CustomForm> | undefined = undefined;
+
+	const handleOpenSettings = (id: number) => {
+		settingsSheetOpen = true;
+		console.log(id);
+		selectedElement = $form.find((element) => element.id === id);
+		console.log(selectedElement);
 	};
 </script>
 
@@ -127,12 +152,7 @@
 					</Sheet.Close>
 
 					<Sheet.Close asChild let:builder>
-						<Button
-							builders={[builder]}
-							variant="secondary"
-							on:click={() => addHelper('radio')}
-							disabled
-						>
+						<Button builders={[builder]} variant="secondary" on:click={() => addHelper('radio')}>
 							<PlusCircle class="h-4 w-4 mr-2" />
 							<span>Options Field</span>
 						</Button>
@@ -147,6 +167,21 @@
 				</div>
 			</Sheet.Content>
 		</Sheet.Root>
+
+		<Sheet.Root bind:open={settingsSheetOpen}>
+			{#if selectedElement}
+				<Sheet.Content side="right">
+					<Sheet.Header>
+						<Sheet.Title>Settings</Sheet.Title>
+						<Sheet.Description>Edit the settings for {selectedElement.label}</Sheet.Description>
+					</Sheet.Header>
+					<div class="flex flex-col gap-2">
+						<SettingsSheet element={selectedElement} />
+					</div>
+				</Sheet.Content>
+			{/if}
+		</Sheet.Root>
+
 		{#if $isDesktop}
 			<Dialog.Root bind:open>
 				<Dialog.Trigger asChild let:builder>
@@ -210,11 +245,11 @@
 					{#each $form as element, id (element.id)}
 						<div animate:flip={{ duration: flipDurationMs }}>
 							{#if element?.type === 'text'}
-								<TextView data={element} {id} />
+								<TextView data={element} {id} {handleOpenSettings} />
 							{:else if element.type === 'textarea'}
-								<TextAreaView data={element} {id} />
+								<TextAreaView data={element} {id} {handleOpenSettings} />
 							{:else if element.type === 'radio'}
-								<div>COMING SOON</div>
+								<RadioView data={element} {id} />
 							{:else}
 								<DropDownView data={element} {id} />
 							{/if}

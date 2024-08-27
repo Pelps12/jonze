@@ -6,8 +6,8 @@
 	import { PlusCircleIcon, Trash } from 'lucide-svelte';
 	import { edit, deleteElement, form } from '$lib/stores/forms';
 	import FieldWrapper from './FieldWrapper.svelte';
-	import type { CustomDropDownField } from '@repo/form-validation';
-	export let data: CustomDropDownField;
+	import type { CustomRadioGroupField } from '@repo/form-validation';
+	export let data: CustomRadioGroupField;
 	export let id: number;
 	$: temporaryEdit = structuredClone(data);
 
@@ -15,7 +15,7 @@
 		edit(id, temporaryEdit);
 	};
 
-	const handleChange = (value: Partial<CustomDropDownField>) => {
+	const handleChange = (value: Partial<CustomRadioGroupField>) => {
 		temporaryEdit = { ...temporaryEdit, ...value };
 		handleSave();
 	};
@@ -36,7 +36,7 @@
 
 	const handleChangeOption = (
 		id: number,
-		value: Partial<ArrayElement<CustomDropDownField['options']>>
+		value: Partial<ArrayElement<CustomRadioGroupField['options']>>
 	) => {
 		temporaryEdit = {
 			...temporaryEdit,
