@@ -213,7 +213,28 @@ export const actions: Actions = {
 			userId: locals.user.id
 		});
 
+		//Add user to our database
+		const [result] = await db
+			.insert(schema.member)
+			.values({
+				id: om.id,
+				orgId: om.organizationId,
+				userId: om.userId,
+				role: 'MEMBER'
+			})
+			.returning()
+			.onConflictDoUpdate({
+				target: schema.member.id,
+				set: {
+					orgId: om.organizationId,
+					userId: om.userId,
+					updatedAt: new Date()
+				}
+			});
+
 		let responseId = null;
+
+		//If there's a form. Create a response
 		if (orgForm) {
 			responseId = newId('response');
 			const insertResult = await db.insert(schema.formResponse).values({
@@ -226,6 +247,14 @@ export const actions: Actions = {
 				memId: om.id
 			});
 			console.log(insertResult);
+
+			//Attach the form response to the user
+			await db
+				.update(schema.member)
+				.set({
+					additionalInfoId: responseId
+				})
+				.where(eq(schema.member.id, om.id));
 		}
 
 		const defaultPlan = await db.query.plan.findFirst({
@@ -235,26 +264,6 @@ export const actions: Actions = {
 			}
 		});
 
-		//Add user to our database
-		const [result] = await db
-			.insert(schema.member)
-			.values({
-				id: om.id,
-				orgId: om.organizationId,
-				userId: om.userId,
-				role: 'MEMBER',
-				additionalInfoId: responseId
-			})
-			.returning()
-			.onConflictDoUpdate({
-				target: schema.member.id,
-				set: {
-					orgId: om.organizationId,
-					userId: om.userId,
-					additionalInfoId: responseId,
-					updatedAt: new Date()
-				}
-			});
 		if (defaultPlan) {
 			await db.insert(schema.membership).values({
 				planId: defaultPlan.id,
