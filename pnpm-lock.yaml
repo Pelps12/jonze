@@ -209,8 +209,8 @@ importers:
         specifier: ^0.0.2
         version: 0.0.2(svelte@4.2.18)
       posthog-js:
-        specifier: ^1.155.4
-        version: 1.155.4
+        specifier: ^1.160.0
+        version: 1.160.0
       posthog-node:
         specifier: ^3.6.3
         version: 3.6.3
@@ -5027,8 +5027,8 @@ packages:
     resolution: {integrity: sha512-IbyN+9KslkqcXa8AO9fxpk97PA4pzewvpi2B3Dwy9u4zpV32QicaEdgmF3eSQUzdRk7ttDHQejNgAEr4XoeH4A==}
     engines: {node: '>=12'}
 
-  posthog-js@1.155.4:
-    resolution: {integrity: sha512-suxwAsmZGqMDXJe/RaCKI3PaDEHiuMDDhKcJklgGAg7eDnywieRkr5CoPcOOvnqTDMnuOPETr98jpYBXKUwGFQ==}
+  posthog-js@1.160.0:
+    resolution: {integrity: sha512-K/RRgmPYIpP69nnveCJfkclb8VU+R+jsgqlrKaLGsM5CtQM9g01WOzAiT3u36WLswi58JiFMXgJtECKQuoqTgQ==}
 
   posthog-node@3.6.3:
     resolution: {integrity: sha512-JB+ei0LkwE+rKHyW5z79Nd1jUaGxU6TvkfjFqY9vQaHxU5aU8dRl0UUaEmZdZbHwjp3WmXCBQQRNyimwbNQfCw==}
@@ -10125,7 +10125,7 @@ snapshots:
       date-fns: 3.6.0
       layercake: 8.3.4(svelte@4.2.18)(typescript@5.5.4)
       lodash-es: 4.17.21
-      posthog-js: 1.155.4
+      posthog-js: 1.160.0
       shapefile: 0.6.6
       svelte: 4.2.18
       svelte-ux: 0.74.4(postcss-load-config@4.0.2(postcss@8.4.41)(ts-node@10.9.2(@types/node@18.19.43)(typescript@5.5.4)))(postcss@8.4.41)(svelte@4.2.18)
@@ -11209,7 +11209,7 @@ snapshots:
 
   postgres@3.4.4: {}
 
-  posthog-js@1.155.4:
+  posthog-js@1.160.0:
     dependencies:
       fflate: 0.4.8
       preact: 10.23.1
