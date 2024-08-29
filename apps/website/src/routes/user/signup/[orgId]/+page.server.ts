@@ -97,6 +97,22 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 
 	const dynamicSchema = createDynamicSchema(mergedForm);
 
+	let defaultNames: Record<string, string> | undefined = {};
+
+	//CONDITIONALLY SET NAME DEFAULTS
+
+	if (locals.user.firstName) {
+		defaultNames[100001] = locals.user.firstName;
+	}
+
+	if (locals.user.lastName) {
+		defaultNames[100002] = locals.user.lastName;
+	}
+
+	if (Object.keys(defaultNames).length == 0) {
+		defaultNames = undefined;
+	}
+
 	return {
 		form: org.forms[0],
 		defaultFields: {
@@ -107,10 +123,7 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 		orgName: org.name,
 
 		mergedForm,
-		zodForm: await superValidate(
-			{ 100001: locals.user.firstName, 100002: locals.user.lastName },
-			zod(dynamicSchema)
-		)
+		zodForm: await superValidate(defaultNames, zod(dynamicSchema))
 	};
 };
 
