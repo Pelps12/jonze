@@ -1,14 +1,102 @@
 import db from '$lib/server/db';
 import schema from '@repo/db/schema';
 import workos, { clientId, verifyJwtToken, verifyAccessToken } from '$lib/server/workos';
-import { error, redirect, type Handle } from '@sveltejs/kit';
+import { error, redirect, type Handle, type HandleServerError } from '@sveltejs/kit';
 import type { Organization, User } from '@workos-inc/node';
 import { eq, and, or } from 'drizzle-orm';
 import { PUBLIC_URL } from '$env/static/public';
-import { JWT_SECRET_KEY, WORKOS_CLIENT_ID, WORKOS_REDIRECT_URI } from '$env/static/private';
+import {
+	AXIOM_DATASET,
+	AXIOM_ENDPOINT,
+	AXIOM_TOKEN,
+	JWT_SECRET_KEY,
+	WORKOS_CLIENT_ID,
+	WORKOS_REDIRECT_URI
+} from '$env/static/private';
 import { sealData, unsealData } from 'iron-session';
 import type { SessionType } from '$lib/types/misc';
 import { sequence } from '@sveltejs/kit/hooks';
+import { nanoid } from '@repo/db/utils/createId';
+
+const logsHttpMinStatusCode = 100; // Filter logs and send only logs with status code above or equal
+const responseHeadersToCapture = ['cf-cache-status', 'cf-ray'];
+const requestHeadersToCapture = ['user-agent'];
+
+const Version = '0.3.0';
+
+function getHeaderMap(headers: Headers, allowlist: string[]) {
+	if (!allowlist.length) {
+		return {};
+	}
+
+	return [...headers].reduce<Record<string, string>>((acc, [headerKey, headerValue]) => {
+		if (allowlist.includes(headerKey)) {
+			acc[headerKey] = headerValue;
+		}
+
+		return acc;
+	}, {});
+}
+
+const handleLog: Handle = async ({ event, resolve }) => {
+	const start = Date.now();
+	const logs: any[] = [];
+
+	const response = await resolve(event);
+
+	const duration = Date.now() - start;
+	const cf = {};
+
+	const url = `${AXIOM_ENDPOINT}/v1/datasets/${AXIOM_DATASET}/ingest`;
+
+	//@ts-ignore
+	if (event.request.cf) {
+		// delete does not work so we copy into a new object
+		//@ts-ignore
+		Object.keys(event.request.cf).forEach((key) => {
+			if (key !== 'tlsClientAuth' && key !== 'tlsExportedAuthenticator') {
+				//@ts-ignore
+				cf[key] = event.request.cf[key];
+			}
+		});
+	}
+	if (response.status >= logsHttpMinStatusCode) {
+		logs.push({
+			_time: Date.now(),
+			request: {
+				url: event.request.url,
+				headers: getHeaderMap(event.request.headers, requestHeadersToCapture),
+				method: event.request.method,
+				...cf
+			},
+			response: {
+				duration,
+				headers: getHeaderMap(response.headers, responseHeadersToCapture),
+				status: response.status
+			},
+			worker: {
+				version: Version,
+				id: nanoid(6),
+				started: start
+			}
+		});
+	}
+
+	event.platform?.context.waitUntil(
+		fetch(url, {
+			signal: AbortSignal.timeout(30_000),
+			method: 'POST',
+			body: logs.map((log) => JSON.stringify(log)).join('\n'),
+			headers: {
+				'Content-Type': 'application/x-ndjson',
+				Authorization: `Bearer ${AXIOM_TOKEN}`,
+				'User-Agent': 'axiom-cloudflare/' + Version
+			}
+		})
+	);
+
+	return response;
+};
 
 const handleAuth: Handle = async ({ event, resolve }) => {
 	console.log('first pre-processing');
@@ -110,7 +198,9 @@ const handleAdminRestrict: Handle = async ({ event, resolve }) => {
 	}
 
 	const response = await resolve(event);
+
+	console.log('AFTERRRRRR');
 	return response;
 };
 
-export const handle = sequence(handleAuth, handleAdminRestrict);
+export const handle = sequence(handleLog, handleAuth, handleAdminRestrict);
