@@ -68,9 +68,6 @@ export const planRouter = router({
 					...(useragent && { $useragent: useragent })
 				}
 			});
-		if (newEvent) {
-			ctx.event.platform?.context.waitUntil(dummyClient.flushAsync());
-		}
 
 		return;
 	}),

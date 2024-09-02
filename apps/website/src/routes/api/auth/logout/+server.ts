@@ -38,8 +38,6 @@ export const POST: RequestHandler = async ({
 		});
 	}
 
-	platform?.context.waitUntil(dummyClient.flushAsync());
-
 	const { accessToken } = await unsealData<SessionType>(session, {
 		password: JWT_SECRET_KEY
 	});

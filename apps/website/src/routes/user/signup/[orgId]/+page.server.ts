@@ -284,7 +284,6 @@ export const actions: Actions = {
 
 		platform?.context.waitUntil(
 			Promise.all([
-				dummyClient.flushAsync(),
 				svix.message.create(orgId, {
 					eventType: 'member.added',
 					payload: {
@@ -441,7 +440,6 @@ export const actions: Actions = {
 
 		platform?.context.waitUntil(
 			Promise.all([
-				dummyClient.flushAsync(),
 				svix.message.create(orgId, {
 					eventType: 'member.added',
 					payload: {

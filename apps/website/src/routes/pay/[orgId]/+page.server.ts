@@ -4,7 +4,7 @@ import type { PageServerLoad } from './$types';
 import schema from '@repo/db/schema';
 import { error } from '@sveltejs/kit';
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
 	const org = await db.query.organization.findFirst({
 		where: eq(schema.organization.id, params.orgId),
 
@@ -19,6 +19,8 @@ export const load: PageServerLoad = async ({ params }) => {
 			}
 		}
 	});
+
+	locals.logger?.info('Organization', org);
 
 	if (!org) {
 		error(404, 'Org Not Found');

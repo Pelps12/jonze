@@ -168,8 +168,6 @@ export const formRouter = router({
 				});
 			}
 
-			ctx.event.platform?.context.waitUntil(dummyClient.flushAsync());
-
 			return orgForm;
 		}),
 	updateForm: adminProcedure
@@ -224,7 +222,6 @@ export const formRouter = router({
 				});
 			}
 
-			ctx.event.platform?.context.waitUntil(Promise.resolve(dummyClient.flushAsync()));
 			return orgForm;
 		}),
 

@@ -168,7 +168,6 @@ export const eventRouter = router({
 		if (newEvent) {
 			ctx.event.platform?.context.waitUntil(
 				Promise.all([
-					dummyClient.flushAsync(),
 					svix.message.create(input.orgId, {
 						eventType: 'event.created',
 						payload: {
@@ -233,7 +232,6 @@ export const eventRouter = router({
 		if (newEvent) {
 			ctx.event.platform?.context.waitUntil(
 				Promise.all([
-					dummyClient.flushAsync(),
 					svix.message.create(input.orgId, {
 						eventType: 'event.updated',
 						payload: {

@@ -183,7 +183,6 @@ export const actions: Actions = {
 
 		platform?.context.waitUntil(
 			Promise.all([
-				dummyClient.flushAsync(),
 				svix.message.create(form.orgId, {
 					eventType: 'form.filled',
 					payload: {

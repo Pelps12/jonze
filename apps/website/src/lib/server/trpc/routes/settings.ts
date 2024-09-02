@@ -129,8 +129,6 @@ export const settingsRouter = router({
 			}
 		});
 
-		ctx.event.platform?.context.waitUntil(dummyClient.flushAsync());
-
 		return { key: createdKey.result.key };
 	}),
 	enableWebhooks: adminProcedure.mutation(async ({ ctx, input }) => {
