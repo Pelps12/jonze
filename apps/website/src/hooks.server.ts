@@ -8,6 +8,7 @@ import {
 	AXIOM_ENDPOINT,
 	AXIOM_TOKEN,
 	BASELIME_API_KEY,
+	BASELIME_SERVICE,
 	JWT_SECRET_KEY,
 	WORKOS_CLIENT_ID,
 	WORKOS_REDIRECT_URI
@@ -35,7 +36,7 @@ const handleLog: Handle = async ({ event, resolve }) => {
 	};
 	const url = new URL(event.request.url);
 	const logger = new BaselimeLogger({
-		service: 'your-service-name',
+		service: BASELIME_SERVICE,
 		namespace: `${event.request.method} ${url.hostname}${url.pathname}`,
 		apiKey: BASELIME_API_KEY,
 		isLocalDev: event.platform ? false : true,
