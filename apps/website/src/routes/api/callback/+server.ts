@@ -75,8 +75,6 @@ export const GET: RequestHandler = async ({ request, cookies, platform, getClien
 				...(useragent && { $useragent: useragent })
 			}
 		});
-
-		platform?.context.waitUntil(dummyClient.flushAsync());
 		redirect(302, url.toString());
 	}
 

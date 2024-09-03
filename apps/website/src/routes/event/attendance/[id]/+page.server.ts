@@ -180,7 +180,6 @@ export const actions: Actions = {
 
 		platform?.context.waitUntil(
 			Promise.all([
-				dummyClient.flushAsync(),
 				svix.message.create(event.orgId, {
 					eventType: 'attendance.marked',
 					payload: {
@@ -286,7 +285,6 @@ export const actions: Actions = {
 
 		platform?.context.waitUntil(
 			Promise.all([
-				dummyClient.flushAsync(),
 				svix.message.create(event.orgId, {
 					eventType: 'attendance.marked',
 					payload: {

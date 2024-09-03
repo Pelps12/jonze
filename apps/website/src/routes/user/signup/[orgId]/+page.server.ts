@@ -284,7 +284,6 @@ export const actions: Actions = {
 
 		platform?.context.waitUntil(
 			Promise.all([
-				dummyClient.flushAsync(),
 				svix.message.create(orgId, {
 					eventType: 'member.added',
 					payload: {
@@ -373,6 +372,24 @@ export const actions: Actions = {
 			userId: locals.user.id
 		});
 
+		const [result] = await db
+			.insert(schema.member)
+			.values({
+				id: om.id,
+				orgId: om.organizationId,
+				userId: om.userId,
+				role: 'MEMBER'
+			})
+			.returning()
+			.onConflictDoUpdate({
+				target: schema.member.id,
+				set: {
+					orgId: om.organizationId,
+					userId: om.userId,
+					updatedAt: new Date()
+				}
+			});
+
 		let responseId = null;
 		if (orgForm) {
 			responseId = newId('response');
@@ -386,6 +403,13 @@ export const actions: Actions = {
 				})),
 				memId: om.id
 			});
+
+			await db
+				.update(schema.member)
+				.set({
+					additionalInfoId: responseId
+				})
+				.where(eq(schema.member.id, om.id));
 			console.log(insertResult);
 		}
 
@@ -396,26 +420,6 @@ export const actions: Actions = {
 			}
 		});
 
-		//Add user to our database
-		const [result] = await db
-			.insert(schema.member)
-			.values({
-				id: om.id,
-				orgId: om.organizationId,
-				userId: om.userId,
-				role: 'MEMBER',
-				additionalInfoId: responseId
-			})
-			.returning()
-			.onConflictDoUpdate({
-				target: schema.member.id,
-				set: {
-					orgId: om.organizationId,
-					userId: om.userId,
-					additionalInfoId: responseId,
-					updatedAt: new Date()
-				}
-			});
 		if (defaultPlan) {
 			await db.insert(schema.membership).values({
 				planId: defaultPlan.id,
@@ -436,7 +440,6 @@ export const actions: Actions = {
 
 		platform?.context.waitUntil(
 			Promise.all([
-				dummyClient.flushAsync(),
 				svix.message.create(orgId, {
 					eventType: 'member.added',
 					payload: {

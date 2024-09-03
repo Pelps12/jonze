@@ -105,7 +105,6 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	}
 	console.log('64');
 
-	platform?.context.waitUntil(dummyClient.flushAsync());
 	return new Response(null, {
 		status: 200
 	});

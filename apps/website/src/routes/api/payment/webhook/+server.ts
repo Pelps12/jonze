@@ -56,7 +56,6 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 				});
 				platform?.context.waitUntil(
 					Promise.all([
-						dummyClient.flushAsync(),
 						svix.message.create(orgId, {
 							eventType: 'membership.updated',
 							payload: {

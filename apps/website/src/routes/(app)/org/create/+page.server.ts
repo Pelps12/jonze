@@ -117,8 +117,6 @@ export const actions: Actions = {
 			sameSite: 'lax',
 			maxAge: 30 * 24 * 60 * 60 // 30 days in seconds
 		});
-
-		platform?.context.waitUntil(dummyClient.flushAsync());
 		redirect(302, `/org/${organization.id}`);
 	}
 };

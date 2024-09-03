@@ -1,17 +1,84 @@
-import db from '$lib/server/db';
-import schema from '@repo/db/schema';
+import { BaselimeLogger } from '@baselime/edge-logger';
 import workos, { clientId, verifyJwtToken, verifyAccessToken } from '$lib/server/workos';
-import { error, redirect, type Handle } from '@sveltejs/kit';
+import { error, redirect, type Handle, type HandleServerError } from '@sveltejs/kit';
 import type { Organization, User } from '@workos-inc/node';
-import { eq, and, or } from 'drizzle-orm';
 import { PUBLIC_URL } from '$env/static/public';
-import { JWT_SECRET_KEY, WORKOS_CLIENT_ID, WORKOS_REDIRECT_URI } from '$env/static/private';
+import {
+	AXIOM_DATASET,
+	AXIOM_ENDPOINT,
+	AXIOM_TOKEN,
+	BASELIME_API_KEY,
+	BASELIME_SERVICE,
+	JWT_SECRET_KEY,
+	WORKOS_CLIENT_ID,
+	WORKOS_REDIRECT_URI
+} from '$env/static/private';
 import { sealData, unsealData } from 'iron-session';
 import type { SessionType } from '$lib/types/misc';
 import { sequence } from '@sveltejs/kit/hooks';
+import { nanoid } from '@repo/db/utils/createId';
+import { dummyClient } from '$lib/server/posthog';
+
+export const handleError: HandleServerError = async ({ error, event, status, message }) => {
+	const errorId = crypto.randomUUID();
+	const context = event.platform?.context || {
+		waitUntil: () => {},
+		passThroughOnException: () => {}
+	};
+	console.error('HSBVODISNVODI');
+
+	const url = new URL(event.request.url);
+
+	const logger = new BaselimeLogger({
+		service: BASELIME_SERVICE,
+		namespace: `${event.request.method} ${url.hostname}${url.pathname}`,
+		apiKey: BASELIME_API_KEY,
+		isLocalDev: event.platform ? false : true,
+		ctx: context
+	});
+
+	logger.error(error);
+
+	await logger.flush();
+
+	return;
+};
+
+const handleAnalytics: Handle = async ({ event, resolve }) => {
+	const context = event.platform?.context || {
+		waitUntil: () => {},
+		passThroughOnException: () => {}
+	};
+	const response = resolve(event);
+	context.waitUntil(dummyClient.flushAsync());
+	return response;
+};
+
+const handleLog: Handle = async ({ event, resolve }) => {
+	const context = event.platform?.context || {
+		waitUntil: () => {},
+		passThroughOnException: () => {}
+	};
+	const url = new URL(event.request.url);
+	const logger = new BaselimeLogger({
+		service: BASELIME_SERVICE,
+		namespace: `${event.request.method} ${url.hostname}${url.pathname}`,
+		apiKey: BASELIME_API_KEY,
+		isLocalDev: event.platform ? false : true,
+		ctx: context
+	});
+
+	event.locals.logger = logger;
+
+	const response = await resolve(event);
+
+	context.waitUntil(logger.flush());
+
+	return response;
+};
 
 const handleAuth: Handle = async ({ event, resolve }) => {
-	console.log('first pre-processing');
+	console.log('HANDLE AUTH BEGIN');
 	event.locals.user = undefined;
 
 	const sessionToken = event.cookies.get('workos-session');
@@ -62,7 +129,10 @@ const handleAuth: Handle = async ({ event, resolve }) => {
 		}
 	}
 
-	return await resolve(event);
+	const response = await resolve(event);
+
+	console.log('HANDLE AUTH BEGIN');
+	return response;
 };
 
 const handleAdminRestrict: Handle = async ({ event, resolve }) => {
@@ -110,7 +180,9 @@ const handleAdminRestrict: Handle = async ({ event, resolve }) => {
 	}
 
 	const response = await resolve(event);
+
+	console.log('AFTERRRRRR');
 	return response;
 };
 
-export const handle = sequence(handleAuth, handleAdminRestrict);
+export const handle = sequence(handleAnalytics, handleLog, handleAuth, handleAdminRestrict);

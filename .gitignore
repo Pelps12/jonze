@@ -9,6 +9,8 @@ coverage
 # svelte
 .svelte-kit
 
+.wrangler
+
 # misc
 .DS_Store
 *.pem

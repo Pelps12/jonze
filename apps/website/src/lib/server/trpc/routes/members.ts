@@ -153,7 +153,6 @@ export const memberRouter = router({
 			if (newMembership) {
 				ctx.event.platform?.context.waitUntil(
 					Promise.all([
-						dummyClient.flushAsync(),
 						svix.message.create(input.orgId, {
 							eventType: 'membership.updated',
 							payload: {
@@ -225,7 +224,6 @@ export const memberRouter = router({
 
 			ctx.event.platform?.context.waitUntil(
 				Promise.all([
-					dummyClient.flushAsync(),
 					svix.message.create(input.orgId, {
 						eventType: 'member.updated',
 						payload: {
