@@ -19,6 +19,31 @@ import { sequence } from '@sveltejs/kit/hooks';
 import { nanoid } from '@repo/db/utils/createId';
 import { dummyClient } from '$lib/server/posthog';
 
+export const handleError: HandleServerError = async ({ error, event, status, message }) => {
+	const errorId = crypto.randomUUID();
+	const context = event.platform?.context || {
+		waitUntil: () => {},
+		passThroughOnException: () => {}
+	};
+	console.error('HSBVODISNVODI');
+
+	const url = new URL(event.request.url);
+
+	const logger = new BaselimeLogger({
+		service: BASELIME_SERVICE,
+		namespace: `${event.request.method} ${url.hostname}${url.pathname}`,
+		apiKey: BASELIME_API_KEY,
+		isLocalDev: event.platform ? false : true,
+		ctx: context
+	});
+
+	logger.error(error);
+
+	await logger.flush();
+
+	return;
+};
+
 const handleAnalytics: Handle = async ({ event, resolve }) => {
 	const context = event.platform?.context || {
 		waitUntil: () => {},
