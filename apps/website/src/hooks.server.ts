@@ -36,6 +36,7 @@ export const handleError: HandleServerError = async ({ error, event, status, mes
 		isLocalDev: event.platform ? false : true,
 		ctx: context
 	});
+	console.error(error);
 
 	logger.error(error);
 
@@ -131,7 +132,7 @@ const handleAuth: Handle = async ({ event, resolve }) => {
 
 	const response = await resolve(event);
 
-	console.log('HANDLE AUTH BEGIN');
+	console.log('HANDLE AUTH END');
 	return response;
 };
 
