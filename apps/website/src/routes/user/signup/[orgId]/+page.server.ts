@@ -129,7 +129,6 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 
 export const actions: Actions = {
 	formUpload: async ({ request, locals, url, params, getClientAddress, platform }) => {
-		const callbackUrl = url.searchParams.get('callbackUrl');
 		if (!locals.user) {
 			redirect(302, '/');
 		}
@@ -169,10 +168,12 @@ export const actions: Actions = {
 
 		const userResponse = userResponseArray.reduce<response>(
 			(acc, [key, value]) => {
-				if (key !== 'firstName' && key !== 'lastName') {
+				if (key !== 'firstName' && key !== 'lastName' && key !== 'callbackUrl') {
 					acc['additionalFields'][key] = value;
 				} else {
-					acc['defaultFields'][key] = value;
+					if (key !== 'callbackUrl') {
+						acc['defaultFields'][key] = value;
+					}
 				}
 				return acc;
 			},
@@ -298,7 +299,7 @@ export const actions: Actions = {
 
 		const orgHomePageUrl = orgForm?.organization.website;
 
-		const returnURL = callbackUrl ?? orgHomePageUrl ?? PUBLIC_URL;
+		const returnURL = formData.get('callbackUrl')?.toString() ?? orgHomePageUrl ?? PUBLIC_URL;
 
 		locals.logger?.info('LOG', { returnURL });
 
