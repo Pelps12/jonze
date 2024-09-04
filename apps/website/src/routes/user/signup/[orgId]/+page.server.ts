@@ -300,6 +300,8 @@ export const actions: Actions = {
 
 		const returnURL = callbackUrl ?? orgHomePageUrl ?? PUBLIC_URL;
 
+		locals.logger?.info('LOG', { returnURL });
+
 		redirect(302, returnURL);
 	},
 	newForm: async ({ request, locals, url, params, getClientAddress, platform }) => {
@@ -455,6 +457,8 @@ export const actions: Actions = {
 		const orgHomePageUrl = orgForm?.organization.website;
 
 		const returnURL = callbackUrl ?? orgHomePageUrl ?? PUBLIC_URL;
+
+		locals.logger?.info('LOG', { returnURL });
 
 		redirect(302, returnURL);
 
