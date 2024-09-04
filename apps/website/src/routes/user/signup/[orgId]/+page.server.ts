@@ -458,7 +458,9 @@ export const actions: Actions = {
 
 		const returnURL = callbackUrl ?? orgHomePageUrl ?? PUBLIC_URL;
 
-		locals.logger?.info('LOG', { returnURL });
+		console.log({ url: url.toString(), callbackUrl });
+
+		locals.logger?.info('LOG', { url: url.toString(), callbackUrl });
 
 		redirect(302, returnURL);
 
