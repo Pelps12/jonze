@@ -14,7 +14,10 @@
 	import { onMount } from 'svelte';
 	import { PUBLIC_ENVIRONMENT } from '$env/static/public';
 	import posthog from 'posthog-js';
+	import { page } from '$app/stores';
 	let formSubmitting = false;
+
+	let callbackUrl = $page.url.searchParams.get('callbackUrl');
 
 	let newFormFlagEnabled = PUBLIC_ENVIRONMENT === 'dev';
 	onMount(() => {
@@ -60,7 +63,7 @@
 		{:else}
 			<form
 				method="post"
-				action="?/formUpload"
+				action={`?/formUpload`}
 				use:enhance={() => {
 					formSubmitting = true;
 					return async ({ result }) => {
@@ -98,6 +101,11 @@
 							/>
 						</div>
 					</div>
+
+					{#if callbackUrl}
+						<Input id="callbackUrl" name="callbackUrl" value={callbackUrl} class="hidden" />
+					{/if}
+
 					{#if data.form}
 						<Preview form={data.form.form} userResponse={undefined} />
 					{/if}
