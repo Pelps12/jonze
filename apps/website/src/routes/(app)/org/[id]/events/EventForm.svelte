@@ -9,7 +9,6 @@
 		defaults
 	} from 'sveltekit-superforms';
 	import { Input } from '$lib/components/ui/input';
-	import { client } from '$lib/client/uploadcare';
 	import { parseISO, format } from 'date-fns';
 	import enUS from 'date-fns/locale/en-US';
 	import { formatInTimeZone } from 'date-fns-tz';
@@ -90,13 +89,18 @@
 
 	const default_tags = [`#social`, `#gbm`, `#study-session`];
 
+	let imageUploading = false;
+
 	async function handleUpload(
 		e: Event & { currentTarget: EventTarget & HTMLInputElement }
 	): Promise<void> {
 		if (!e.currentTarget.files) return;
+		const { client } = await import('$lib/client/uploadcare');
 		const file = e.currentTarget.files[0];
+		imageUploading = true;
 		client.uploadFile(file).then((file) => {
 			console.log(file);
+			imageUploading = false;
 			$formData.image = file.cdnUrl;
 		});
 		console.log(form);
@@ -167,7 +171,13 @@
 
 	<Form.Field {form} name="image" class="mb-2">
 		<Form.Control let:attrs>
-			<Form.Label>Image {$formData.image ? '(Image uploaded)' : ''}</Form.Label>
+			<Form.Label
+				>Image {imageUploading
+					? '(Image Uploading...)'
+					: $formData.image
+						? '(Image uploaded)'
+						: ''}</Form.Label
+			>
 			<Input type="file" on:input={(e) => handleUpload(e)} />
 			<Input class="hidden" {...attrs} bind:value={$formData.image} />
 		</Form.Control>
@@ -281,7 +291,7 @@
 		</Form.Control>
 	</Form.Field>
 
-	<Form.Button class="w-full" disabled={$uploadMutation.isPending}
+	<Form.Button class="w-full" disabled={$uploadMutation.isPending || imageUploading}
 		>{#if $uploadMutation.isPending}
 			<LoaderCircle class="mr-2 h-4 w-4 animate-spin" />
 		{/if}{actionType === 'create' ? 'Create' : 'Update'}</Form.Button

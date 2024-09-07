@@ -8,7 +8,6 @@
 		dateProxy
 	} from 'sveltekit-superforms';
 	import { Input } from '$lib/components/ui/input';
-	import { client } from '$lib/client/uploadcare';
 	import type { OrgForm, Event as dbEvent } from '@repo/db/types';
 	import { onMount, tick } from 'svelte';
 	import { zodClient } from 'sveltekit-superforms/adapters';
@@ -58,6 +57,8 @@
 	): Promise<void> {
 		if (!e.currentTarget.files) return;
 		const file = e.currentTarget.files[0];
+		const { client } = await import('$lib/client/uploadcare');
+
 		client.uploadFile(file).then((file) => {
 			console.log(file);
 			$formData.image = file.cdnUrl;
