@@ -1,7 +1,7 @@
 import { stripe } from '$lib/server/stripe';
 import { error, json, type NumericRange, type RequestHandler } from '@sveltejs/kit';
 import Stripe from 'stripe';
-import { STRIPE_WEBHOOK_SECRET } from '$env/static/private';
+import { STRIPE_WEBHOOK_CONNECT_SECRET } from '$env/static/private';
 import schema from '@repo/db/schema';
 import db from '$lib/server/db';
 import { dummyClient } from '$lib/server/posthog';
@@ -13,10 +13,10 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	if (!sig) error(400, 'Invalid request');
 
 	let event: Stripe.Event;
-	console.log(STRIPE_WEBHOOK_SECRET, sig);
+	console.log(STRIPE_WEBHOOK_CONNECT_SECRET, sig);
 
 	try {
-		event = await stripe.webhooks.constructEventAsync(buf, sig, STRIPE_WEBHOOK_SECRET);
+		event = await stripe.webhooks.constructEventAsync(buf, sig, STRIPE_WEBHOOK_CONNECT_SECRET);
 	} catch (err: any) {
 		error(400, `Webhook Error: ${err.message}`);
 	}
