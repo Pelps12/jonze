@@ -12,7 +12,7 @@
 	import { browser } from '$app/environment';
 	import { toast } from 'svelte-sonner';
 	import * as Avatar from '$lib/components/ui/avatar';
-	import { invalidate } from '$app/navigation';
+	import { goto, invalidate } from '$app/navigation';
 	import { PUBLIC_APIKEY_PREFIX, PUBLIC_STRIPE_KEY, PUBLIC_URL } from '$env/static/public';
 	import { Label } from '$lib/components/ui/label';
 	import InviteBox from './InviteBox.svelte';
@@ -34,6 +34,8 @@
 	const stripeDashboardMutation = trpc().settingsRouter.getStripeAccountDashboard.createMutation();
 	const homePageUrlMutation = trpc().settingsRouter.changeHomePage.createMutation();
 	const orgLogoMutation = trpc().settingsRouter.changeOrgLogo.createMutation();
+
+	const orgDeletetionMutation = trpc().settingsRouter.deleteOrganization.createMutation();
 
 	const APIKeyCreation = trpc().settingsRouter.createAPIKey.createMutation();
 
@@ -459,5 +461,46 @@
 				</Dialog.Root>
 			</div>
 		{/if}
+
+		<div>
+			<AlertDialog.Root>
+				<Card.Root class="max-w-[425px] my-2">
+					<Card.Header>
+						<Card.Title class="text-destructive">Delete Organization</Card.Title>
+						<Card.Description>You sure? Just know, it's gone for good</Card.Description>
+					</Card.Header>
+
+					<Card.Footer>
+						<AlertDialog.Trigger asChild let:builder>
+							<Button builders={[builder]} variant="destructive">Delete Organization</Button>
+						</AlertDialog.Trigger>
+					</Card.Footer>
+				</Card.Root>
+
+				<AlertDialog.Content>
+					<AlertDialog.Header>
+						<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
+						<AlertDialog.Description>
+							This action cannot be undone. This will permanently delete your organization and
+							remove all it's data from our servers.
+						</AlertDialog.Description>
+					</AlertDialog.Header>
+					<AlertDialog.Footer>
+						<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+						<AlertDialog.Action
+							on:click={async () =>
+								$orgDeletetionMutation
+									.mutateAsync({
+										orgId: $page.params.id
+									})
+									.then(() => goto('/'))}
+							class={buttonVariants({
+								variant: 'destructive'
+							})}>Continue</AlertDialog.Action
+						>
+					</AlertDialog.Footer>
+				</AlertDialog.Content>
+			</AlertDialog.Root>
+		</div>
 	</div>
 {/if}
