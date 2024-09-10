@@ -25,6 +25,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 			case 'invoice.paid':
 				const orgId = event.data.object.subscription_details?.metadata?.orgId;
 				if (!orgId) error(400, 'Org Id required in Subscription Metadata');
+				console.log(orgId);
 
 				await db
 					.update(schema.organization)
@@ -42,6 +43,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		if (err instanceof Stripe.errors.StripeError) {
 			error((err.statusCode as any) ?? 500, err.message);
 		} else {
+			console.error(err);
 			error(500);
 		}
 	}
