@@ -12,16 +12,7 @@ import { getApplicationFee } from '$lib/utils';
 export const load: PageServerLoad = async ({ url, locals, params }) => {
 	const callbackUrl = url.searchParams.get('callbackUrl');
 	if (!locals.user) {
-		const loginUrl = workos.userManagement.getAuthorizationUrl({
-			// Specify that we'd like AuthKit to handle the authentication flow
-			provider: 'authkit',
-			state: url.toString(),
-			// The callback endpoint that WorkOS will redirect to after a user authenticates
-			redirectUri: `${WORKOS_REDIRECT_URI}`,
-			clientId
-		});
-		console.log(`${WORKOS_REDIRECT_URI}`);
-		redirect(302, loginUrl);
+		redirect(302, `/api/auth?callbackUrl=${url.toString()}`);
 	}
 	const member = await db.query.member.findFirst({
 		where: and(eq(schema.member.userId, locals.user.id), eq(schema.member.orgId, params.orgId)),
@@ -203,16 +194,7 @@ export const load: PageServerLoad = async ({ url, locals, params }) => {
 export const actions: Actions = {
 	default: async ({ locals, ...event }) => {
 		if (!locals.user) {
-			const loginUrl = workos.userManagement.getAuthorizationUrl({
-				// Specify that we'd like AuthKit to handle the authentication flow
-				provider: 'authkit',
-				state: event.url.toString(),
-				// The callback endpoint that WorkOS will redirect to after a user authenticates
-				redirectUri: `${WORKOS_REDIRECT_URI}`,
-				clientId
-			});
-			console.log(`${WORKOS_REDIRECT_URI}`);
-			redirect(302, loginUrl);
+			redirect(302, `/api/auth?callbackUrl=${event.url.toString()}`);
 		}
 		const member = await db.query.member.findFirst({
 			where: and(
@@ -244,16 +226,7 @@ export const actions: Actions = {
 			redirect(302, `/user/signup/${event.params.orgId}?callbackUrl=${event.url.toString()}`);
 		}
 		if (!locals.user) {
-			const loginUrl = workos.userManagement.getAuthorizationUrl({
-				// Specify that we'd like AuthKit to handle the authentication flow
-				provider: 'authkit',
-				state: event.url.toString(),
-				// The callback endpoint that WorkOS will redirect to after a user authenticates
-				redirectUri: `${WORKOS_REDIRECT_URI}`,
-				clientId
-			});
-			console.log(`${WORKOS_REDIRECT_URI}`);
-			redirect(302, loginUrl);
+			redirect(302, `/api/auth?callbackUrl=${event.url.toString()}`);
 		}
 		const returnURL =
 			event.url.searchParams.get('callbackUrl') ?? member.organization.website ?? PUBLIC_URL;

@@ -27,16 +27,7 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 	});
 
 	if (!locals.user) {
-		const loginUrl = workos.userManagement.getAuthorizationUrl({
-			// Specify that we'd like AuthKit to handle the authentication flow
-			provider: 'authkit',
-			state: url.toString(),
-			// The callback endpoint that WorkOS will redirect to after a user authenticates
-			redirectUri: `${WORKOS_REDIRECT_URI}`,
-			clientId
-		});
-		console.log(`${WORKOS_REDIRECT_URI}`);
-		redirect(302, loginUrl);
+		redirect(302, `/api/auth?callbackUrl=${url.toString()}`);
 	}
 	if (locals.user) {
 		const member = await db.query.member.findFirst({
@@ -121,6 +112,7 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 		},
 		orgLogo: org.logo,
 		orgName: org.name,
+		orgPlan: org.plan,
 
 		mergedForm,
 		zodForm: await superValidate(defaultNames, zod(dynamicSchema))

@@ -114,6 +114,7 @@ export const homePageRouter = router({
 			});
 			const session = await stripe.checkout.sessions.create({
 				billing_address_collection: 'auto',
+				customer_email: ctx.event.locals.user.email,
 				line_items: [
 					{
 						price: prices.data[0].id,
@@ -122,6 +123,11 @@ export const homePageRouter = router({
 					}
 				],
 				mode: 'subscription',
+				subscription_data: {
+					metadata: {
+						orgId: input.orgId
+					}
+				},
 				success_url: input.returnURL,
 				cancel_url: input.returnURL
 			});

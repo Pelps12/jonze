@@ -21,7 +21,8 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
 				columns: {
 					name: true,
 					logo: true,
-					website: true
+					website: true,
+					plan: true
 				}
 			}
 		}

@@ -139,15 +139,7 @@ const handleAuth: Handle = async ({ event, resolve }) => {
 const handleAdminRestrict: Handle = async ({ event, resolve }) => {
 	if (event.request.url.includes(`${PUBLIC_URL}/org/org_`)) {
 		if (!event.locals.user) {
-			const loginUrl = workos.userManagement.getAuthorizationUrl({
-				// Specify that we'd like AuthKit to handle the authentication flow
-				provider: 'authkit',
-				state: event.url.toString(),
-				// The callback endpoint that WorkOS will redirect to after a user authenticates
-				redirectUri: `${WORKOS_REDIRECT_URI}`,
-				clientId
-			});
-			redirect(302, loginUrl);
+			redirect(302, `/api/auth?callbackUrl=${event.url.toString()}`);
 		}
 		if (event.locals.user) {
 			const pathname = event.url.pathname;
@@ -168,15 +160,7 @@ const handleAdminRestrict: Handle = async ({ event, resolve }) => {
 				orgId: org.id
 			} as any;
 		} else {
-			const loginUrl = workos.userManagement.getAuthorizationUrl({
-				// Specify that we'd like AuthKit to handle the authentication flow
-				provider: 'authkit',
-				state: event.url.toString(),
-				// The callback endpoint that WorkOS will redirect to after a user authenticates
-				redirectUri: `${WORKOS_REDIRECT_URI}`,
-				clientId
-			});
-			redirect(302, loginUrl);
+			redirect(302, `/api/auth?callbackUrl=${event.url.toString()}`);
 		}
 	}
 

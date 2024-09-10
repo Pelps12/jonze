@@ -22,53 +22,20 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	}
 	try {
 		switch (event.type) {
-			case 'checkout.session.completed':
-				const data = event.data.object;
-				const memId = data.metadata?.memId;
-				const userId = data.metadata?.userId;
-				const orgId = data.metadata?.orgId;
-				const planId = data.metadata?.planId;
-				const responseId = data.metadata?.responseId;
-				if (!memId || !planId || !userId || !orgId) error(400, 'Invalid Metadata');
+			case 'invoice.paid':
+				const orgId = event.data.object.subscription_details?.metadata?.orgId;
+				if (!orgId) error(400, 'Org Id required in Subscription Metadata');
+				console.log(orgId);
 
-				const [newMembership] = await db
-					.insert(schema.membership)
-					.values({
-						planId,
-						memId,
-						provider: 'Jonze',
-						responseId
+				await db
+					.update(schema.organization)
+					.set({
+						plan: 'plus'
 					})
-					.returning();
-				const member = await db.query.member.findFirst({
-					where: eq(schema.member.id, memId)
-				});
-
-				dummyClient.capture({
-					distinctId: userId,
-					event: 'new user membership',
-					properties: {
-						memId,
-						orgId,
-						method: 'managed',
-						id: newMembership.id
-					}
-				});
-				platform?.context.waitUntil(
-					Promise.all([
-						svix.message.create(orgId, {
-							eventType: 'membership.updated',
-							payload: {
-								type: 'membership.updated',
-								data: {
-									...{ ...newMembership, member }
-								}
-							}
-						})
-					])
-				);
+					.where(eq(schema.organization.id, orgId));
 
 				break;
+
 			default:
 				error(400, `Unhandled event type ${event.type}`);
 		}
@@ -76,6 +43,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		if (err instanceof Stripe.errors.StripeError) {
 			error((err.statusCode as any) ?? 500, err.message);
 		} else {
+			console.error(err);
 			error(500);
 		}
 	}

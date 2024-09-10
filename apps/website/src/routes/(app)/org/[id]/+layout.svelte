@@ -18,6 +18,13 @@
 
 	let commandBoxOpen = false;
 
+	let currentOrg = data.user?.orgs.find((org) => org.id === $page.params.id);
+
+	page.subscribe(() => {
+		currentOrg = data.user?.orgs.find((org) => org.id === $page.params.id);
+		console.log(currentOrg);
+	});
+
 	onMount(() => {
 		function handleKeydown(e: KeyboardEvent) {
 			if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
@@ -36,7 +43,7 @@
 <QueryClientProvider client={data.queryClient}>
 	<div class="lg:grid lg:grid-cols-5">
 		<aside class={cn('lg:h-[90vh] lg:sticky lg:top-0 lg:justify-between lg:flex lg:flex-col')}>
-			<Sidebar class="" />
+			<Sidebar class="" showSubscribe={currentOrg?.plan === 'standard'} />
 		</aside>
 
 		<div class="lg:col-span-4 border-t lg:border-l p-3">

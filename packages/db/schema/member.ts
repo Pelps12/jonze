@@ -18,7 +18,11 @@ export const member = pgTable('Member', {
 		.references(() => organization.id, {
 			onDelete: 'cascade'
 		}),
-	userId: varchar('userId', { length: 128 }).notNull(),
+	userId: varchar('userId', { length: 128 })
+		.notNull()
+		.references(() => user.id, {
+			onDelete: 'cascade'
+		}),
 	role: roleEnum('role').notNull().default('MEMBER'),
 	additionalInfoId: varchar('additionalInfoId', { length: 128 }),
 	createdAt: timestamp('createdAt', { mode: 'date', precision: 6, withTimezone: true })
