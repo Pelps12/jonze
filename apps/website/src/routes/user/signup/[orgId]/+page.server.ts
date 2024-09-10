@@ -112,6 +112,7 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 		},
 		orgLogo: org.logo,
 		orgName: org.name,
+		orgPlan: org.plan,
 
 		mergedForm,
 		zodForm: await superValidate(defaultNames, zod(dynamicSchema))

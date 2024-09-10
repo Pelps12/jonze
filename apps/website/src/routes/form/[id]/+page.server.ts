@@ -20,7 +20,9 @@ export const load: PageServerLoad = async ({ parent, url, locals, params }) => {
 			organization: {
 				columns: {
 					logo: true,
-					name: true
+					name: true,
+					website: true,
+					plan: true
 				}
 			}
 		}

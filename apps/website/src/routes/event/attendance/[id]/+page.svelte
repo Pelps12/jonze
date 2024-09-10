@@ -13,6 +13,7 @@
 	import { LoaderCircle } from 'lucide-svelte';
 	import posthog from 'posthog-js';
 	import Form from '$lib/components/custom/form/UI/Form.svelte';
+	import { cn } from '$lib/utils';
 	export let data;
 	let filled = data.formFilled;
 	let formSubmitting = false;
@@ -92,7 +93,10 @@
 	>
 		<Card.Root class="w-[350px] relative">
 			<div
-				class=" text-sm bg-secondary rounded-tl-md rounded-br-md font-semibold px-4 py-2 flex items-start w-20 gap-0.5"
+				class={cn(
+					' text-sm bg-secondary rounded-tl-md rounded-br-md font-semibold px-4 py-2 flex items-start w-20 gap-0.5',
+					data.event.organization.plan === 'plus' && 'invisible'
+				)}
 			>
 				<img src="/logo.svg" alt="Logo" class="h-4 w-4" />
 				Jonze

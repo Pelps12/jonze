@@ -15,6 +15,7 @@
 	import { PUBLIC_ENVIRONMENT } from '$env/static/public';
 	import posthog from 'posthog-js';
 	import { page } from '$app/stores';
+	import { cn } from '$lib/utils';
 	let formSubmitting = false;
 
 	let callbackUrl = $page.url.searchParams.get('callbackUrl');
@@ -43,7 +44,10 @@
 
 	<Card.Root class="w-[350px] relative">
 		<div
-			class=" text-sm bg-secondary rounded-tl-md rounded-br-md font-semibold px-4 py-2 flex items-start w-20 gap-0.5"
+			class={cn(
+				' text-sm bg-secondary rounded-tl-md rounded-br-md font-semibold px-4 py-2 flex items-start w-20 gap-0.5',
+				data.orgPlan === 'plus' && 'invisible'
+			)}
 		>
 			<img src="/logo.svg" alt="Logo" class="h-4 w-4" />
 			Jonze
