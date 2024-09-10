@@ -83,25 +83,37 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 				required: true
 			}
 		},
+		{
+			label: 'Callback URL',
+			id: 100003,
+			type: 'text',
+			hidden: true
+		},
 		...(!!userInfoForm ? userInfoForm.form : [])
 	];
 
 	const dynamicSchema = createDynamicSchema(mergedForm);
 
-	let defaultNames: Record<string, string> | undefined = {};
+	let defaultFields: Record<string, string> | undefined = {};
 
 	//CONDITIONALLY SET NAME DEFAULTS
 
 	if (locals.user.firstName) {
-		defaultNames[100001] = locals.user.firstName;
+		defaultFields[100001] = locals.user.firstName;
 	}
 
 	if (locals.user.lastName) {
-		defaultNames[100002] = locals.user.lastName;
+		defaultFields[100002] = locals.user.lastName;
+	}
+	if (callbackUrl) {
+		defaultFields[100003] = callbackUrl;
+	} else {
+		//Only cause callbackURL is the last property
+		mergedForm.pop();
 	}
 
-	if (Object.keys(defaultNames).length == 0) {
-		defaultNames = undefined;
+	if (Object.keys(defaultFields).length == 0) {
+		defaultFields = undefined;
 	}
 
 	return {
@@ -115,7 +127,7 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 		orgPlan: org.plan,
 
 		mergedForm,
-		zodForm: await superValidate(defaultNames, zod(dynamicSchema))
+		zodForm: await superValidate(defaultFields, zod(dynamicSchema))
 	};
 };
 
@@ -298,7 +310,7 @@ export const actions: Actions = {
 		redirect(302, returnURL);
 	},
 	newForm: async ({ request, locals, url, params, getClientAddress, platform }) => {
-		const callbackUrl = url.searchParams.get('callbackUrl');
+		let callbackUrl = url.searchParams.get('callbackUrl');
 
 		if (!locals.user) {
 			redirect(302, '/');
@@ -343,6 +355,12 @@ export const actions: Actions = {
 					required: true
 				}
 			},
+			{
+				label: 'Callback URL',
+				id: 100003,
+				type: 'text',
+				hidden: true
+			},
 			...(!!userInfoForm ? userInfoForm.form : [])
 		];
 		const dynamicSchema = createDynamicSchema(mergedForm);
@@ -360,6 +378,8 @@ export const actions: Actions = {
 				lastName: form.data[100002] ?? undefined
 			});
 		}
+
+		callbackUrl = form.data[100003];
 
 		//Create membership in WorkOS
 		const om = await workos.userManagement.createOrganizationMembership({

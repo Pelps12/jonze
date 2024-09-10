@@ -13,6 +13,7 @@
 	import * as RadioGroup from '$lib/components/ui/radio-group';
 	import type { OrgForm } from '@repo/db';
 	import { LoaderCircle } from 'lucide-svelte';
+	import { cn } from '$lib/utils';
 
 	export let action = '';
 
@@ -65,7 +66,7 @@
 <form method="POST" use:enhance class="" {action}>
 	{#each data.form as element}
 		{#if element.type === 'text'}
-			<Form.Field {form} name={element.id.toString()}>
+			<Form.Field {form} name={element.id.toString()} class={cn(element.hidden && 'hidden')}>
 				<Form.Control let:attrs>
 					<Form.Label>{element.label}</Form.Label>
 					<Input
@@ -78,7 +79,7 @@
 				<Form.FieldErrors />
 			</Form.Field>
 		{:else if element.type === 'textarea'}
-			<Form.Field {form} name={element.id.toString()}>
+			<Form.Field {form} name={element.id.toString()} class={cn(element.hidden && 'hidden')}>
 				<Form.Control let:attrs>
 					<Form.Label>{element.label}</Form.Label>
 					<Textarea
@@ -91,7 +92,11 @@
 				<Form.FieldErrors />
 			</Form.Field>
 		{:else if element.type === 'radio'}
-			<Form.Fieldset {form} name={element.id.toString()} class="space-y-3">
+			<Form.Fieldset
+				{form}
+				name={element.id.toString()}
+				class={cn('space-y-3', element.hidden && 'hidden')}
+			>
 				<Form.Legend>{element.label}</Form.Legend>
 				<RadioGroup.Root
 					bind:value={$formData[element.id.toString()]}
@@ -111,7 +116,7 @@
 				<Form.FieldErrors />
 			</Form.Fieldset>
 		{:else if element.type === 'dropdown'}
-			<Form.Field {form} name={element.id.toString()}>
+			<Form.Field {form} name={element.id.toString()} class={cn(element.hidden && 'hidden')}>
 				<Form.Control let:attrs>
 					<Form.Label>{element.label}</Form.Label>
 					<Select.Root
