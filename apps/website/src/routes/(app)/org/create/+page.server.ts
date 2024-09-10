@@ -70,7 +70,7 @@ export const actions: Actions = {
 			...originalSession,
 			orgs: [
 				...originalSession.orgs,
-				{ id: organization.id, name: organization.name, memberId: om.id }
+				{ id: organization.id, name: organization.name, memberId: om.id, plan: 'standard' }
 			],
 			accessToken: originalSession.accessToken,
 			refreshToken: originalSession.refreshToken

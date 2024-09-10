@@ -22,6 +22,8 @@
 	import * as Tooltip from '$lib/components/ui/tooltip';
 
 	export { className as class };
+
+	export let showSubscribe: boolean;
 </script>
 
 <div class=" px-3 lg:py-2 flex lg:block">
@@ -158,22 +160,24 @@
 		</Tooltip.Root>
 	</div>
 
-	<Card.Root>
-		<Card.Header class="p-2 pt-0 md:p-4">
-			<Card.Title>Upgrade to Pro</Card.Title>
-			<Card.Description>
-				Unlock all features and get unlimited access to our support team.
-			</Card.Description>
-		</Card.Header>
-		<Card.Content class="p-2 pt-0 md:p-4 md:pt-0">
-			<Dialog.Root>
-				<Dialog.Trigger class={cn(buttonVariants({ size: 'sm' }), 'w-full')}
-					>Subscribe</Dialog.Trigger
-				>
-				<Dialog.Content class="w-full">
-					<Subscription />
-				</Dialog.Content>
-			</Dialog.Root>
-		</Card.Content>
-	</Card.Root>
+	{#if showSubscribe}
+		<Card.Root>
+			<Card.Header class="p-2 pt-0 md:p-4">
+				<Card.Title>Upgrade to Pro</Card.Title>
+				<Card.Description>
+					Unlock all features and get unlimited access to our support team.
+				</Card.Description>
+			</Card.Header>
+			<Card.Content class="p-2 pt-0 md:p-4 md:pt-0">
+				<Dialog.Root>
+					<Dialog.Trigger class={cn(buttonVariants({ size: 'sm' }), 'w-full')}
+						>Subscribe</Dialog.Trigger
+					>
+					<Dialog.Content class="w-full">
+						<Subscription />
+					</Dialog.Content>
+				</Dialog.Root>
+			</Card.Content>
+		</Card.Root>
+	{/if}
 </div>

@@ -176,6 +176,20 @@
       "when": 1723049109512,
       "tag": "0025_aromatic_stranger",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "5",
+      "when": 1725583499365,
+      "tag": "0026_lyrical_annihilus",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "5",
+      "when": 1725929709179,
+      "tag": "0027_nosy_hitman",
+      "breakpoints": true
     }
   ]
 }

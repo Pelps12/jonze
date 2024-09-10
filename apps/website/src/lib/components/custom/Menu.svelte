@@ -13,10 +13,12 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { cn, formatName, getInitials } from '$lib/utils';
+	import * as Tooltip from '../ui/tooltip';
+	import type { SessionType } from '$lib/types/misc';
 	let open = false;
 	const isDesktop = mediaQuery('(min-width: 768px)');
 
-	export let user: (User & { orgs: Pick<Organization, 'id' | 'name'>[] }) | null | undefined;
+	export let user: Omit<SessionType, 'accessToken' | 'refreshToken'> | null | undefined;
 	onMount(() => {
 		console.log(user);
 		console.log($page);
@@ -38,6 +40,16 @@
 		);
 	};
 
+	function truncateString(input: string): string {
+		if (input.length <= 20) {
+			return input;
+		}
+
+		return input.length > 37
+			? input.slice(0, 17) + '...' + input.slice(-3)
+			: input.slice(0, 17) + '...';
+	}
+
 	const username = formatName(user?.firstName ?? null, user?.lastName ?? null);
 </script>
 
@@ -53,12 +65,20 @@
 		<div class="w-full flex items-end">
 			{#if !currentOrg}
 				<img src="/logo.svg" class="w-8 h-8" alt="Logo" />
+				<a class="flex-none text-xl font-semibold dark:text-white d" href="/" aria-label="Jonze"
+					>Jonze
+				</a>
+			{:else}
+				<a
+					class="flex items-center gap-2 text-xl font-semibold dark:text-white"
+					href={`/org/${currentOrg.id}`}
+					aria-label="Jonze"
+					>{currentOrg.name}
+					{#if currentOrg.plan === 'plus'}
+						<Badge class="h-4">Plus</Badge>
+					{/if}
+				</a>
 			{/if}
-			<a
-				class="flex-none text-xl font-semibold dark:text-white d"
-				href={currentOrg ? `/org/${currentOrg.id}` : '/'}
-				aria-label="Jonze">{currentOrg?.name ?? 'Jonze'}</a
-			>
 		</div>
 
 		<DropdownMenu.Root closeOnItemClick={false}>
@@ -207,7 +227,19 @@
 													id={org.id}
 													checked={org.id === $page.params?.id}
 												>
-													{org.name}
+													<Tooltip.Root>
+														<Tooltip.Trigger class="w-full text-left"
+															>{truncateString(org.name)}
+															{#if org.plan === 'plus'}
+																<Badge class="text-xs h-4">Plus</Badge>
+															{/if}
+														</Tooltip.Trigger>
+														{#if org.name.length > 20}
+															<Tooltip.Content>
+																<p>{org.name}</p>
+															</Tooltip.Content>
+														{/if}
+													</Tooltip.Root>
 												</DropdownMenu.CheckboxItem>
 											</a>
 										{/each}

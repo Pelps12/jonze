@@ -7,6 +7,7 @@ export type SessionType = User & {
 		id: string;
 		name: string;
 		memberId: string;
+		plan: 'standard' | 'plus';
 	}[];
 	accessToken: string;
 	refreshToken: string;
