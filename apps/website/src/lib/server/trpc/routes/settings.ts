@@ -5,12 +5,14 @@ import { adminProcedure, router } from '..';
 import db from '$lib/server/db';
 import { TRPCError } from '@trpc/server';
 import unkey from '$lib/server/unkey';
-import { UNKEY_API_KEY } from '$env/static/private';
+import { JWT_SECRET_KEY, UNKEY_API_KEY } from '$env/static/private';
 import { PUBLIC_APIKEY_PREFIX } from '$env/static/public';
 import { dummyClient } from '$lib/server/posthog';
 import { z } from 'zod';
 import workos from '$lib/server/workos';
 import { stripe } from '$lib/server/stripe';
+import { unsealData, sealData } from 'iron-session';
+import type { SessionType } from '$lib/types/misc';
 
 export const settingsRouter = router({
 	getSettings: adminProcedure.query(async ({ ctx, input }) => {
@@ -226,5 +228,43 @@ export const settingsRouter = router({
 					logo: input.cdnUrl
 				})
 				.where(eq(schema.organization.id, input.orgId));
-		})
+		}),
+	deleteOrganization: adminProcedure.mutation(async ({ input, ctx }) => {
+		await db.delete(schema.organization).where(eq(schema.organization.id, input.orgId));
+		await workos.organizations.deleteOrganization(input.orgId);
+
+		const sessionToken = ctx.event.cookies.get('workos-session');
+
+		if (!sessionToken) {
+			throw new TRPCError({
+				code: 'UNAUTHORIZED',
+				message: ' You lost the plot'
+			});
+		}
+
+		const originalSession = await unsealData<SessionType>(sessionToken, {
+			password: JWT_SECRET_KEY
+		});
+
+		const filteredOrgs = originalSession.orgs.filter((org) => org.id !== input.orgId);
+
+		const newUser: SessionType = {
+			...originalSession,
+			orgs: filteredOrgs,
+			accessToken: originalSession.accessToken,
+			refreshToken: originalSession.refreshToken
+		};
+
+		const newSessionToken = await sealData(newUser, {
+			password: JWT_SECRET_KEY
+		});
+
+		ctx.event.cookies.set('workos-session', newSessionToken, {
+			path: '/',
+			httpOnly: true,
+			secure: true,
+			sameSite: 'lax',
+			maxAge: 30 * 24 * 60 * 60 // 30 days in seconds
+		});
+	})
 });

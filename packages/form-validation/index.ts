@@ -38,7 +38,8 @@ const ZodFieldValidator = z.union([
 const ZodCustomFieldBase = z.object({
 	label: z.string(),
 	id: z.number(),
-	placeholder: z.string().optional()
+	placeholder: z.string().optional(),
+	hidden: z.boolean().optional()
 });
 
 // Schema for text and textarea fields (without options)

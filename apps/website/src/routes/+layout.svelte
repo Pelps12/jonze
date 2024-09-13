@@ -10,6 +10,7 @@
 	import type { LayoutData } from './$types';
 	import { MetaTags } from 'svelte-meta-tags';
 	import { PUBLIC_URL } from '$env/static/public';
+	import { formatName } from '$lib/utils';
 	export let data: LayoutData;
 	if (browser) {
 		beforeNavigate(() => posthog.capture('$pageleave'));
@@ -17,7 +18,7 @@
 		if ($page.url.searchParams.get('signedIn') === 'true' && data.user) {
 			posthog.identify(data.user.id, {
 				email: data.user.email,
-				name: data.user.firstName + ' ' + data.user.lastName
+				name: formatName(data.user.firstName, data.user.lastName)
 			});
 		} else if (!data.user) {
 			posthog.reset();
@@ -25,7 +26,7 @@
 	}
 </script>
 
-<ModeWatcher />
+<ModeWatcher defaultMode="light" />
 <Toaster />
 
 <MetaTags
