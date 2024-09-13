@@ -109,7 +109,7 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 		defaultFields[100003] = callbackUrl;
 	} else {
 		//Only cause callbackURL is the last property
-		mergedForm = mergedForm.filter((el) => el.id === 100003);
+		mergedForm = mergedForm.filter((el) => el.id !== 100003);
 	}
 
 	if (Object.keys(defaultFields).length == 0) {
