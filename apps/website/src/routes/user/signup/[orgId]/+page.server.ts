@@ -64,7 +64,7 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 
 	const userInfoForm = org.forms[0];
 
-	const mergedForm: CustomForm = [
+	let mergedForm: CustomForm = [
 		{
 			label: 'First Name',
 			id: 100001,
@@ -109,7 +109,7 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 		defaultFields[100003] = callbackUrl;
 	} else {
 		//Only cause callbackURL is the last property
-		mergedForm.pop();
+		mergedForm = mergedForm.filter((el) => el.id === 100003);
 	}
 
 	if (Object.keys(defaultFields).length == 0) {
