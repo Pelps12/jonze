@@ -7,9 +7,15 @@
 	import { Input } from '$lib/components/ui/input';
 
 	import { page } from '$app/stores';
+	import * as AlertDialog from '$lib/components/ui/alert-dialog';
+	import { trpc } from '$lib/client/trpc';
 	export let memberId: string;
 	let open = false;
 	$: open, console.log(open);
+	let confirmDeletionOpen = false;
+
+	const memberDeletionMutation = trpc().memberRouter.deleteMember.createMutation();
+	const utils = trpc().createUtils();
 </script>
 
 <DropdownMenu.Root>
@@ -30,9 +36,16 @@
 		<DropdownMenu.Item>Favorite</DropdownMenu.Item>
 		<DropdownMenu.Separator />
 		<DropdownMenu.Separator />
-		<DropdownMenu.Item>
-			Delete
-			<DropdownMenu.Shortcut>⌘⌫</DropdownMenu.Shortcut>
-		</DropdownMenu.Item>
+
+		<DropdownMenu.Item
+			class="text-destructive"
+			on:click={async () =>
+				$memberDeletionMutation
+					.mutateAsync({
+						orgId: $page.params.id,
+						memberId
+					})
+					.then(() => utils.memberRouter.getMembers.invalidate())}>Delete</DropdownMenu.Item
+		>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>

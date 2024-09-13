@@ -25,6 +25,7 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { memberUpdationSchema, membershipCreationSchema } from '$lib/formSchema/member';
 import { dummyClient } from '$lib/server/posthog';
 import svix from '$lib/server/svix';
+import workos from '$lib/server/workos';
 
 function delay(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
@@ -238,10 +239,9 @@ export const memberRouter = router({
 
 			return;
 		}),
-	getMembers: procedure
+	getMembers: adminProcedure
 		.input(
 			z.object({
-				orgId: z.string(),
 				email: z.string().nullish(),
 				name: z.string().nullish(),
 				customValue: z.string().nullish(),
@@ -374,5 +374,27 @@ export const memberRouter = router({
 								: null
 				}
 			};
+		}),
+	deleteMember: adminProcedure
+		.input(
+			z.object({
+				memberId: z.string()
+			})
+		)
+		.mutation(async ({ input, ctx }) => {
+			const currentMemberId = ctx.user.orgs.find(
+				(org) => org.memberId === input.memberId
+			)?.memberId;
+			if (input.memberId === currentMemberId) {
+				new TRPCError({
+					code: 'BAD_REQUEST',
+					message: "You can't delete yourself :)"
+				});
+			}
+			await db.delete(schema.member).where(eq(schema.member.id, input.memberId));
+
+			await workos.userManagement.deleteOrganizationMembership(input.memberId);
+
+			return;
 		})
 });
