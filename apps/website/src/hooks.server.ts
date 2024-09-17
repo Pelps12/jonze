@@ -137,7 +137,8 @@ const handleAuth: Handle = async ({ event, resolve }) => {
 };
 
 const handleAdminRestrict: Handle = async ({ event, resolve }) => {
-	if (event.request.url.includes(`${PUBLIC_URL}/org/org_`)) {
+	if (event.request.url.startsWith(`${PUBLIC_URL}/org/org_`)) {
+		console.log('HANDLE AUTH ADMIN RESTRICT BEGIN');
 		if (!event.locals.user) {
 			redirect(302, `/api/auth?callbackUrl=${event.url.toString()}`);
 		}
