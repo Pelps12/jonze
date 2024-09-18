@@ -13,6 +13,7 @@
 		ExternalLink,
 		FileDown,
 		MoreHorizontal,
+		Highlighter,
 		PlusIcon,
 		QrCode,
 		XIcon
@@ -500,6 +501,11 @@
 												<span>Duplicate Event</span>
 												<CopyPlus class="ml-2 h-4 w-4" />
 											</DropdownMenu.Item>
+											<DropdownMenu.Item href={`scan/${event.id}`} class="justify-between">
+												<span>Manual Attendance</span>
+												<Highlighter class="ml-2 h-4 w-4" />
+											</DropdownMenu.Item>
+
 											{#if event.formId}
 												<DropdownMenu.Item
 													href={`/org/${$page.params.id}/forms/${event.formId}/responses?eventId=${event.id}`}

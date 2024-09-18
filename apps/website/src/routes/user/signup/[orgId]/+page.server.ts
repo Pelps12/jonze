@@ -87,12 +87,13 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 			label: 'Callback URL',
 			id: 100003,
 			type: 'text',
-			hidden: true
+			hidden: true,
+			validator: {
+				required: true
+			}
 		},
 		...(!!userInfoForm ? userInfoForm.form : [])
 	];
-
-	const dynamicSchema = createDynamicSchema(mergedForm);
 
 	let defaultFields: Record<string, string> | undefined = {};
 
@@ -105,16 +106,22 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 	if (locals.user.lastName) {
 		defaultFields[100002] = locals.user.lastName;
 	}
-	if (callbackUrl) {
+
+	if (!!callbackUrl) {
 		defaultFields[100003] = callbackUrl;
 	} else {
 		//Only cause callbackURL is the last property
+		console.log('ELSEEEE CONDITIONNSNNN');
 		mergedForm = mergedForm.filter((el) => el.id !== 100003);
 	}
 
 	if (Object.keys(defaultFields).length == 0) {
 		defaultFields = undefined;
 	}
+	const dynamicSchema = createDynamicSchema(mergedForm);
+	console.log(defaultFields, mergedForm, callbackUrl);
+
+	console.log(1188888);
 
 	return {
 		form: org.forms[0],

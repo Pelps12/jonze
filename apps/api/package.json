@@ -12,11 +12,14 @@
 		"@unkey/hono": "^1.4.3",
 		"drizzle-zod": "0.5.1",
 		"hono": "^4.0.7",
+		"jose": "^5.2.1",
+		"resend": "^4.0.0",
 		"zod": "^3.22.4"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20240208.0",
 		"@repo/db": "^0.0.0",
+		"@repo/emails": "^0.0.0",
 		"@repo/webhooks": "^0.0.0",
 		"wrangler": "^3.25.0"
 	}
