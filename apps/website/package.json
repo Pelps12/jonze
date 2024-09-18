@@ -6,13 +6,14 @@
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview --port 5173",
-		"preview:flare": "vite build && wrangler pages dev .svelte-kit/cloudflare --compatibility-flags=\"nodejs_compat\" --port=5173",
+		"preview:flare": "vite build && wrangler pages dev .svelte-kit/cloudflare --compatibility-flags=\"nodejs_compat\" --port=5173 --service INTEGRATION_SERVICE=backend",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write ."
 	},
 	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20240208.0",
 		"@repo/db": "^0.0.0",
 		"@repo/webhooks": "^0.0.0",
 		"@sveltejs/adapter-auto": "^3.0.0",
@@ -78,6 +79,7 @@
 		"drizzle-orm": "^0.29.3",
 		"formsnap": "^0.5.1",
 		"front-matter": "^4.0.2",
+		"html5-qrcode": "^2.3.8",
 		"install": "^0.13.0",
 		"iron-session": "^8.0.1",
 		"jose": "^5.2.1",
