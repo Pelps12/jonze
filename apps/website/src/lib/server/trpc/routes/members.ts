@@ -15,7 +15,8 @@ import {
 	type User,
 	ilike,
 	gt,
-	lt
+	lt,
+	or
 } from '@repo/db';
 import schema from '@repo/db/schema';
 import { z } from 'zod';
@@ -375,6 +376,72 @@ export const memberRouter = router({
 				}
 			};
 		}),
+
+	getMembersToScan: adminProcedure
+		.input(
+			z.object({
+				name: z.string().nullish(),
+				eventId: z.string(),
+				memberId: z.string().nullish()
+			})
+		)
+		.query(async ({ input }) => {
+			const name = input.name;
+			const formattedName = name ? `%${name}%` : null;
+
+			const new_members = await db
+				.select()
+				.from(schema.member)
+				.innerJoin(schema.user, eq(schema.member.userId, schema.user.id))
+				.leftJoin(
+					schema.attendance,
+					and(
+						eq(schema.attendance.memId, schema.member.id),
+						eq(schema.attendance.eventId, input.eventId)
+					)
+				)
+				.where(
+					and(
+						eq(schema.member.orgId, input.orgId),
+						or(
+							formattedName
+								? sql`CONCAT(${schema.user.firstName}, ' ', ${schema.user.lastName}) ILIKE ${formattedName}`
+								: undefined
+						),
+						input.memberId ? eq(schema.member.id, input.memberId) : undefined
+					)
+				);
+
+			return {
+				new_members
+			};
+		}),
+
+	upsertAttendance: adminProcedure
+		.input(
+			z.object({
+				eventId: z.string(),
+				memberId: z.string(),
+				attendanceId: z.string().optional()
+			})
+		)
+		.mutation(async ({ input }) => {
+			const result = await db
+				.insert(schema.attendance)
+				.values({
+					eventId: input.eventId,
+					id: input.attendanceId,
+					memId: input.memberId
+				})
+				.onConflictDoUpdate({
+					target: schema.attendance.id,
+					set: { updatedAt: new Date() }
+				})
+				.returning();
+
+			return result;
+		}),
+
 	deleteMember: adminProcedure
 		.input(
 			z.object({

@@ -42,7 +42,21 @@
 		}),
 		table.column({
 			accessor: (item) => item.createdAt,
-			header: 'Marked',
+			header: 'Check In',
+			cell: ({ value }) => {
+				return value.toLocaleString('en-US', {
+					month: 'short',
+					day: 'numeric',
+					hour: 'numeric',
+					minute: '2-digit',
+					second: 'numeric',
+					hour12: true
+				});
+			}
+		}),
+		table.column({
+			accessor: (item) => item.updatedAt,
+			header: 'Check Out',
 			cell: ({ value }) => {
 				return value.toLocaleString('en-US', {
 					month: 'short',
