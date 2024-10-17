@@ -44,7 +44,7 @@ importers:
         version: 1.4.3(hono@4.5.4)
       drizzle-zod:
         specifier: 0.5.1
-        version: 0.5.1(drizzle-orm@0.33.0(@cloudflare/workers-types@4.20240806.0)(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.6.0)(@planetscale/database@1.18.0)(@types/pg@8.11.6)(@types/react@18.3.7)(mysql2@3.11.0)(pg@8.12.0)(postgres@3.4.4)(react@18.3.1))(zod@3.23.8)
+        version: 0.5.1(drizzle-orm@0.33.0(@cloudflare/workers-types@4.20241011.0)(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.6.0)(@planetscale/database@1.18.0)(@types/pg@8.11.6)(@types/react@18.3.7)(mysql2@3.11.0)(pg@8.12.0)(postgres@3.4.4)(react@18.3.1))(zod@3.23.8)
       hono:
         specifier: ^4.0.7
         version: 4.5.4
@@ -59,8 +59,8 @@ importers:
         version: 3.23.8
     devDependencies:
       '@cloudflare/workers-types':
-        specifier: ^4.20240208.0
-        version: 4.20240806.0
+        specifier: ^4.20241011.0
+        version: 4.20241011.0
       '@repo/db':
         specifier: ^0.0.0
         version: link:../../packages/db
@@ -72,7 +72,7 @@ importers:
         version: link:../../packages/webhooks
       wrangler:
         specifier: ^3.78.6
-        version: 3.80.5(@cloudflare/workers-types@4.20240806.0)
+        version: 3.80.5(@cloudflare/workers-types@4.20241011.0)
 
   apps/docs:
     dependencies:
@@ -385,7 +385,7 @@ importers:
         version: 0.20.18
       drizzle-orm:
         specifier: ^0.33.0
-        version: 0.33.0(@cloudflare/workers-types@4.20240806.0)(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.6.0)(@planetscale/database@1.18.0)(@types/pg@8.11.6)(@types/react@18.3.7)(mysql2@3.11.0)(pg@8.12.0)(postgres@3.4.4)(react@18.3.1)
+        version: 0.33.0(@cloudflare/workers-types@4.20241011.0)(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.6.0)(@planetscale/database@1.18.0)(@types/pg@8.11.6)(@types/react@18.3.7)(mysql2@3.11.0)(pg@8.12.0)(postgres@3.4.4)(react@18.3.1)
       mysql2:
         specifier: ^3.9.1
         version: 3.11.0
@@ -619,6 +619,9 @@ packages:
 
   '@cloudflare/workers-types@4.20240806.0':
     resolution: {integrity: sha512-8lvgrwXGTZEBsUQJ8YUnMk72Anh9omwr6fqWLw/EwVgcw1nQxs/bfdadBEbdP48l9fWXjE4E5XERLUrrFuEpsg==}
+
+  '@cloudflare/workers-types@4.20241011.0':
+    resolution: {integrity: sha512-emwBnuFB/2lS1z6NXAeBqrSL8Xwnr7YpgdLuchOmgu/igqBsLLNPBb4Qmgh3neFWUe9wbzQyx030836YF3c3Xw==}
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -7065,6 +7068,8 @@ snapshots:
 
   '@cloudflare/workers-types@4.20240806.0': {}
 
+  '@cloudflare/workers-types@4.20241011.0': {}
+
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
@@ -8392,7 +8397,7 @@ snapshots:
 
   '@sveltejs/adapter-cloudflare@4.7.0(@sveltejs/kit@2.5.20(@sveltejs/vite-plugin-svelte@3.1.1(svelte@4.2.18)(vite@5.3.5(@types/node@18.19.43)))(svelte@4.2.18)(vite@5.3.5(@types/node@18.19.43)))(wrangler@3.80.5(@cloudflare/workers-types@4.20240806.0))':
     dependencies:
-      '@cloudflare/workers-types': 4.20240806.0
+      '@cloudflare/workers-types': 4.20241011.0
       '@sveltejs/kit': 2.5.20(@sveltejs/vite-plugin-svelte@3.1.1(svelte@4.2.18)(vite@5.3.5(@types/node@18.19.43)))(svelte@4.2.18)(vite@5.3.5(@types/node@18.19.43))
       esbuild: 0.21.5
       worktop: 0.8.0-next.18
@@ -9815,9 +9820,9 @@ snapshots:
       postgres: 3.4.4
       react: 18.3.1
 
-  drizzle-orm@0.33.0(@cloudflare/workers-types@4.20240806.0)(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.6.0)(@planetscale/database@1.18.0)(@types/pg@8.11.6)(@types/react@18.3.7)(mysql2@3.11.0)(pg@8.12.0)(postgres@3.4.4)(react@18.3.1):
+  drizzle-orm@0.33.0(@cloudflare/workers-types@4.20241011.0)(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.6.0)(@planetscale/database@1.18.0)(@types/pg@8.11.6)(@types/react@18.3.7)(mysql2@3.11.0)(pg@8.12.0)(postgres@3.4.4)(react@18.3.1):
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20240806.0
+      '@cloudflare/workers-types': 4.20241011.0
       '@neondatabase/serverless': 0.9.4
       '@opentelemetry/api': 1.6.0
       '@planetscale/database': 1.18.0
@@ -9828,9 +9833,9 @@ snapshots:
       postgres: 3.4.4
       react: 18.3.1
 
-  drizzle-zod@0.5.1(drizzle-orm@0.33.0(@cloudflare/workers-types@4.20240806.0)(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.6.0)(@planetscale/database@1.18.0)(@types/pg@8.11.6)(@types/react@18.3.7)(mysql2@3.11.0)(pg@8.12.0)(postgres@3.4.4)(react@18.3.1))(zod@3.23.8):
+  drizzle-zod@0.5.1(drizzle-orm@0.33.0(@cloudflare/workers-types@4.20241011.0)(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.6.0)(@planetscale/database@1.18.0)(@types/pg@8.11.6)(@types/react@18.3.7)(mysql2@3.11.0)(pg@8.12.0)(postgres@3.4.4)(react@18.3.1))(zod@3.23.8):
     dependencies:
-      drizzle-orm: 0.33.0(@cloudflare/workers-types@4.20240806.0)(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.6.0)(@planetscale/database@1.18.0)(@types/pg@8.11.6)(@types/react@18.3.7)(mysql2@3.11.0)(pg@8.12.0)(postgres@3.4.4)(react@18.3.1)
+      drizzle-orm: 0.33.0(@cloudflare/workers-types@4.20241011.0)(@neondatabase/serverless@0.9.4)(@opentelemetry/api@1.6.0)(@planetscale/database@1.18.0)(@types/pg@8.11.6)(@types/react@18.3.7)(mysql2@3.11.0)(pg@8.12.0)(postgres@3.4.4)(react@18.3.1)
       zod: 3.23.8
 
   eastasianwidth@0.2.0: {}
@@ -13799,6 +13804,33 @@ snapshots:
       xxhash-wasm: 1.0.2
     optionalDependencies:
       '@cloudflare/workers-types': 4.20240806.0
+      fsevents: 2.3.3
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
+  wrangler@3.80.5(@cloudflare/workers-types@4.20241011.0):
+    dependencies:
+      '@cloudflare/kv-asset-handler': 0.3.4
+      '@cloudflare/workers-shared': 0.6.0
+      '@esbuild-plugins/node-globals-polyfill': 0.2.3(esbuild@0.17.19)
+      '@esbuild-plugins/node-modules-polyfill': 0.2.2(esbuild@0.17.19)
+      blake3-wasm: 2.1.5
+      chokidar: 3.6.0
+      esbuild: 0.17.19
+      miniflare: 3.20241011.0
+      nanoid: 3.3.7
+      path-to-regexp: 6.3.0
+      resolve: 1.22.8
+      resolve.exports: 2.0.2
+      selfsigned: 2.4.1
+      source-map: 0.6.1
+      unenv: unenv-nightly@2.0.0-20241009-125958-e8ea22f
+      workerd: 1.20241011.1
+      xxhash-wasm: 1.0.2
+    optionalDependencies:
+      '@cloudflare/workers-types': 4.20241011.0
       fsevents: 2.3.3
     transitivePeerDependencies:
       - bufferutil
