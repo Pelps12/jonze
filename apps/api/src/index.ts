@@ -13,6 +13,7 @@ import forms from './forms';
 import responses from './responses';
 import { swaggerUI } from '@hono/swagger-ui';
 import { WrapperSvix } from '@repo/webhooks';
+import integrations from './integrations';
 
 export type Bindings = {
 	DATABASE_HOST: string;
@@ -22,6 +23,10 @@ export type Bindings = {
 	TEST_SECRET: string;
 	ENVIRONMENT: string;
 	SVIX_TOKEN: string;
+	RESEND_API_KEY: string;
+	GOOGLE_WALLET_PRIVATE_KEY: string;
+	GOOGLE_WALLET_ISSUER_ID: string;
+	GOOGLE_WALLET_SERVICE_ACC_EMAIL: string;
 };
 
 const app = new OpenAPIHono<{
@@ -33,7 +38,7 @@ app.use('*', async (c, next) =>
 	cors({
 		origin:
 			c.env.ENVIRONMENT === 'production'
-				? 'https://jonze.co'
+				? '*'
 				: ['https://dev.jonze.co', 'http://localhost:5173', 'http://localhost:8787'],
 		allowHeaders: ['X-Custom-Header', 'Upgrade-Insecure-Requests'],
 		allowMethods: ['POST', 'GET', 'OPTIONS'],
@@ -83,6 +88,8 @@ app.doc('/doc', (c) => ({
 		}
 	]
 }));
+
+app.route('/integrations', integrations);
 
 app.get('/ui', swaggerUI({ url: '/doc' }));
 
