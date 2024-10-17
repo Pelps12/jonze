@@ -1,4 +1,4 @@
-import { adminProcedure, procedure, router } from '..';
+import { adminProcedure, plusProcedure, procedure, router } from '..';
 import db from '$lib/server/db';
 import {
 	and,
@@ -377,7 +377,7 @@ export const memberRouter = router({
 			};
 		}),
 
-	getMembersToScan: adminProcedure
+	getMembersToScan: plusProcedure
 		.input(
 			z.object({
 				name: z.string().nullish(),
@@ -417,7 +417,7 @@ export const memberRouter = router({
 			};
 		}),
 
-	upsertAttendance: adminProcedure
+	upsertAttendance: plusProcedure
 		.input(
 			z.object({
 				eventId: z.string(),
@@ -425,8 +425,8 @@ export const memberRouter = router({
 				attendanceId: z.string().optional()
 			})
 		)
-		.mutation(async ({ input }) => {
-			const result = await db
+		.mutation(async ({ input, ctx }) => {
+			const attendance = await db
 				.insert(schema.attendance)
 				.values({
 					eventId: input.eventId,
@@ -439,7 +439,33 @@ export const memberRouter = router({
 				})
 				.returning();
 
-			return result;
+			if (!input.attendanceId) {
+				dummyClient.capture({
+					distinctId: ctx.member.userId,
+					event: 'attendance marked',
+					properties: {
+						$ip: ctx.event.getClientAddress(),
+						eventId: input.eventId,
+						orgId: ctx.member.orgId
+					}
+				});
+
+				ctx.event.platform?.context.waitUntil(
+					Promise.all([
+						svix.message.create(ctx.member.orgId, {
+							eventType: 'attendance.marked',
+							payload: {
+								type: 'attendance.marked',
+								data: {
+									...attendance
+								}
+							}
+						})
+					])
+				);
+			}
+
+			return attendance;
 		}),
 
 	deleteMember: adminProcedure

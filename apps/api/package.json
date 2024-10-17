@@ -17,10 +17,10 @@
 		"zod": "^3.22.4"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20240208.0",
+		"@cloudflare/workers-types": "^4.20241011.0",
 		"@repo/db": "^0.0.0",
 		"@repo/emails": "^0.0.0",
 		"@repo/webhooks": "^0.0.0",
-		"wrangler": "^3.25.0"
+		"wrangler": "^3.78.6"
 	}
 }

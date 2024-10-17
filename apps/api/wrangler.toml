@@ -1,5 +1,5 @@
 name = "api"
-compatibility_date = "2022-04-05"
+compatibility_date = "2024-09-23"
 route = { pattern = "dev-api.jonze.co", custom_domain = true }
 vars = { ENVIRONMENT = "dev" }
 
@@ -7,6 +7,8 @@ vars = { ENVIRONMENT = "dev" }
 route = { pattern = "api.jonze.co", custom_domain = true }
 vars = { ENVIRONMENT = "production" }
 
+[observability]
+enabled = true
 # [[kv_namespaces]]
 # binding = "MY_KV_NAMESPACE"
 # id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
