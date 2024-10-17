@@ -13,7 +13,7 @@ import forms from './forms';
 import responses from './responses';
 import { swaggerUI } from '@hono/swagger-ui';
 import { WrapperSvix } from '@repo/webhooks';
-import integrations from './integrations';
+//import integrations from './integrations';
 
 export type Bindings = {
 	DATABASE_HOST: string;
@@ -89,7 +89,7 @@ app.doc('/doc', (c) => ({
 	]
 }));
 
-app.route('/integrations', integrations);
+//app.route('/integrations', integrations);
 
 app.get('/ui', swaggerUI({ url: '/doc' }));
 
