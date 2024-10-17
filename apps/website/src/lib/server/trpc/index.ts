@@ -63,7 +63,18 @@ export const adminProcedure = t.procedure
 		};
 
 		return next({
-			ctx: { ...ctx, member, user }
+			ctx: { ...ctx, member, user, orgType: org.plan }
 		});
 	});
+
+export const plusProcedure = adminProcedure.use(async ({ ctx, next }) => {
+	if (ctx.orgType !== 'plus') {
+		throw new TRPCError({
+			code: 'BAD_REQUEST',
+			message: 'This org is not a Jonze Plus Org'
+		});
+	}
+	return next();
+});
+
 export const { procedure, router, middleware, createCallerFactory } = t;
